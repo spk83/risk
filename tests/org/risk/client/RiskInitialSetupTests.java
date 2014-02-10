@@ -28,16 +28,16 @@ public class RiskInitialSetupTests extends AbstractTest {
   // Create state after A has claimed #1 territory 
   Map<String, Object> turnOfB_ClaimTerritory = ImmutableMap.<String, Object>of(
           TURN, bId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(1+"", new Set(PLAYER_ID, 1))) );
+          TERRITORY_DELTA, ImmutableList.of(new Set(1+"", new Set(UNITS, 1))) );
 
   // Create state after B has claimed #2 territory 
   Map<String, Object> turnOfC_ClaimTerritory = ImmutableMap.<String, Object>of(
           TURN, cId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(2+"", new Set(PLAYER_ID, 1))) );
+          TERRITORY_DELTA, ImmutableList.of(new Set(2+"", new Set(UNITS, 1))) );
 
   Map<String, Object> stateAfterClaimTerritory = ImmutableMap.<String, Object>of(
           TURN, aId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(3+"", new Set(PLAYER_ID, 1))) );
+          TERRITORY_DELTA, ImmutableList.of(new Set(3+"", new Set(UNITS, 1))) );
 
   // Write operations to be performed
   final List<Operation> claimTerritoryByA = ImmutableList.<Operation>of(
