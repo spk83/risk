@@ -42,32 +42,23 @@ public class AbstractTest {
   final Map<String, Object> emptyState = ImmutableMap.<String, Object>of();
   final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of("k", "v");
   
-  protected void assertMoveOk(List<VerifyMove> verifyMoveList) {
-    for(VerifyMove verifyMove : verifyMoveList) {
-      VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-      assertEquals(new VerifyMoveDone(), verifyDone);
-    }
+  protected void assertMoveOk(VerifyMove verifyMove) {
+    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
+    assertEquals(new VerifyMoveDone(), verifyDone);
   }
 
-  protected void assertHacker(List<VerifyMove> verifyMoveList) {
-    for(VerifyMove verifyMove : verifyMoveList) {
-      VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-      assertEquals(new VerifyMoveDone(
-          verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
-    }
+  protected void assertHacker(VerifyMove verifyMove) {
+    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
+    assertEquals(new VerifyMoveDone(
+        verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
   }
-  protected List<VerifyMove> move(
-        int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
-    List<VerifyMove> verifyMoveList = Lists.newArrayList();
-    for(String playerId : getPlayerIds()) {
-      // Not required to send it to lastMovePlayerId
-      if( lastMovePlayerId != Integer.parseInt(playerId)) {
-        verifyMoveList.add(new VerifyMove(
-            Integer.parseInt(playerId), playersInfo, emptyState, lastState, 
-            lastMove, lastMovePlayerId));
-      }
-    }
-    return verifyMoveList;
+
+  protected VerifyMove move(
+      int yourPlayerId, List<Map<String,Object>> playersInfo, Map<String, Object> state, 
+      int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
+    return new VerifyMove(
+            yourPlayerId, playersInfo, state, lastState, lastMove, 
+            lastMovePlayerId);
   }
 
   protected List<String> getPlayerIds() {
