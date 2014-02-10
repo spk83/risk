@@ -22,49 +22,49 @@ public class RiskInitialSetupTests extends AbstractTest {
     // Create Game States like of following type
     // Can add more parameters to state, this is just for start
     Map<String, Object> turnOfA_ClaimTerritory = ImmutableMap.<String, Object>of(
-            turn, aId,
-            territory, ImmutableList.of() ); // Start from empty board
+            TURN, aId,
+            TERRITORY, ImmutableList.of() ); // Start from empty board
 
     // Create state after A has claimed #1 territory 
     Map<String, Object> turnOfB_ClaimTerritory = ImmutableMap.<String, Object>of(
-            turn, bId,
-            territory_delta, ImmutableList.of(new Set(1+"", new Set(playerId, 1))) );
+            TURN, bId,
+            TERRITORY_DELTA, ImmutableList.of(new Set(1+"", new Set(PLAYER_ID, 1))) );
 
     // Create state after B has claimed #2 territory 
     Map<String, Object> turnOfC_ClaimTerritory = ImmutableMap.<String, Object>of(
-            turn, bId,
-            territory_delta, ImmutableList.of(new Set(2+"", new Set(playerId, 1))) );
+            TURN, bId,
+            TERRITORY_DELTA, ImmutableList.of(new Set(2+"", new Set(PLAYER_ID, 1))) );
 
     // Write operations to be performed
     final List<Operation> claimTerritoryByA = ImmutableList.<Operation>of(
-            new Set(turn, aId),
-            new Set(claimTerritory, 1));
+            new Set(TURN, aId),
+            new Set(CLAIM_TERRITORY, 1));
         
     final List<Operation> claimTerritoryByB = ImmutableList.<Operation>of(
-            new Set(turn, bId),
-            new Set(claimTerritory, 2));
+            new Set(TURN, bId),
+            new Set(CLAIM_TERRITORY, 2));
     
     final List<Operation> claimTerritoryByC = ImmutableList.<Operation>of(
-            new Set(turn, bId),
-            new Set(claimTerritory, 3));
+            new Set(TURN, bId),
+            new Set(CLAIM_TERRITORY, 3));
     
     private List<Operation> getInitialOperations() {
-        List<Operation> operations = Lists.newArrayList();
+      List<Operation> operations = Lists.newArrayList();
 
-        // Shuffle playerIds and assign that list as turns
-        operations.add(new Set(turn, new Shuffle(getPlayerIds())));
+      // Shuffle playerIds and assign that list as turns
+      operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds())));
 
-        // Assign initial X armies to all the players
-        operations.add(new Set(units, getPlayerIds()));
+      // Assign initial X armies to all the players
+      //operations.add(new Set(UNITS, getPlayerIds()));
 
-        // Shuffle all the RISK cards in the deck
-        // sets all 44 cards: set(RC1,I1),set(RC2,C2),set(RC3,A3),..,set(RC44,W44)
-        for (int i = 1; i <= 44; i++) {
-            operations.add(new Set(C + i, cardIdToString(i)));
-        }
-        // shuffle(RC1,...,RC44)
-        operations.add(new Shuffle(getCardsInRange(1, 44)));
-        return operations;
+      // Shuffle all the RISK cards in the deck
+      // sets all 44 cards: set(RC1,I1),set(RC2,C2),set(RC3,A3),..,set(RC44,W44)
+      for (int i = 1; i <= 44; i++) {
+          operations.add(new Set(RISK_CARD + i, cardIdToString(i)));
+      }
+      // shuffle(RC1,...,RC44)
+      operations.add(new Shuffle(getCardsInRange(1, 44)));
+      return operations;
     }
     
     // When game starts, assuming player A has to do all the initial settings
@@ -86,7 +86,7 @@ public class RiskInitialSetupTests extends AbstractTest {
     @Test
     public void testInitialMoveWithExtraOperation() {
         List<Operation> initialOperations = getInitialOperations();
-        initialOperations.add(new Set(territory, new Set(playerId, 2)));
+        initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2)));
         assertHacker(move(aId, emptyState, initialOperations));
     }
 
