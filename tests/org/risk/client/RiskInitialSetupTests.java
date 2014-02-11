@@ -4,10 +4,8 @@ import java.util.Map;
 import java.util.List;
 
 import org.junit.Test;
-import org.risk.client.GameApi.Delete;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
-import org.risk.client.GameApi.SetVisibility;
 import org.risk.client.GameApi.Shuffle;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -21,36 +19,56 @@ public class RiskInitialSetupTests extends AbstractTest {
   
   // Create Game States like of following type
   // Can add more parameters to state, this is just for start
-  Map<String, Object> turnOfA_ClaimTerritory = ImmutableMap.<String, Object>of(
-          TURN, aId,
-          TERRITORY, ImmutableList.of() ); // Start from empty board
+  private final Map<String, Object> turnOfA_ClaimTerritory = ImmutableMap.<String, Object>of(
+      TURN, aId,
+      aId+"", ImmutableMap.of(),
+      bId+"", ImmutableMap.of(),
+      cId+"", ImmutableMap.of() ); // Start from empty board
 
   // Create state after A has claimed #1 territory 
-  Map<String, Object> turnOfB_ClaimTerritory = ImmutableMap.<String, Object>of(
-          TURN, bId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(1+"", new Set(UNITS, 1))) );
+  private final Map<String, Object> turnOfB_ClaimTerritory = ImmutableMap.<String, Object>of(
+      TURN, bId,
+      aId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              1 + "", new Set(UNITS, 1))),
+      bId+"", ImmutableMap.of(),
+      cId+"", ImmutableMap.of() );
 
   // Create state after B has claimed #2 territory 
   Map<String, Object> turnOfC_ClaimTerritory = ImmutableMap.<String, Object>of(
-          TURN, cId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(2+"", new Set(UNITS, 1))) );
+      TURN, cId,
+      aId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              1 + "", new Set(UNITS, 1))),
+      bId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              2 + "", new Set(UNITS, 1))),
+      cId+"", ImmutableMap.of() );
 
   Map<String, Object> stateAfterClaimTerritory = ImmutableMap.<String, Object>of(
-          TURN, aId,
-          TERRITORY_DELTA, ImmutableList.of(new Set(3+"", new Set(UNITS, 1))) );
-
-  // Write operations to be performed
+      TURN, aId,
+      aId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              1 + "", new Set(UNITS, 1))),
+      bId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              2 + "", new Set(UNITS, 1))),
+      cId+"", ImmutableMap.<String, Object>of(
+          TERRITORY, ImmutableMap.<String, Object>of(
+              3 + "", new Set(UNITS, 1))) );
+  
+  // Write operations to be performed for doing initial setup
   final List<Operation> claimTerritoryByA = ImmutableList.<Operation>of(
-          new Set(TURN, aId),
-          new Set(CLAIM_TERRITORY, 1));
+      new Set(TURN, bId),
+      new Set(CLAIM_TERRITORY, 1));
       
   final List<Operation> claimTerritoryByB = ImmutableList.<Operation>of(
-          new Set(TURN, bId),
-          new Set(CLAIM_TERRITORY, 2));
+      new Set(TURN, cId),
+      new Set(CLAIM_TERRITORY, 2));
   
   final List<Operation> claimTerritoryByC = ImmutableList.<Operation>of(
-          new Set(TURN, bId),
-          new Set(CLAIM_TERRITORY, 3));
+      new Set(TURN, aId),
+      new Set(CLAIM_TERRITORY, 3));
   
   private List<Operation> getInitialOperations() {
     List<Operation> operations = Lists.newArrayList();
@@ -120,4 +138,5 @@ public class RiskInitialSetupTests extends AbstractTest {
     assertMoveOk(move(bId, playersInfo, stateAfterClaimTerritory, cId, turnOfC_ClaimTerritory,
             claimTerritoryByC));
   }
+  
 }

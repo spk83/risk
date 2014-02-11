@@ -18,6 +18,7 @@ public class AbstractTest {
   protected final int reinforcement = 0; // Reinforcement Phase
   protected final int attack = 1; // Attack Phase
   protected final int fortify = 2; // Fortify Phase
+  protected static final int TOTAL_TERRITORIES = 42;
   protected static final String PLAYER_ID = "playerId";
   protected static final String TURN_ORDER = "turnOrder"; // turn of which player (either A or B)
   protected static final String TURN = "turn"; // turn of which player (either A or B)
@@ -30,6 +31,14 @@ public class AbstractTest {
   protected static final String CLAIM_TERRITORY = "claimTerritory";
   protected static final String CONTINENT = "continent"; // (1..6)
   protected static final String UNITS = "units"; // Units of armies assigned
+  protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
+  protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
+  protected static final String DICE_ROLL = "diceRoll";
+  protected static final String WINNING_TERRITORY = "winningTerritory";
+  protected static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
+  protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
+  protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
+  protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
   protected static final int TOTAL_PLAYERS = 3;
   protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
   protected final int aId = 1; // Player A
@@ -49,16 +58,15 @@ public class AbstractTest {
 
   protected void assertHacker(VerifyMove verifyMove) {
     VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-    assertEquals(new VerifyMoveDone(
-        verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
+    assertEquals(new VerifyMoveDone(verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
   }
 
   protected VerifyMove move(
       int yourPlayerId, List<Map<String,Object>> playersInfo, Map<String, Object> state, 
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-            yourPlayerId, playersInfo, state, lastState, lastMove, 
-            lastMovePlayerId);
+        yourPlayerId, playersInfo, state, lastState, lastMove, 
+        lastMovePlayerId);
   }
 
   protected List<String> getPlayerIds() {
