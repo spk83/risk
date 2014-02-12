@@ -40,10 +40,14 @@ public class AbstractTest {
   protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
   protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
   protected static final int TOTAL_PLAYERS = 3;
+  protected static final String PLAYERS = "players";
+  protected static final String CARDS = "cards";
+  protected static final String BOARD = "board";
+  
   protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
-  protected final int aId = 1; // Player A
-  protected final int bId = 2; // Player B
-  protected final int cId = 3; // Player C
+  protected static final int aId = 1; // Player A
+  protected static final int bId = 2; // Player B
+  protected static final int cId = 3; // Player C
   final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(PLAYER_ID, aId);
   final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(PLAYER_ID, bId);
   final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(PLAYER_ID, cId);
@@ -78,12 +82,16 @@ public class AbstractTest {
   }
 
   protected String cardIdToString(int cardId) {
-    checkArgument(cardId >= 1 && cardId <= 44);
+    checkArgument(cardId >= 0 && cardId <= 43);
     int category = cardId % 3;
-    String categoryString = cardId > 42 ? "W"
+    String categoryString = cardId > 41 ? "W"
         : category == 1 ? "I"
             : category == 2 ? "C" : "A";
     return categoryString + cardId;
+  }
+  
+  protected static String playerIdToString(int playerId) {
+    return "P"+playerId;
   }
 
   protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {

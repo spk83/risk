@@ -80,12 +80,12 @@ public class RiskInitialSetupTests extends AbstractTest {
     //operations.add(new Set(UNITS, getPlayerIds()));
 
     // Shuffle all the RISK cards in the deck
-    // sets all 44 cards: set(RC1,I1),set(RC2,C2),set(RC3,A3),..,set(RC44,W44)
-    for (int i = 1; i <= 44; i++) {
+    // sets all 44 cards: set(RC0,A0),set(RC1,I1),set(RC2,C2),..,set(RC43,W43)
+    for (int i = 0; i < 44; i++) {
         operations.add(new Set(RISK_CARD + i, cardIdToString(i)));
     }
     // shuffle(RC1,...,RC44)
-    operations.add(new Shuffle(getCardsInRange(1, 44)));
+    operations.add(new Shuffle(getCardsInRange(0, 43)));
     return operations;
   }
   
