@@ -36,25 +36,25 @@ public class ReinforcementPhaseTest extends AbstractTest {
    * Test the operations done while trading RISK cards
    */
   @Test
-  public void testTradeCardsMoveByC(){
+  public void testTradeCardsMoveByC() {
     Map<String, Object> lastStateAtC = ImmutableMap.<String, Object>builder()
         .put(TURN, PLAYER_C)
         .put(PHASE, CARD_TRADE)
         .put(PLAYER_A, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(4),
-            CARD_VALUES, ImmutableMap.<String, String>of("RC4", null),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC4", ""),
             TERRITORY, getTerritories(PLAYER_A),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(3),
-            CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC3", ""),
             TERRITORY, getTerritories(PLAYER_B),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(0, 1, 2),
-            CARD_VALUES, ImmutableMap.<String,String>of("RC0", "I1","RC1", "I4","RC2","I7"),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC0", "I1", "RC1", "I4", "RC2", "I7"),
             TERRITORY, getTerritories(PLAYER_C),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
@@ -89,7 +89,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             CONTINENT, emptyListString))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(3),
-            CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC3", ""),
             TERRITORY, getTerritories(PLAYER_B),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
@@ -103,7 +103,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
         .put(CARDS, getCardsInRange(5, 43))
         .put(TRADE_NUMBER, 1)
         .put(CARDS_BEING_TRADED, ImmutableMap.<String, String>of(
-                "RC0", "I1","RC1", "I4","RC2","I7"))
+                "RC0", "I1", "RC1", "I4", "RC2", "I7"))
         .put(REINFORCE_UNITS, 4)
         .build();
     
@@ -117,24 +117,24 @@ public class ReinforcementPhaseTest extends AbstractTest {
     assertHacker(new VerifyMove(
         cId, playersInfo, newStateAtA, lastStateAtC, tradeCardsMoveByC, bId));
 
-    Map<String, Object> lastStateAtC_1 = ImmutableMap.<String, Object>builder()
+    Map<String, Object> lastStateAtC1 = ImmutableMap.<String, Object>builder()
         .put(TURN, PLAYER_C)
         .put(PHASE, CARD_TRADE)
         .put(PLAYER_A, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(4),
-            CARD_VALUES, ImmutableMap.<String, String>of("RC4", null),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC4", ""),
             TERRITORY, getTerritories(PLAYER_A),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(3),
-            CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC3", ""),
             TERRITORY, getTerritories(PLAYER_B),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(0, 1, 2),
-            CARD_VALUES, ImmutableMap.<String,String>of("RC0", "C1","RC1", "I4","RC2","I7"),
+            CARD_VALUES, ImmutableMap.<String, String>of("RC0", "C1", "RC1", "I4", "RC2", "I7"),
             TERRITORY, getTerritories(PLAYER_C),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
@@ -145,7 +145,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     
     // Check if hacker is trading invalid pair of cards
     assertHacker(new VerifyMove(
-        cId, playersInfo, newStateAtA, lastStateAtC_1, tradeCardsMoveByC, cId));
+        cId, playersInfo, newStateAtA, lastStateAtC1, tradeCardsMoveByC, cId));
   }
   
   /*
@@ -176,11 +176,11 @@ public class ReinforcementPhaseTest extends AbstractTest {
         .put(CARDS, getCardsInRange(5, 43))
         .put(TRADE_NUMBER, 1)
         .put(CARDS_BEING_TRADED, ImmutableMap.<String, String>of(
-                "RC0", "I1","RC1", "I4","RC2","I7"))
+                "RC0", "I1", "RC1", "I4", "RC2", "I7"))
         .put(REINFORCE_UNITS, 4)
         .build();
     
-    List<String> cards = Lists.newArrayList("RC0","RC1","RC2");
+    List<String> cards = Lists.newArrayList("RC0", "RC1", "RC2");
     cards.addAll(getCardsInRange(4, 43));
     
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
@@ -256,18 +256,6 @@ public class ReinforcementPhaseTest extends AbstractTest {
             TERRITORY, territoryC,
             UNCLAIMED_UNITS, 7,
             CONTINENT, emptyListString)));
-
-    territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "4", 1);
-    territoryC = performDeltaOnTerritory(territoryC, "38", 2);
-    territoryC = performDeltaOnTerritory(territoryC, "41", 2);
-
-    List<Operation> reinforceTerritoryOfCWithIncorrectTerritory = ImmutableList.<Operation>of(
-        new Set(PHASE, ATTACK_PHASE),
-        new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
-            TERRITORY, territoryC,
-            UNCLAIMED_UNITS, 7,
-            CONTINENT, emptyListString)));
     
     // Check valid move
     assertMoveOk(move(cId, state, reinforceTerritoryOfC));
@@ -278,8 +266,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     assertHacker(move(cId, emptyState, reinforceTerritoryOfC));
     assertHacker(move(cId, nonEmptyState, reinforceTerritoryOfC));
     
-    // Check if invalid operations - invalid number of units, invalid territory
+    // Check if invalid operations - invalid number of units
     assertHacker(move(cId, state, reinforceTerritoryOfCWithIncorrectNumberOfUnits));
-    assertHacker(move(cId, state, reinforceTerritoryOfCWithIncorrectTerritory));
   }
 }

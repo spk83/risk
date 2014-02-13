@@ -18,21 +18,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+/**
+ * This class provides helper methods and define variables that are used by all the test classes.
+ * @author vishal
+ *
+ */
 @RunWith(JUnit4.class)
 public class AbstractTest {
-  protected static final int TOTAL_TERRITORIES = 42;
+  protected static final int TOTAL_TERRITORIES = 42; // Number of territories
   protected static final String PLAYER_ID = "playerId";
-  protected static final String TURN_ORDER = "turnOrder"; // turn of which player (either A or B)
-  protected static final String TURN = "turn"; // turn of which player (either A or B)
-  protected static final String PHASE = "phase"; // Reinforcement or Attack or Fortify
-  protected static final String RISK_CARD = "RC"; // RISK Card key (1 ..44)
-  protected static final String ATTACK_ARMY = "attackArmy"; // Size of attack army
-  protected static final String DEFENCE_ARMY = "defenceArmy"; // Size of defence army
-  protected static final String TERRITORY = "territory"; // (1..42)
-  protected static final String UNCLAIMED_TERRITORY = "unclaimedTerritory"; // (1..42)
-  protected static final String TERRITORY_DELTA = "territoryDelta";
-  protected static final String CONTINENT = "continent"; // (1..6)
-  protected static final String UNITS = "units"; // Units of armies assigned
+  protected static final String TURN_ORDER = "turnOrder";
+  protected static final String TURN = "turn";
+  protected static final String PHASE = "phase"; // reinforce, attack, fortify
+  protected static final String RISK_CARD = "RC";
+  protected static final String TERRITORY = "territory";
+  protected static final String UNCLAIMED_TERRITORY = "unclaimedTerritory";
+  protected static final String CONTINENT = "continent";
+  protected static final String UNITS = "units";
   protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
   protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
   protected static final String DICE_ROLL = "diceRoll";
@@ -42,18 +44,16 @@ public class AbstractTest {
   protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
   protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
   protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
-  protected static final int TOTAL_PLAYERS = 3;
-  protected static final String PLAYERS = "players";
+  protected static final int TOTAL_PLAYERS = 3; // Number of players playing
   protected static final String CARDS = "cards";
-  protected static final String BOARD = "board";
   protected static final String CARDS_TRADED = "cards_traded";
   protected static final String DEPLOYMENT = "deployment";
   protected static final String CLAIM_TERRITORY = "claimTerritory";
   protected static final String CARD_TRADE = "cardTrade";
   protected static final String ATTACK_PHASE = "attackPhase";
   protected static final String FORTIFY = "fortify";
+  protected static final String END_GAME = "endGame";
   
-  protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
   protected static final int aId = 1; // Player A
   protected static final int bId = 2; // Player B
   protected static final int cId = 3; // Player C
@@ -61,48 +61,69 @@ public class AbstractTest {
   protected static final String PLAYER_B = playerIdToString(bId);
   protected static final String PLAYER_C = playerIdToString(cId);
   
-  protected static final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(PLAYER_ID, aId);
-  protected static final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(PLAYER_ID, bId);
-  protected static final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(PLAYER_ID, cId);
-  protected static final List<Map<String, Object>> playersInfo = ImmutableList.of(aInfo, bInfo,cInfo);
+  protected static final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(
+      PLAYER_ID, aId);
+  protected static final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(
+      PLAYER_ID, bId);
+  protected static final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(
+      PLAYER_ID, cId);
+  protected static final List<Map<String, Object>> playersInfo = ImmutableList.of(
+      aInfo, bInfo, cInfo);
   
   protected static final Map<String, Object> emptyState = ImmutableMap.<String, Object>of();
-  protected static final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of("k", "v");
-  
+  protected static final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of(
+      "k", "v");
   protected static final Map<String, Object> emptyMap = ImmutableMap.<String, Object>of();
   protected static final List<String> emptyListString = ImmutableList.<String>of();
   protected static final List<Integer> emptyListInt = ImmutableList.<Integer>of();
   
+  /*
+   * This method is used to check if verifyMove outcome is valid. 
+   */
   protected void assertMoveOk(VerifyMove verifyMove) {
     VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
     assertEquals(new VerifyMoveDone(), verifyDone);
   }
 
+  /*
+   * This method is used to check if verifyMove outcome is invalid. 
+   */
   protected void assertHacker(VerifyMove verifyMove) {
     VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
     assertEquals(new VerifyMoveDone(verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
   }
 
+  /*
+   * This method is used to create object of VerifyMove class.
+   */
   protected VerifyMove move(
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        aId, playersInfo, emptyState, lastState, lastMove, 
-        lastMovePlayerId);
+        aId, playersInfo, emptyState, lastState, lastMove, lastMovePlayerId);
   }
 
+  /*
+   * This is a helper method to get list of player IDs.
+   */
   protected List<String> getPlayerIds() {
     List<String> playerIds = Lists.newArrayList();
-    playerIds.add("P"+aId);
-    playerIds.add("P"+bId);
-    playerIds.add("P"+cId);
+    playerIds.add("P" + aId);
+    playerIds.add("P" + bId);
+    playerIds.add("P" + cId);
     return playerIds;
   }
 
+  /*
+   * Test for getPlayerIds method.
+   */
   @Test
-  public void testgetPlayersIds(){
+  public void testgetPlayersIds() {
     assertEquals(Lists.newArrayList("P1", "P2", "P3"), getPlayerIds());
   }
   
+  /*
+   * This is a helper method to get risk card value from its ID.
+   */
   protected String cardIdToString(int cardId) {
     checkArgument(cardId >= 0 && cardId <= 43);
     int category = cardId % 3;
@@ -112,25 +133,37 @@ public class AbstractTest {
     return categoryString + cardId;
   }
   
+  /*
+   * Test for cardIdToString.
+   */
   @Test
-  public void testcardIdToString(){
+  public void testcardIdToString() {
     assertEquals("I1", cardIdToString(1));
     assertEquals("C8", cardIdToString(8));
     assertEquals("A15", cardIdToString(15));
     assertEquals("W42", cardIdToString(42));
   }
   
+  /*
+   * This is a helper method to convert player's ID from int to String.
+   */
   protected static String playerIdToString(int playerId) {
-    return "P"+playerId;
+    return "P" + playerId;
   }
   
+  /* 
+   * Test for playerIdToString.
+   */
   @Test
-  public void testplayerIdToString(){
+  public void testplayerIdToString() {
     assertEquals("P1", playerIdToString(aId));
     assertEquals("P2", playerIdToString(bId));
     assertEquals("P3", playerIdToString(cId));
   }
 
+  /*
+   * This is a helper method which returns a list of RISK cards of given range.
+   */
   protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {
     List<String> keys = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
@@ -139,32 +172,44 @@ public class AbstractTest {
     return keys;
   }
   
+  /*
+   * Test for getCardsInRange method.
+   */
   @Test
-  public void testgetCardsInRange(){
-    assertEquals(Lists.newArrayList("RC0","RC1","RC2","RC3"), getCardsInRange(0, 3));
-    assertEquals(Lists.newArrayList("RC41","RC42","RC43"), getCardsInRange(41, 43));
+  public void testgetCardsInRange() {
+    assertEquals(Lists.newArrayList("RC0", "RC1", "RC2", "RC3"), getCardsInRange(0, 3));
+    assertEquals(Lists.newArrayList("RC41", "RC42", "RC43"), getCardsInRange(41, 43));
   }
   
+  /* 
+   * This is a helper method to get list of territories for a playerID.
+   */
   protected Map<String, Integer> getTerritories(String playerID) {
     Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-    int territory = 0;
-    switch(playerID){
-    case "P1": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
+    switch(playerID) {
+    case "P1":
+      for (int i = 0; i < 14; i++) {
+        territoryMap.put(i + "", 1);
       }
+      break;
     case "P2": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
+      for (int i = 14; i < 28; i++) {
+        territoryMap.put(i + "", 1);
       }
+      break;
     case "P3": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
+      for (int i = 28; i < 42; i++) {
+        territoryMap.put(i + "", 1);
       }
+      break;
+    default:
     }
     return territoryMap;
   }
   
+  /*
+   * Test for getTerritories method
+   */
   @Test
   public void testgetTerritories() {
     Map<String, Integer> playerATerritoryMap = ImmutableMap.<String, Integer>builder()
@@ -184,19 +229,27 @@ public class AbstractTest {
         .put("27", 1)
         .build();
     
-    assertEquals(playerATerritoryMap, getTerritories("P2"));
+    assertEquals(equalMaps(playerATerritoryMap, getTerritories("P2")), true);
   }
   
+  /*
+   * Helper method to get Map of territories with specified change.
+   */
   protected Map<String, Integer> performDeltaOnTerritory(
       Map<String, Integer> currentMap, String territory, int delta) {
     int oldValue = currentMap.get(territory);
     int newValue = oldValue + delta;
-    currentMap.put(territory, newValue);
-    return currentMap;
+    Map<String, Integer> newMap = new HashMap<String, Integer>();
+    newMap.putAll(currentMap);
+    newMap.put(territory, newValue);
+    return newMap;
   }
   
+  /*
+   * Test for performDeltaOnTerritory.
+   */
   @Test
-  public void testperformDeltaOnTerritory(){
+  public void testperformDeltaOnTerritory() {
     Map<String, Integer> oldTerritory = ImmutableMap.<String, Integer>builder()
         .put("1", 1)
         .put("20", 3)
@@ -204,10 +257,40 @@ public class AbstractTest {
     
     Map<String, Integer> newTerritory = ImmutableMap.<String, Integer>builder()
         .put("1", 3)
-        .put("20", 3)
+        .put("20", 1)
         .build();
         
-    assertEquals(newTerritory, performDeltaOnTerritory(oldTerritory, "1", 2));
-    
+    assertEquals(newTerritory.get("1"), performDeltaOnTerritory(oldTerritory, "1", 2).get("1"));
+    assertEquals(newTerritory.get("20"), performDeltaOnTerritory(oldTerritory, "20", -2).get("20"));    
   }
+  
+  /*
+   * Helper method to get list of territory from given range.
+   */
+  protected List<Integer> getTerritoriesInRange(int fromInclusive, int toInclusive) {
+    List<Integer> listOfTerritories = Lists.newArrayList();
+    for (int i = fromInclusive; i <= toInclusive; i++) {
+      listOfTerritories.add(i);
+    }
+    return listOfTerritories;
+  }
+  
+  /*
+   * Test the helper method getTerritoriesInRange.
+   */
+  public void testgetTerritoriesInRange() {
+    assertEquals(Lists.newArrayList(0, 1, 2, 3, 4, 5), getTerritoriesInRange(0, 5));
+  }
+  
+  /*
+   * Compare two maps
+   */
+  public boolean equalMaps(Map<String, Integer>m1, Map<String, Integer>m2) {
+    if (m1.size() != m2.size())
+       return false;
+    for (String key: m1.keySet())
+       if (!m1.get(key).equals(m2.get(key)))
+          return false;
+    return true;
+ }
 }

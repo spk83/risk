@@ -32,7 +32,7 @@ public class InitialSetupTest extends AbstractTest {
 
     // Shuffle playerIds, assign that list as turnOrder
     List<String> turnOrder = new Shuffle(getPlayerIds()).getKeys();
-    operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds())));
+    operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds()).getKeys()));
     
     // set TURN to first from that shuffled list
     operations.add(new Set(TURN, turnOrder.get(0)));
@@ -56,12 +56,12 @@ public class InitialSetupTest extends AbstractTest {
   /*
    * Helper method to get number of initial army units based on number of players 
    */
-  private Map<Integer, Integer> assignInitialUnits() {
+  private Map<String, Integer> assignInitialUnits() {
     int initialNumberOfUnits = GameConstants.getInitialNumberOfUnits(getPlayerIds().size());
-    Map<Integer, Integer> assignUnits = new HashMap<Integer, Integer>();
+    Map<String, Integer> assignUnits = new HashMap<String, Integer>();
     
     for (String playerId : getPlayerIds()) {
-      assignUnits.put(Integer.parseInt(playerId), initialNumberOfUnits);
+      assignUnits.put(playerId, initialNumberOfUnits);
     }
     return assignUnits;
   }
@@ -71,10 +71,10 @@ public class InitialSetupTest extends AbstractTest {
    */
   @Test
   public void testassignInitialUnits() {
-    assertEquals(ImmutableMap.<Integer, Integer>of(
-        aId, 35,
-        bId, 35,
-        cId, 35), assignInitialUnits());
+    assertEquals(ImmutableMap.<String, Integer>of(
+        PLAYER_A, 35,
+        PLAYER_B, 35,
+        PLAYER_C, 35), assignInitialUnits());
   }
   
   /*

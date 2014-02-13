@@ -1,7 +1,5 @@
 package org.risk.client;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +67,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     claimTerritoryByC.add(new Set(PLAYER_C, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 35,
-        TERRITORY, ImmutableMap.<String, Object>of("30", 1,"32",1),
+        TERRITORY, ImmutableMap.<String, Object>of("30", 1, "32", 1),
         CONTINENT, emptyListString)));
     assertHacker(move(cId, stateTurn1, claimTerritoryByC));
     
@@ -192,27 +190,11 @@ public class DeploymentPhaseTest extends AbstractTest {
     assertHacker(move(aId, stateTurnLast, changePhase));
   }
   
-  /*
-   * Helper method to get list of territory from given range
-   */
-  private List<Integer> getTerritoriesInRange(int fromInclusive, int toInclusive) {
-    List<Integer> listOfTerritories = Lists.newArrayList();
-    for (int i = fromInclusive; i <= toInclusive; i++) {
-      listOfTerritories.add(i);
-    }
-    return listOfTerritories;
-  }
-  
-  /*
-   * Test the helper method getTerritoriesInRange
-   */
-  public void testgetTerritoriesInRange() {
-    assertEquals(Lists.newArrayList(0, 1, 2, 3, 4, 5), getTerritoriesInRange(0, 5));
-  }
 
   /*
    * Test the operations performed in deployment phase of the game
    */
+  @Test
   public void testDeployment() {
     Map<String, Object> stateTurn1 = ImmutableMap.<String, Object>builder()
         .put(TURN, PLAYER_C)

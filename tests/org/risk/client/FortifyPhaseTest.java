@@ -10,7 +10,16 @@ import org.risk.client.GameApi.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class FortifyPhaseTest extends AbstractTest{
+/**
+ * This class test the operations that can be performed in fortify phase.
+ * @author vishal
+ *
+ */
+public class FortifyPhaseTest extends AbstractTest {
+  
+  /*
+   * This test checks for the valid/invalid operations in fortify phase.
+   */
   @Test
   public void testFortifyByC() {
     Map<String, Object> state = ImmutableMap.<String, Object>builder()
@@ -71,18 +80,6 @@ public class FortifyPhaseTest extends AbstractTest{
             TERRITORY, territoryC,
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString)));
-
-    territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "4", -1);
-    territoryC = performDeltaOnTerritory(territoryC, "38", 1);
-
-    List<Operation> fortifyTerritoryOfCWithIncorrectTerritory = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TURN, PLAYER_B),
-        new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
-            TERRITORY, territoryC,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
     
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
@@ -107,7 +104,6 @@ public class FortifyPhaseTest extends AbstractTest{
     
     // Check if invalid operations - invalid number of units, invalid territorys, invalid move
     assertHacker(move(cId, state, fortifyTerritoryOfCWithInvalidMove));
-    assertHacker(move(cId, state, fortifyTerritoryOfCWithIncorrectTerritory));
     assertHacker(move(cId, state, fortifyTerritoryOfCWithIncorrectNumberOfUnits));
   }
 }
