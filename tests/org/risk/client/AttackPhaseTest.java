@@ -28,27 +28,26 @@ public class AttackPhaseTest extends AbstractTest {
   private static final String UNCLAIMED_UNITS = "unclaimedUnits";
   private static final String TERRITORY_WINNER = "territoryWinner";
   private static final String PLAYER = "player";
-  private static final String Message = "message";
+  private static final String MESSAGE = "message";
   
-  private Map<String, Integer> getTerritoriesInRange
-      (int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+  private Map<String, Integer> getTerritoriesInRange(
+      int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
           throws Exception {
-    if( isTerritoryInRange(highestTerritoryIdInclusive) 
+    if (isTerritoryInRange(highestTerritoryIdInclusive) 
         && isTerritoryInRange(lowestTerritoryIdInclusive)
-            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive ) {
+            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
       Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-      for(int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+      for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
         territoryMap.put(i + "", baseUnits);
       }
       return territoryMap;
-    }
-    else {
+    } else {
       throw new Exception("Invalid Territory ID");
     }
   }
   
   private boolean isTerritoryInRange(int territoryId) {
-    if( territoryId >= 0 && territoryId < 42 ) {
+    if (territoryId >= 0 && territoryId < 42) {
       return true;
     }
     return false;
@@ -58,23 +57,23 @@ public class AttackPhaseTest extends AbstractTest {
   public void testGetTerritoriesInRange() throws Exception {
     Map<String, Integer> territoryMap = getTerritoriesInRange(0, 4, 2);
     Assert.assertEquals(territoryMap.size(), 5);
-    for( int i = 0; i <= 4; ++i ) {
-      Assert.assertEquals(2, territoryMap.get(i+"").intValue());
+    for (int i = 0; i <= 4; ++i) {
+      Assert.assertEquals(2, territoryMap.get(i + "").intValue());
     }
   }
   
   @Test(expected = Exception.class)
-  public void testGetTerritoriesInRange_withInvalidHighRange() throws Exception {
+  public void testGetTerritoriesInRangeWithInvalidHighRange() throws Exception {
     getTerritoriesInRange(0, 50, 2);
   }
   
   @Test(expected = Exception.class)
-  public void testGetTerritoriesInRange_withInvalidLowRange() throws Exception {
+  public void testGetTerritoriesInRangeWithInvalidLowRange() throws Exception {
     getTerritoriesInRange(-1, 41, 2);
   }
   
   @Test(expected = Exception.class)
-  public void testGetTerritoriesInRange_withLowGreaterThanHigh() throws Exception {
+  public void testGetTerritoriesInRangeWithLowGreaterThanHigh() throws Exception {
     getTerritoriesInRange(23, 1, 2);
   }
   
@@ -97,7 +96,7 @@ public class AttackPhaseTest extends AbstractTest {
         
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
     
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_PHASE).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -126,11 +125,11 @@ public class AttackPhaseTest extends AbstractTest {
   }
   
   @Test
-  public void testAttackOfAOnB_A_Wins() throws Exception {
+  public void testAttackOfAOnBAWins() throws Exception {
     
     final Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
     
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -169,7 +168,7 @@ public class AttackPhaseTest extends AbstractTest {
     
     @SuppressWarnings("unchecked")
     Map<String, Object> playerBMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_B));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_B));
     
     playerBMap.put(TERRITORY, territoryMapB);
     
@@ -195,11 +194,11 @@ public class AttackPhaseTest extends AbstractTest {
   }
   
   @Test
-  public void testAttackOfAOnB_A_DoesNotWin() throws Exception {
+  public void testAttackOfAOnBADoesNotWin() throws Exception {
     
     final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 1);
     
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -237,7 +236,7 @@ public class AttackPhaseTest extends AbstractTest {
     performDeltaOnTerritory(territoryMapA, "10", -1);
     @SuppressWarnings("unchecked")
     Map<String, Object> playerAMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
     playerAMap.put(TERRITORY, territoryMapA);
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, ATTACK_PHASE),
@@ -260,13 +259,13 @@ public class AttackPhaseTest extends AbstractTest {
   }
   
   @Test
-  public void testAttackOfAOnB_A_Occupying() throws Exception {
+  public void testAttackOfAOnBAOccupying() throws Exception {
     final Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
     performDeltaOnTerritory(territoryMapB, "15", -1);
     territoryMapB.remove("15");
      
     //creating state after the attack of A
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_OCCUPY).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -299,7 +298,7 @@ public class AttackPhaseTest extends AbstractTest {
     //changing the territory map for A and going back to attack phase
     @SuppressWarnings("unchecked")
     Map<String, Object> playerAMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
     playerAMap.put(TERRITORY, territoryMapA);
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, ATTACK_PHASE),
@@ -352,7 +351,7 @@ public class AttackPhaseTest extends AbstractTest {
     //ending the Attack phase and since PLAYER_A won a territory, giving it a card.
     @SuppressWarnings("unchecked")
     Map<String, Object> playerAMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
     playerAMap.put(CARDS, ImmutableList.<Integer>of(0));
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, END_ATTACK),
@@ -371,11 +370,11 @@ public class AttackPhaseTest extends AbstractTest {
   
   @SuppressWarnings("unchecked")
   @Test
-  public void testAttackOfAOnB_A_WinsAndB_LosesTheGame() throws Exception {
+  public void testAttackOfAOnBAWinsAndBLosesTheGame() throws Exception {
     final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 14, 6);
     final Map<String, Integer> territoryMapB = getTerritoriesInRange(15, 15, 1);
     
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -412,9 +411,9 @@ public class AttackPhaseTest extends AbstractTest {
     //deleting the data of player B since it had just one territory. And giving the cards of B to A
     
     Map<String, Object> playerAMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
     playerAMap.put(CARDS, ImmutableList.<Integer>copyOf(
-        (List<Integer>)((Map<String, Object>)state.get(PLAYER_B)).get(CARDS)));
+        (List<Integer>) ((Map<String, Object>) state.get(PLAYER_B)).get(CARDS)));
     
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, ATTACK_OCCUPY),
@@ -428,7 +427,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(ATTACKER),
         new Delete(DEFENDER + DICE_ROLL + "1"),
         new Delete(DEFENDER),
-        new Set(Message, PLAYER_B+" out of the game !"),
+        new Set(MESSAGE, PLAYER_B + " out of the game !"),
         new Set(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_A)));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
@@ -441,11 +440,11 @@ public class AttackPhaseTest extends AbstractTest {
   }
   
   @SuppressWarnings("unchecked")
-  public void testAttackOfAOnB_A_WinsTheGame() throws Exception {
+  public void testAttackOfAOnBAWinsTheGame() throws Exception {
     final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 40, 6);
     final Map<String, Integer> territoryMapB = getTerritoriesInRange(41, 41, 1);
     
-    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -476,9 +475,9 @@ public class AttackPhaseTest extends AbstractTest {
     //based on dice rolls
     //deleting the data of player B, giving B's cards to A and sending the victory message for A
     Map<String, Object> playerAMap = 
-        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+        new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
     playerAMap.put(CARDS, ImmutableList.<Integer>copyOf(
-        (List<Integer>)((Map<String, Object>)state.get(PLAYER_B)).get(CARDS)));
+        (List<Integer>) ((Map<String, Object>) state.get(PLAYER_B)).get(CARDS)));
     
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, END_GAME),
@@ -492,7 +491,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(ATTACKER),
         new Delete(DEFENDER + DICE_ROLL + "1"),
         new Delete(DEFENDER),
-        new Set(Message, PLAYER_B+" out of the game ! and "+PLAYER_A+" wins !!!"));
+        new Set(MESSAGE, PLAYER_B + " out of the game ! and " + PLAYER_A + " wins !!!"));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
     assertMoveOk(move(aId, state, movementOperations));
