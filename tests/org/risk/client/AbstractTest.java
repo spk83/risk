@@ -6,6 +6,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.VerifyMove;
 import org.risk.client.GameApi.VerifyMoveDone;
@@ -14,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+@RunWith(JUnit4.class)
 public class AbstractTest {
   protected final int reinforcement = 0; // Reinforcement Phase
   protected final int attack = 1; // Attack Phase
@@ -43,6 +47,7 @@ public class AbstractTest {
   protected static final String PLAYERS = "players";
   protected static final String CARDS = "cards";
   protected static final String BOARD = "board";
+  protected static final String CARDS_TRADED = "cards_traded";
   
   protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
   protected static final int aId = 1; // Player A
@@ -66,10 +71,9 @@ public class AbstractTest {
   }
 
   protected VerifyMove move(
-      int yourPlayerId, List<Map<String,Object>> playersInfo, Map<String, Object> state, 
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        yourPlayerId, playersInfo, state, lastState, lastMove, 
+        aId, playersInfo, emptyState, lastState, lastMove, 
         lastMovePlayerId);
   }
 
@@ -81,6 +85,11 @@ public class AbstractTest {
     return playerIds;
   }
 
+  @Test
+  public void testgetPlayersIds(){
+    assertEquals(Lists.newArrayList(aId+"", bId+"", cId+""), getPlayerIds());
+  }
+  
   protected String cardIdToString(int cardId) {
     checkArgument(cardId >= 0 && cardId <= 43);
     int category = cardId % 3;
@@ -90,8 +99,23 @@ public class AbstractTest {
     return categoryString + cardId;
   }
   
+  @Test
+  public void testcardIdToString(){
+    assertEquals("I1", cardIdToString(1));
+    assertEquals("C8", cardIdToString(8));
+    assertEquals("A15", cardIdToString(15));
+    assertEquals("W42", cardIdToString(42));
+  }
+  
   protected static String playerIdToString(int playerId) {
     return "P"+playerId;
+  }
+  
+  @Test
+  public void testplayerIdToString(){
+    assertEquals("P1", playerIdToString(aId));
+    assertEquals("P2", playerIdToString(bId));
+    assertEquals("P3", playerIdToString(cId));
   }
 
   protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {
@@ -100,5 +124,11 @@ public class AbstractTest {
       keys.add(RISK_CARD + i);
     }
     return keys;
+  }
+  
+  @Test
+  public void testgetCardsInRange(){
+    assertEquals(Lists.newArrayList("RC0","RC1","RC2","RC3"), getCardsInRange(0, 3));
+    assertEquals(Lists.newArrayList("RC41","RC42","RC43"), getCardsInRange(41, 43));
   }
 }
