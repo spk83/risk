@@ -184,4 +184,28 @@ public class AbstractTest {
     
     assertEquals(playerATerritoryMap, getTerritories("P2"));
   }
+  
+  protected Map<String, Integer> performDeltaOnTerritory(
+      Map<String, Integer> currentMap, String territory, int delta) {
+    int oldValue = currentMap.get(territory);
+    int newValue = oldValue + delta;
+    currentMap.put(territory, newValue);
+    return currentMap;
+  }
+  
+  @Test
+  public void testperformDeltaOnTerritory(){
+    Map<String, Integer> oldTerritory = ImmutableMap.<String, Integer>builder()
+        .put("1", 1)
+        .put("20", 3)
+        .build();
+    
+    Map<String, Integer> newTerritory = ImmutableMap.<String, Integer>builder()
+        .put("1", 3)
+        .put("20", 3)
+        .build();
+        
+    assertEquals(newTerritory, performDeltaOnTerritory(oldTerritory, "1", 2));
+    
+  }
 }

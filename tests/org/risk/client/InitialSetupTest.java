@@ -46,7 +46,7 @@ public class InitialSetupTest extends AbstractTest {
     }
     
     // Shuffle all the RISK cards in the deck
-    operations.add(new Shuffle(getCardsInRange(0, 43)));
+    operations.add(new Set(CARDS, new Shuffle(getCardsInRange(0, 43)).getKeys()));
     
     // Set next phase of the game
     operations.add(new Set(PHASE, CLAIM_TERRITORY));

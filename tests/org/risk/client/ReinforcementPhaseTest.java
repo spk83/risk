@@ -10,54 +10,47 @@ import org.junit.runners.JUnit4;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
 import org.risk.client.GameApi.SetVisibility;
+import org.risk.client.GameApi.VerifyMove;
+import org.risk.client.GameApi.Delete;
+import org.risk.client.GameApi.Shuffle;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+/**
+ * This class test the operations performed in the Reinforcement phase of the game.
+ * @author vishal
+ *
+ */
 @RunWith(JUnit4.class)
 public class ReinforcementPhaseTest extends AbstractTest {
 
   private static final String REINFORCE = "reinforce";
   private static final String REINFORCE_UNITS = "reinforceUnits";
-  private static final String CARD_TRADE = "cardTrade";
   private static final String ADD_UNITS = "addUnits";
   private static final String CARDS_BEING_TRADED = "cardsBeingTraded";
   private static final String CARD_VALUES = "cardValues";
   private static final String TRADE_NUMBER = "tradeNumber";
 
-  //private static final Map<String, Integer> territoryMapA = ImmutableMap.<String, Integer>of();
-  //private static final Map<String, Integer> territoryMapB = ImmutableMap.<String, Integer>of();
-  //private static final Map<String, Integer> territoryMapC = ImmutableMap.<String, Integer>of();
-  
-  //private static final List<String> continentsA = ImmutableList.<String>of();
-  //private static final List<String> continentsB = ImmutableList.<String>of();
-  //private static final List<String> continentsC = ImmutableList.<String>of();
-  
-  //player C turn to trade cards
-  
+  /*
+   * Test the operations done while trading RISK cards
+   */
   @Test
   public void testTradeCardsMoveByC(){
-    List<Operation> tradeCardsMoveByC = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TRADE_NUMBER, 1),
-        new Set(CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2)),
-        new Set(REINFORCE_UNITS, 4),
-        new SetVisibility("RC0"),
-        new SetVisibility("RC1"),
-        new SetVisibility("RC2"));
-   
-    Map<String, Object> state = ImmutableMap.<String, Object>of(
+    Map<String, Object> lastStateAtC = ImmutableMap.<String, Object>of(
         TURN, PLAYER_C,
-        PHASE, END_DEPLOYMENT, // other possible value "CARD_TRADE"
+        PHASE, ADD_UNITS,
         PLAYERS, ImmutableMap.<String, Object>of(
             PLAYER_A, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(4),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC4", null),
                 TERRITORY, getTerritories(PLAYER_A),
                 UNCLAIMED_UNITS, 0,
                 CONTINENT, emptyListString),
             PLAYER_B, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(3),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
                 TERRITORY, getTerritories(PLAYER_B),
                 UNCLAIMED_UNITS, 0,
                 CONTINENT, emptyListString),
@@ -69,158 +62,99 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
             TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
-            CARDS, getCardsInRange(5, 43)));
-     
-  //  assertMoveOk(verifyMove);
+            CARDS, getCardsInRange(5, 43),
+            TRADE_NUMBER, 0));
 
-  }
-  
-  //Game state as seen by C after the trade
-  private final Map<String, Object> gameStateAfterTradeByC = ImmutableMap.<String, Object>of(
-      TURN, PLAYER_C,
-      PHASE, CARD_TRADE,
-      PLAYERS, ImmutableMap.<String, Object>of(
-          PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(4),
-            TERRITORY, getTerritories(PLAYER_A),
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString),
-          PLAYER_B, ImmutableMap.<String, Object>of(
-              CARDS, ImmutableList.<Integer>of(3),
-              TERRITORY, getTerritories(PLAYER_B),
-              UNCLAIMED_UNITS, 0,
-              CONTINENT, emptyListString),
-          PLAYER_C, ImmutableMap.<String, Object>of(
-              CARDS, emptyListInt,
-              TERRITORY, getTerritories(PLAYER_C),
-              UNCLAIMED_UNITS, 4,
-              CONTINENT, emptyListString)),
-      BOARD, ImmutableMap.<String, Object>of(
-          TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
-          CARDS, getCardsInRange(5, 43),
-          CARDS_TRADED, ImmutableMap.<String,String>of("RC0", "I1","RC1", "I4","RC2","I7")));
-  
-  
-/*  
-  @Test
-  public void testTradeByC_AtB() {
-    final Map<String, Object> lastGameStateAtB = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
-        PLAYER_A+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapA,
-            UNITS, 10,
-            CONTINENT, continentsA),
-        PLAYER_B+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(4),
-            TERRITORY, territoryMapB,
-            UNITS, 10,
-            CONTINENT, continentsB),
-        PLAYER_C+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(1, 2, 3),
-            TERRITORY, territoryMapC,
-            UNITS, 20,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsC));
+    List<Operation> tradeCardsMoveByC = ImmutableList.<Operation>of(
+        new Set(PHASE, REINFORCE),
+        new Set(TRADE_NUMBER, 1),
+        new Set(CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2)),
+        new Set(REINFORCE_UNITS, 4),
+        new SetVisibility("RC0"),
+        new SetVisibility("RC1"),
+        new SetVisibility("RC2"));
+   
+    Map<String, Object> newStateAtA = ImmutableMap.<String, Object>of(
+        TURN, PLAYER_C,
+        PHASE, ADD_UNITS,
+        PLAYERS, ImmutableMap.<String, Object>of(
+            PLAYER_A, ImmutableMap.<String, Object>of(
+                CARDS, ImmutableList.<Integer>of(4),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC4", "C41"),
+                TERRITORY, getTerritories(PLAYER_A),
+                UNCLAIMED_UNITS, 0,
+                CONTINENT, emptyListString),
+            PLAYER_B, ImmutableMap.<String, Object>of(
+                CARDS, ImmutableList.<Integer>of(3),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
+                TERRITORY, getTerritories(PLAYER_B),
+                UNCLAIMED_UNITS, 0,
+                CONTINENT, emptyListString),
+            PLAYER_C, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                CARD_VALUES, emptyMap,
+                TERRITORY, getTerritories(PLAYER_C),
+                UNCLAIMED_UNITS, 4,
+                CONTINENT, emptyListString)),
+        BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
+            CARDS, getCardsInRange(5, 43),
+            TRADE_NUMBER, 1,
+            CARDS_BEING_TRADED, ImmutableMap.<String, String>of(
+                "RC0", "I1","RC1", "I4","RC2","I7"),
+            REINFORCE_UNITS, 4));
+
+    // Check valid move
+    assertMoveOk(new VerifyMove(
+        cId, playersInfo, newStateAtA, lastStateAtC, tradeCardsMoveByC, cId));
     
-    final Map<String, Object> gameStateAtB = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
-        PLAYER_A+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapA,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsA),
-        PLAYER_B+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(4),
-            TERRITORY, territoryMapB,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsB),
-        PLAYER_C+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapC,
-            UNITS, 20,
-            UNCLAIMED_UNITS, 4,
-            CONTINENT, continentsC));
-    assertMoveOk(move(
-        bId, playersInfo, gameStateAtB, 
-        cId, lastGameStateAtB, tradeCardsMoveByC));
-    assertHacker(move(
-        aId, playersInfo, gameStateAtB, 
-        cId, lastGameStateAtB, tradeCardsMoveByC));
-  }
-  
-  @Test
-  public void testTradeByC_AtA() {
-    final Map<String, Object> lastGameStateAtB = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
-        PLAYER_A+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(5),
-            TERRITORY, territoryMapA,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsA),
-        PLAYER_B+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapB,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsB),
-        PLAYER_C+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(1, 2, 3),
-            TERRITORY, territoryMapC,
-            UNITS, 20,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsC));
+    // Check invalid move
+    assertHacker(new VerifyMove(
+        cId, playersInfo, newStateAtA, emptyState, tradeCardsMoveByC, cId));
+    assertHacker(new VerifyMove(
+        cId, playersInfo, newStateAtA, lastStateAtC, tradeCardsMoveByC, bId));
+
+    Map<String, Object> lastStateAtC_1 = ImmutableMap.<String, Object>of(
+        TURN, PLAYER_C,
+        PHASE, CARD_TRADE,
+        PLAYERS, ImmutableMap.<String, Object>of(
+            PLAYER_A, ImmutableMap.<String, Object>of(
+                CARDS, ImmutableList.<Integer>of(4),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC4", null),
+                TERRITORY, getTerritories(PLAYER_A),
+                UNCLAIMED_UNITS, 0,
+                CONTINENT, emptyListString),
+            PLAYER_B, ImmutableMap.<String, Object>of(
+                CARDS, ImmutableList.<Integer>of(3),
+                CARD_VALUES, ImmutableMap.<String, String>of("RC3", null),
+                TERRITORY, getTerritories(PLAYER_B),
+                UNCLAIMED_UNITS, 0,
+                CONTINENT, emptyListString),
+            PLAYER_C, ImmutableMap.<String, Object>of(
+                CARDS, ImmutableList.<Integer>of(0, 1, 2),
+                CARD_VALUES, ImmutableMap.<String,String>of("RC0", "C1","RC1", "I4","RC2","I7"),
+                TERRITORY, getTerritories(PLAYER_C),
+                UNCLAIMED_UNITS, 0,
+                CONTINENT, emptyListString)),
+        BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
+            CARDS, getCardsInRange(5, 43),
+            TRADE_NUMBER, 0));
     
-    final Map<String, Object> gameStateAtB = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
-        PLAYER_A+"", ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(5),
-            TERRITORY, territoryMapA,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsA),
-        PLAYER_B+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapB,
-            UNITS, 10,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsB),
-        PLAYER_C+"", ImmutableMap.<String, Object>of(
-            CARDS, null,
-            TERRITORY, territoryMapC,
-            UNITS, 20,
-            UNCLAIMED_UNITS, 4,
-            CONTINENT, continentsC));
-    assertMoveOk(move(
-        aId, playersInfo, gameStateAtB, 
-        cId, lastGameStateAtB, tradeCardsMoveByC));
-    assertHacker(move(
-        bId, playersInfo, gameStateAtB, 
-        cId, lastGameStateAtB, tradeCardsMoveByC));
+    // Check if hacker is trading invalid pair of cards
+    assertHacker(new VerifyMove(
+        cId, playersInfo, newStateAtA, lastStateAtC_1, tradeCardsMoveByC, cId));
   }
   
-  @Test
-  public void testTradeByC() {
-    assertMoveOk(move(
-        cId, playersInfo, gameStateAfterTradeByC, 
-        cId, gameStateAtC, tradeCardsMoveByC));
-    assertHacker(move(
-        bId, playersInfo, gameStateAfterTradeByC, 
-        cId, gameStateAtC, tradeCardsMoveByC));
-    assertHacker(move(
-        aId, playersInfo, gameStateAfterTradeByC, 
-        cId, gameStateAtC, tradeCardsMoveByC));
-  }
-  */
-  
+  /*
+   * Test operations for giving a player army units based on 
+   * number of territories and continents.
+   */
   @Test
   public void testAddUnitsByC() {
     Map<String, Object> state = ImmutableMap.<String, Object>of(
         TURN, PLAYER_C,
-        PHASE, CARD_TRADE,
+        PHASE, ADD_UNITS,
         PLAYERS, ImmutableMap.<String, Object>of(
             PLAYER_A, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(4),
@@ -239,16 +173,28 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
             TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
-            CARDS, getCardsInRange(5, 43)));
+            CARDS, getCardsInRange(5, 43),
+            TRADE_NUMBER, 1,
+            CARDS_BEING_TRADED, ImmutableMap.<String, String>of(
+                "RC0", "I1","RC1", "I4","RC2","I7"),
+            REINFORCE_UNITS, 4));
+    
+    List<String> cards = Lists.newArrayList("RC0","RC1","RC2");
+    cards.addAll(getCardsInRange(4, 43));
     
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
-        new Set(PHASE, ADD_UNITS),
-        new Set(REINFORCE_UNITS, 3));
+        new Set(PHASE, REINFORCE),
+        new Delete(CARDS_BEING_TRADED),
+        new Set(REINFORCE_UNITS, 3),
+        new Set(CARDS, new Shuffle(cards).getKeys()));
   
+    // Check if valid move
     assertMoveOk(move(cId, state, addUnitsToC));
+    
+    // Check for invalid moves
     assertHacker(move(bId, state, addUnitsToC));
     assertHacker(move(cId, emptyState, addUnitsToC));
-    assertHacker(move(cId, nonEmptyState, addUnitsToC));
+    assertHacker(move(cId, nonEmptyState, addUnitsToC));    
   }
   
   @Test
