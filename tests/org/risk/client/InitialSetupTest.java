@@ -101,7 +101,8 @@ public class InitialSetupTest extends AbstractTest {
     assertHacker(move(bId, emptyState, initialOperations));
     assertHacker(move(aId, nonEmptyState, initialOperations));
     assertHacker(move(cId, nonEmptyState, initialOperations));
-    initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2)));
+    
+    initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2))); // Fake operation
     assertHacker(move(aId, emptyState, initialOperations));
     assertHacker(move(bId, emptyState, initialOperations));
   }

@@ -50,6 +50,7 @@ public class AbstractTest {
   protected static final String DEPLOYMENT = "deployment";
   protected static final String CLAIM_TERRITORY = "claimTerritory";
   protected static final String CARD_TRADE = "cardTrade";
+  protected static final String ATTACK_PHASE = "attackPhase";
   
   protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
   protected static final int aId = 1; // Player A
