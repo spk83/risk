@@ -222,8 +222,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
         .put(CARDS, getCardsInRange(2, 43))
         .build();
     
-    Map<String, Integer> territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "27", 3);
-    territoryC = performDeltaOnTerritory(territoryC, "28", 2);
+    Map<String, Integer> territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "29", 3);
+    territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     territoryC = performDeltaOnTerritory(territoryC, "41", 2);
     
     List<Operation> reinforceTerritoryOfC = ImmutableList.<Operation>of(
@@ -245,8 +245,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString)));
 
-    territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "27", 5);
-    territoryC = performDeltaOnTerritory(territoryC, "28", 2);
+    territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "29", 5);
+    territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     territoryC = performDeltaOnTerritory(territoryC, "41", 2);
 
     List<Operation> reinforceTerritoryOfCWithIncorrectNumberOfUnits = ImmutableList.<Operation>of(
@@ -258,7 +258,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             CONTINENT, emptyListString)));
 
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "4", 1);
-    territoryC = performDeltaOnTerritory(territoryC, "28", 2);
+    territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     territoryC = performDeltaOnTerritory(territoryC, "41", 2);
 
     List<Operation> reinforceTerritoryOfCWithIncorrectTerritory = ImmutableList.<Operation>of(

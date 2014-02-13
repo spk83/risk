@@ -53,7 +53,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     claimTerritoryByC.add(new Set(PLAYER_C, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 35,
-        TERRITORY, ImmutableMap.<String, Object>of("1", 1),
+        TERRITORY, ImmutableMap.<String, Object>of("30", 1),
         CONTINENT, emptyListString)));
     
     // Check valid move
@@ -69,7 +69,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     claimTerritoryByC.add(new Set(PLAYER_C, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 35,
-        TERRITORY, ImmutableMap.<String, Object>of("1", 1,"12",1),
+        TERRITORY, ImmutableMap.<String, Object>of("30", 1,"32",1),
         CONTINENT, emptyListString)));
     assertHacker(move(cId, stateTurn1, claimTerritoryByC));
     
@@ -78,7 +78,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     claimTerritoryByC.add(new Set(PLAYER_C, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 35,
-        TERRITORY, ImmutableMap.<String, Object>of("12", 2),
+        TERRITORY, ImmutableMap.<String, Object>of("32", 2),
         CONTINENT, emptyListString)));
     assertHacker(move(cId, stateTurn1, claimTerritoryByC));
     
@@ -98,11 +98,11 @@ public class DeploymentPhaseTest extends AbstractTest {
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
             CARDS, emptyListInt,
             UNCLAIMED_UNITS, 34,
-            TERRITORY, ImmutableMap.<String, Object>of("1", 1),
+            TERRITORY, ImmutableMap.<String, Object>of("30", 1),
             CONTINENT, emptyListString))
         .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A))
         .put(CARDS, getCardsInRange(0, 43))
-        .put(UNCLAIMED_TERRITORY, getTerritoriesInRange(0, 41).remove(1))
+        .put(UNCLAIMED_TERRITORY, getTerritoriesInRange(0, 41).remove(30))
         .build();
     
     List<Operation> claimTerritoryByB = Lists.newArrayList();
@@ -135,7 +135,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     claimTerritoryByB.add(new Set(PLAYER_B, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 34,
-        TERRITORY, ImmutableMap.<String, Object>of("1", 1),
+        TERRITORY, ImmutableMap.<String, Object>of("30", 1),
         CONTINENT, emptyListString)));
     assertHacker(move(bId, stateTurn2, claimTerritoryByB));
    
@@ -187,7 +187,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     changePhase.add(new Set(PLAYER_A, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 21,
-        TERRITORY, getTerritories(PLAYER_A),
+        TERRITORY, performDeltaOnTerritory(getTerritories(PLAYER_A), "10", 1),
         CONTINENT, emptyListString)));
     assertHacker(move(aId, stateTurnLast, changePhase));
   }
@@ -242,7 +242,7 @@ public class DeploymentPhaseTest extends AbstractTest {
     deploymentByC.add(new Set(PLAYER_C, ImmutableMap.<String, Object>of(
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 21,
-        TERRITORY, performDeltaOnTerritory(getTerritories(PLAYER_C), "9", 1),
+        TERRITORY, performDeltaOnTerritory(getTerritories(PLAYER_C), "29", 1),
         CONTINENT, emptyListString)));
     
     // Check valid move
@@ -259,7 +259,7 @@ public class DeploymentPhaseTest extends AbstractTest {
         CARDS, emptyListInt,
         UNCLAIMED_UNITS, 21,
         TERRITORY, performDeltaOnTerritory(
-            performDeltaOnTerritory(getTerritories(PLAYER_C), "9", 1), "12", 2),
+            performDeltaOnTerritory(getTerritories(PLAYER_C), "29", 1), "32", 2),
         CONTINENT, emptyListString)));
     
     assertHacker(move(cId, stateTurn1, deploymentByC));
