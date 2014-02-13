@@ -16,9 +16,17 @@ import org.risk.client.GameApi.Shuffle;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+/**
+ * This class test the operations performed for initial setup of the game.
+ * @author vishal
+ *
+ */
 @RunWith(JUnit4.class)
 public class InitialSetupTest extends AbstractTest {
   
+  /*
+   * This helper method returns list operations that are required to perform when game starts
+   */
   private List<Operation> getInitialOperations() {
     List<Operation> operations = Lists.newArrayList();
 
@@ -39,19 +47,28 @@ public class InitialSetupTest extends AbstractTest {
     
     // Shuffle all the RISK cards in the deck
     operations.add(new Shuffle(getCardsInRange(0, 43)));
+    
+    // Set next phase of the game
+    operations.add(new Set(PHASE, CLAIM_TERRITORY));
     return operations;
   }
   
+  /*
+   * Helper method to get number of initial army units based on number of players 
+   */
   private Map<Integer, Integer> assignInitialUnits() {
     int initialNumberOfUnits = GameConstants.getInitialNumberOfUnits(getPlayerIds().size());
     Map<Integer, Integer> assignUnits = new HashMap<Integer, Integer>();
     
-    for(String playerId: getPlayerIds()) {
+    for (String playerId : getPlayerIds()) {
       assignUnits.put(Integer.parseInt(playerId), initialNumberOfUnits);
     }
     return assignUnits;
   }
   
+  /*
+   * Test the helper method assignInitialUnits
+   */
   @Test
   public void testassignInitialUnits() {
     assertEquals(ImmutableMap.<Integer, Integer>of(
@@ -60,23 +77,32 @@ public class InitialSetupTest extends AbstractTest {
         cId, 35), assignInitialUnits());
   }
   
+  /*
+   * Test the helper method getInitialOperations
+   */
   @Test
-  public void testgetInitialOperations(){
-    assertEquals( 1 + 1 + 1 + 44 + 1, getInitialOperations().size());
+  public void testgetInitialOperations() {
+    assertEquals(1 + 1 + 1 + 44 + 1 + 1, getInitialOperations().size());
   }
   
+  /*
+   * Test the initial operations performed by player
+   * Detect if there is any hacker move
+   * Assume PLAYER_A will always do the initial operations
+   */
   @Test
-  public void testInitialSetup(){
+  public void testInitialSetup() {
     List<Operation> initialOperations = getInitialOperations();
     
+    // Check valid move
     assertMoveOk(move(aId, emptyState, initialOperations));
+    
+    // Check invalid moves - turn by wrong player, from invalid state, with additional operation
     assertHacker(move(bId, emptyState, initialOperations));
     assertHacker(move(aId, nonEmptyState, initialOperations));
     assertHacker(move(cId, nonEmptyState, initialOperations));
-    
     initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2)));
     assertHacker(move(aId, emptyState, initialOperations));
     assertHacker(move(bId, emptyState, initialOperations));
   }
- 
 }

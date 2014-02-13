@@ -25,7 +25,6 @@ public class ReinforcementPhaseTest extends AbstractTest {
   private static final String CARDS_BEING_TRADED = "cardsBeingTraded";
   private static final String CARD_VALUES = "cardValues";
   private static final String TRADE_NUMBER = "tradeNumber";
-  private static final String UNCLAIMED_UNITS = "unclaimedUnits";
 
   //private static final Map<String, Integer> territoryMapA = ImmutableMap.<String, Integer>of();
   //private static final Map<String, Integer> territoryMapB = ImmutableMap.<String, Integer>of();
@@ -49,7 +48,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
         new SetVisibility("RC2"));
    
     Map<String, Object> state = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
+        TURN, PLAYER_C,
+        PHASE, END_DEPLOYMENT, // other possible value "CARD_TRADE"
         PLAYERS, ImmutableMap.<String, Object>of(
             PLAYER_A, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(4),
@@ -68,7 +68,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 UNCLAIMED_UNITS, 0,
                 CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
-            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+            TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
             CARDS, getCardsInRange(5, 43)));
      
   //  assertMoveOk(verifyMove);
@@ -77,7 +77,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
   
   //Game state as seen by C after the trade
   private final Map<String, Object> gameStateAfterTradeByC = ImmutableMap.<String, Object>of(
-      TURN, cId+"",
+      TURN, PLAYER_C,
+      PHASE, CARD_TRADE,
       PLAYERS, ImmutableMap.<String, Object>of(
           PLAYER_A, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(4),
@@ -95,29 +96,11 @@ public class ReinforcementPhaseTest extends AbstractTest {
               UNCLAIMED_UNITS, 4,
               CONTINENT, emptyListString)),
       BOARD, ImmutableMap.<String, Object>of(
-          TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+          TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
           CARDS, getCardsInRange(5, 43),
           CARDS_TRADED, ImmutableMap.<String,String>of("RC0", "I1","RC1", "I4","RC2","I7")));
   
-  private Map<String, Integer> getTerritories(String playerID) {
-    Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-    int territory = 0;
-    switch(playerID){
-    case "1": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
-      }
-    case "2": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
-      }
-    case "3": 
-      for(int i = 0; i < 14; i++) {
-        territoryMap.put(territory++ + "", 1);
-      }
-    }
-    return territoryMap;
-  }
+  
 /*  
   @Test
   public void testTradeByC_AtB() {
@@ -236,7 +219,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
   @Test
   public void testAddUnitsByC() {
     Map<String, Object> state = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
+        TURN, PLAYER_C,
+        PHASE, CARD_TRADE,
         PLAYERS, ImmutableMap.<String, Object>of(
             PLAYER_A, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(4),
@@ -254,7 +238,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 UNCLAIMED_UNITS, 4, // Got from Trading cards
                 CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
-            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+            TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A),
             CARDS, getCardsInRange(5, 43)));
     
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
@@ -270,7 +254,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
   @Test
   public void testReinforceTerritoriesByC() {
     Map<String, Object> state = ImmutableMap.<String, Object>of(
-        TURN, cId+"",
+        TURN, PLAYER_C,
+        PHASE, ADD_UNITS, // not sure
         PLAYERS, ImmutableMap.<String, Object>of(
             PLAYER_A, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(4),

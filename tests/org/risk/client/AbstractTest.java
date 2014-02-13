@@ -3,6 +3,7 @@ package org.risk.client;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,6 @@ import com.google.common.collect.Lists;
 
 @RunWith(JUnit4.class)
 public class AbstractTest {
-  protected final int reinforcement = 0; // Reinforcement Phase
-  protected final int attack = 1; // Attack Phase
-  protected final int fortify = 2; // Fortify Phase
   protected static final int TOTAL_TERRITORIES = 42;
   protected static final String PLAYER_ID = "playerId";
   protected static final String TURN_ORDER = "turnOrder"; // turn of which player (either A or B)
@@ -31,8 +29,8 @@ public class AbstractTest {
   protected static final String ATTACK_ARMY = "attackArmy"; // Size of attack army
   protected static final String DEFENCE_ARMY = "defenceArmy"; // Size of defence army
   protected static final String TERRITORY = "territory"; // (1..42)
+  protected static final String UNCLAIMED_TERRITORY = "unclaimedTerritory"; // (1..42)
   protected static final String TERRITORY_DELTA = "territoryDelta";
-  protected static final String CLAIM_TERRITORY = "claimTerritory";
   protected static final String CONTINENT = "continent"; // (1..6)
   protected static final String UNITS = "units"; // Units of armies assigned
   protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
@@ -43,11 +41,15 @@ public class AbstractTest {
   protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
   protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
   protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
+  protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
   protected static final int TOTAL_PLAYERS = 3;
   protected static final String PLAYERS = "players";
   protected static final String CARDS = "cards";
   protected static final String BOARD = "board";
   protected static final String CARDS_TRADED = "cards_traded";
+  protected static final String DEPLOYMENT = "deployment";
+  protected static final String CLAIM_TERRITORY = "claimTerritory";
+  protected static final String CARD_TRADE = "cardTrade";
   
   protected static final int TOTAL_UNITS = GameConstants.PLAYERS_UNIT_MAP.get(TOTAL_PLAYERS);
   protected static final int aId = 1; // Player A
@@ -88,15 +90,15 @@ public class AbstractTest {
 
   protected List<String> getPlayerIds() {
     List<String> playerIds = Lists.newArrayList();
-    playerIds.add(aId+"");
-    playerIds.add(bId+"");
-    playerIds.add(cId+"");
+    playerIds.add("P"+aId);
+    playerIds.add("P"+bId);
+    playerIds.add("P"+cId);
     return playerIds;
   }
 
   @Test
   public void testgetPlayersIds(){
-    assertEquals(Lists.newArrayList(aId+"", bId+"", cId+""), getPlayerIds());
+    assertEquals(Lists.newArrayList("P1", "P2", "P3"), getPlayerIds());
   }
   
   protected String cardIdToString(int cardId) {
@@ -139,5 +141,47 @@ public class AbstractTest {
   public void testgetCardsInRange(){
     assertEquals(Lists.newArrayList("RC0","RC1","RC2","RC3"), getCardsInRange(0, 3));
     assertEquals(Lists.newArrayList("RC41","RC42","RC43"), getCardsInRange(41, 43));
+  }
+  
+  protected Map<String, Integer> getTerritories(String playerID) {
+    Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+    int territory = 0;
+    switch(playerID){
+    case "P1": 
+      for(int i = 0; i < 14; i++) {
+        territoryMap.put(territory++ + "", 1);
+      }
+    case "P2": 
+      for(int i = 0; i < 14; i++) {
+        territoryMap.put(territory++ + "", 1);
+      }
+    case "P3": 
+      for(int i = 0; i < 14; i++) {
+        territoryMap.put(territory++ + "", 1);
+      }
+    }
+    return territoryMap;
+  }
+  
+  @Test
+  public void testgetTerritories() {
+    Map<String, Integer> playerATerritoryMap = ImmutableMap.<String, Integer>builder()
+        .put("14", 1)
+        .put("15", 1)
+        .put("16", 1)
+        .put("17", 1)
+        .put("18", 1)
+        .put("19", 1)
+        .put("20", 1)
+        .put("21", 1)
+        .put("22", 1)
+        .put("23", 1)
+        .put("24", 1)
+        .put("25", 1)
+        .put("26", 1)
+        .put("27", 1)
+        .build();
+    
+    assertEquals(playerATerritoryMap, getTerritories("P2"));
   }
 }
