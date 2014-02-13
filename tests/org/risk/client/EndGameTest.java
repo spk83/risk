@@ -25,17 +25,12 @@ public class EndGameTest extends AbstractTest {
     Map<String, Object> state = ImmutableMap.<String, Object>builder()
         .put(TURN, PLAYER_C)
         .put(PHASE, END_GAME)
-        .put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
-            TERRITORY, emptyMap,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
             CARDS, emptyListInt,
             TERRITORY, getTerritoriesInRange(0, 41),
             UNCLAIMED_UNITS, 0,
             CONTINENT, emptyListString))
-        .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_A))
+        .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C))
         .put(CARDS, getCardsInRange(0, 43))
         .build();
         
