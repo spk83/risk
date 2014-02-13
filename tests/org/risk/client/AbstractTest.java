@@ -54,28 +54,28 @@ public class AbstractTest {
   protected static final String FORTIFY = "fortify";
   protected static final String END_GAME = "endGame";
   
-  protected static final int aId = 1; // Player A
-  protected static final int bId = 2; // Player B
-  protected static final int cId = 3; // Player C
-  protected static final String PLAYER_A = playerIdToString(aId);
-  protected static final String PLAYER_B = playerIdToString(bId);
-  protected static final String PLAYER_C = playerIdToString(cId);
+  protected static final int AID = 1; // Player A
+  protected static final int BID = 2; // Player B
+  protected static final int CID = 3; // Player C
+  protected static final String PLAYER_A = playerIdToString(AID);
+  protected static final String PLAYER_B = playerIdToString(BID);
+  protected static final String PLAYER_C = playerIdToString(CID);
   
-  protected static final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(
-      PLAYER_ID, aId);
-  protected static final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(
-      PLAYER_ID, bId);
-  protected static final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(
-      PLAYER_ID, cId);
-  protected static final List<Map<String, Object>> playersInfo = ImmutableList.of(
-      aInfo, bInfo, cInfo);
+  protected static final Map<String, Object> AINFO = ImmutableMap.<String, Object>of(
+      PLAYER_ID, AID);
+  protected static final Map<String, Object> BINFO = ImmutableMap.<String, Object>of(
+      PLAYER_ID, BID);
+  protected static final Map<String, Object> CINFO = ImmutableMap.<String, Object>of(
+      PLAYER_ID, CID);
+  protected static final List<Map<String, Object>> PLAYERSINFO = ImmutableList.of(
+      AINFO, BINFO, CINFO);
   
-  protected static final Map<String, Object> emptyState = ImmutableMap.<String, Object>of();
-  protected static final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of(
+  protected static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
+  protected static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
       "k", "v");
-  protected static final Map<String, Object> emptyMap = ImmutableMap.<String, Object>of();
-  protected static final List<String> emptyListString = ImmutableList.<String>of();
-  protected static final List<Integer> emptyListInt = ImmutableList.<Integer>of();
+  protected static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
+  protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
+  protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
   
   /*
    * This method is used to check if verifyMove outcome is valid. 
@@ -99,7 +99,7 @@ public class AbstractTest {
   protected VerifyMove move(
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        aId, playersInfo, emptyState, lastState, lastMove, lastMovePlayerId);
+        AID, PLAYERSINFO, EMPTYSTATE, lastState, lastMove, lastMovePlayerId);
   }
 
   /*
@@ -107,9 +107,9 @@ public class AbstractTest {
    */
   protected List<String> getPlayerIds() {
     List<String> playerIds = Lists.newArrayList();
-    playerIds.add("P" + aId);
-    playerIds.add("P" + bId);
-    playerIds.add("P" + cId);
+    playerIds.add("P" + AID);
+    playerIds.add("P" + BID);
+    playerIds.add("P" + CID);
     return playerIds;
   }
 
@@ -156,9 +156,9 @@ public class AbstractTest {
    */
   @Test
   public void testplayerIdToString() {
-    assertEquals("P1", playerIdToString(aId));
-    assertEquals("P2", playerIdToString(bId));
-    assertEquals("P3", playerIdToString(cId));
+    assertEquals("P1", playerIdToString(AID));
+    assertEquals("P2", playerIdToString(BID));
+    assertEquals("P3", playerIdToString(CID));
   }
 
   /*
@@ -261,7 +261,8 @@ public class AbstractTest {
         .build();
         
     assertEquals(newTerritory.get("1"), performDeltaOnTerritory(oldTerritory, "1", 2).get("1"));
-    assertEquals(newTerritory.get("20"), performDeltaOnTerritory(oldTerritory, "20", -2).get("20"));    
+    assertEquals(newTerritory.get("20"), performDeltaOnTerritory(oldTerritory, "20", -2)
+        .get("20"));    
   }
   
   /*
@@ -286,11 +287,14 @@ public class AbstractTest {
    * Compare two maps
    */
   public boolean equalMaps(Map<String, Integer>m1, Map<String, Integer>m2) {
-    if (m1.size() != m2.size())
+    if (m1.size() != m2.size()) {
        return false;
-    for (String key: m1.keySet())
-       if (!m1.get(key).equals(m2.get(key)))
+    }
+    for (String key: m1.keySet()) {
+       if (!m1.get(key).equals(m2.get(key))) {
           return false;
+       }
+    }
     return true;
  }
 }

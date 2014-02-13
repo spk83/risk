@@ -95,15 +95,15 @@ public class InitialSetupTest extends AbstractTest {
     List<Operation> initialOperations = getInitialOperations();
     
     // Check valid move
-    assertMoveOk(move(aId, emptyState, initialOperations));
+    assertMoveOk(move(AID, EMPTYSTATE, initialOperations));
     
     // Check invalid moves - turn by wrong player, from invalid state, with additional operation
-    assertHacker(move(bId, emptyState, initialOperations));
-    assertHacker(move(aId, nonEmptyState, initialOperations));
-    assertHacker(move(cId, nonEmptyState, initialOperations));
+    assertHacker(move(BID, EMPTYSTATE, initialOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, initialOperations));
+    assertHacker(move(CID, NONEMPTYSTATE, initialOperations));
     
     initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2))); // Fake operation
-    assertHacker(move(aId, emptyState, initialOperations));
-    assertHacker(move(bId, emptyState, initialOperations));
+    assertHacker(move(AID, EMPTYSTATE, initialOperations));
+    assertHacker(move(BID, EMPTYSTATE, initialOperations));
   }
 }

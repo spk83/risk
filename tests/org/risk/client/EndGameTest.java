@@ -26,33 +26,33 @@ public class EndGameTest extends AbstractTest {
         .put(TURN, PLAYER_C)
         .put(PHASE, END_GAME)
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 41),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString))
+            CONTINENT, EMPTYLISTSTRING))
         .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C))
         .put(CARDS, getCardsInRange(0, 43))
         .build();
         
     List<Operation> claimEndGameByC = ImmutableList.<Operation>of(
-        new EndGame(cId));
+        new EndGame(CID));
 
-    assertMoveOk(move(cId, state, claimEndGameByC));
+    assertMoveOk(move(CID, state, claimEndGameByC));
     
     // Check invalid operations - wrong turn, from invalid states
-    assertHacker(move(aId, state, claimEndGameByC));
-    assertHacker(move(cId, emptyState, claimEndGameByC));
-    assertHacker(move(cId, nonEmptyState, claimEndGameByC));
+    assertHacker(move(AID, state, claimEndGameByC));
+    assertHacker(move(CID, EMPTYSTATE, claimEndGameByC));
+    assertHacker(move(CID, NONEMPTYSTATE, claimEndGameByC));
     
     List<Operation> invalidClaimEndGameByC = ImmutableList.<Operation>of(
-        new EndGame(cId),
+        new EndGame(CID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 41),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
+            CONTINENT, EMPTYLISTSTRING)));
     
     // Check invalid move 
-    assertHacker(move(cId, state, invalidClaimEndGameByC));
+    assertHacker(move(CID, state, invalidClaimEndGameByC));
   }
 }

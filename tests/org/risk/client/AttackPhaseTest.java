@@ -100,28 +100,28 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_PHASE).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 10, 6),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(11, 29, 1),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(0, 43)).build();
-    assertMoveOk(move(aId, state, attackOperationsOfAOnB));
-    assertHacker(move(aId, emptyState, attackOperationsOfAOnB));
-    assertHacker(move(aId, nonEmptyState, attackOperationsOfAOnB));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, attackOperationsOfAOnB));
-    assertHacker(move(cId, state, attackOperationsOfAOnB));
+    assertMoveOk(move(AID, state, attackOperationsOfAOnB));
+    assertHacker(move(AID, EMPTYSTATE, attackOperationsOfAOnB));
+    assertHacker(move(AID, NONEMPTYSTATE, attackOperationsOfAOnB));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, attackOperationsOfAOnB));
+    assertHacker(move(CID, state, attackOperationsOfAOnB));
   }
   
   @Test
@@ -133,20 +133,20 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 10, 6),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(11, 29, 1),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(0, 43)).
         put(ATTACKER + DICE_ROLL + "1", 6).
@@ -185,12 +185,12 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(DEFENDER));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
   
   @Test
@@ -202,20 +202,20 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 10, 6),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(11, 29, 1),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(0, 43)).
         put(ATTACKER + DICE_ROLL + "1", 4).
@@ -250,12 +250,12 @@ public class AttackPhaseTest extends AbstractTest {
 
     //consequently the ATTACK_DETAILS will be removed while computing new state
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
   
   @Test
@@ -269,20 +269,20 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_OCCUPY).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(0, 10, 6),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryMapB,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(0, 43)).
         put(UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)).
@@ -306,12 +306,12 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(UNCLAIMED_TERRITORY));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
   @Test
   public void testEndAttackByA() throws Exception {
@@ -330,20 +330,20 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_OCCUPY).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryMapA,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryMapB,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(0, 43)).
         put(TERRITORY_WINNER, PLAYER_A).build();
@@ -360,12 +360,12 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(TERRITORY_WINNER));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
   
   @SuppressWarnings("unchecked")
@@ -378,20 +378,20 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryMapA,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(0, 1),
             TERRITORY, territoryMapB,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritoriesInRange(30, 41, 3),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(2, 43)).
         put(ATTACKER + DICE_ROLL + "1", 6).
@@ -431,12 +431,12 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_A)));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
   
   @SuppressWarnings("unchecked")
@@ -448,15 +448,15 @@ public class AttackPhaseTest extends AbstractTest {
         put(TURN, PLAYER_A).
         put(PHASE, ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryMapA,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(0, 1),
             TERRITORY, territoryMapB,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)).
+            CONTINENT, EMPTYLISTSTRING)).
         put(TURN_ORDER, ImmutableList.<String>of(PLAYER_B, PLAYER_A)).
         put(CARDS, getCardsInRange(2, 43)).
         put(ATTACKER + DICE_ROLL + "1", 6).
@@ -494,11 +494,11 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(MESSAGE, PLAYER_B + " out of the game ! and " + PLAYER_A + " wins !!!"));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
-    assertMoveOk(move(aId, state, movementOperations));
-    assertHacker(move(aId, emptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, movementOperations));
-    assertHacker(move(aId, nonEmptyState, emptyOperations));
-    assertHacker(move(bId, state, movementOperations));
-    assertHacker(move(cId, state, movementOperations));
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, movementOperations));
+    assertHacker(move(AID, NONEMPTYSTATE, emptyOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
   }
 }

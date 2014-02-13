@@ -29,17 +29,17 @@ public class FortifyPhaseTest extends AbstractTest {
             CARDS, ImmutableList.<Integer>of(0),
             TERRITORY, getTerritories(PLAYER_A),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString))
+            CONTINENT, EMPTYLISTSTRING))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
             CARDS, ImmutableList.<Integer>of(1),
             TERRITORY, getTerritories(PLAYER_B),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString))
+            CONTINENT, EMPTYLISTSTRING))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, getTerritories(PLAYER_C),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString))
+            CONTINENT, EMPTYLISTSTRING))
         .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A))
         .put(CARDS, getCardsInRange(2, 43))
         .build();
@@ -51,10 +51,10 @@ public class FortifyPhaseTest extends AbstractTest {
         new Set(PHASE, CARD_TRADE),
         new Set(TURN, PLAYER_B),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryC,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
+            CONTINENT, EMPTYLISTSTRING)));
 
     Map<String, Integer> territoryB = performDeltaOnTerritory(getTerritories(PLAYER_B), "15", -1);
     territoryB = performDeltaOnTerritory(territoryB, "16", 1);
@@ -66,7 +66,7 @@ public class FortifyPhaseTest extends AbstractTest {
             CARDS, ImmutableList.<Integer>of(1),
             TERRITORY, territoryB,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
+            CONTINENT, EMPTYLISTSTRING)));
 
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
@@ -76,10 +76,10 @@ public class FortifyPhaseTest extends AbstractTest {
         new Set(PHASE, CARD_TRADE),
         new Set(TURN, PLAYER_B),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryC,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
+            CONTINENT, EMPTYLISTSTRING)));
     
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
@@ -88,22 +88,22 @@ public class FortifyPhaseTest extends AbstractTest {
         new Set(PHASE, CARD_TRADE),
         new Set(TURN, PLAYER_B),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, emptyListInt,
+            CARDS, EMPTYLISTINT,
             TERRITORY, territoryC,
             UNCLAIMED_UNITS, 0,
-            CONTINENT, emptyListString)));
+            CONTINENT, EMPTYLISTSTRING)));
     
     // Check valid move
-    assertMoveOk(move(cId, state, fortifyTerritoryOfC));
+    assertMoveOk(move(CID, state, fortifyTerritoryOfC));
     
     // Check invalid move - wrong turn, invalid moves, from invalid states
-    assertHacker(move(bId, state, fortifyTerritoryOfC));
-    assertHacker(move(cId, state, fortifyTerritoryOfBInWrongTurn));
-    assertHacker(move(cId, emptyState, fortifyTerritoryOfC));
-    assertHacker(move(cId, nonEmptyState, fortifyTerritoryOfC));
+    assertHacker(move(BID, state, fortifyTerritoryOfC));
+    assertHacker(move(CID, state, fortifyTerritoryOfBInWrongTurn));
+    assertHacker(move(CID, EMPTYSTATE, fortifyTerritoryOfC));
+    assertHacker(move(CID, NONEMPTYSTATE, fortifyTerritoryOfC));
     
     // Check if invalid operations - invalid number of units, invalid territorys, invalid move
-    assertHacker(move(cId, state, fortifyTerritoryOfCWithInvalidMove));
-    assertHacker(move(cId, state, fortifyTerritoryOfCWithIncorrectNumberOfUnits));
+    assertHacker(move(CID, state, fortifyTerritoryOfCWithInvalidMove));
+    assertHacker(move(CID, state, fortifyTerritoryOfCWithIncorrectNumberOfUnits));
   }
 }
