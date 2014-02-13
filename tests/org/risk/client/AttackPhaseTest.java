@@ -1,14 +1,17 @@
 package org.risk.client;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
+import org.risk.client.GameApi.SetRandomInteger;
+import org.risk.client.GameApi.Delete;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -16,92 +19,487 @@ import com.google.common.collect.ImmutableMap;
 @RunWith(JUnit4.class)
 public class AttackPhaseTest extends AbstractTest {
   
-  //creating objects for initial territories of players
-  private static final Map<String, Object> initialTerritoriesOfA =ImmutableMap.<String, Object>of();
-  private static final Map<String, Object> initialTerritoriesOfB =ImmutableMap.<String, Object>of();
-  private static final Map<String, Object> initialTerritoriesOfC =ImmutableMap.<String, Object>of();
-  private static final Map<String, Object> finalTerritoriesOfA =ImmutableMap.<String, Object>of();
-  private static final Map<String, Object> finalTerritoriesOfB =ImmutableMap.<String, Object>of();
-  private static final Map<String, Object> finalTerritoriesOfC =ImmutableMap.<String, Object>of();
-  private static final int attackFromTerritory = 1;
-  private static final int attackToTerritory = 17;
-  private static final int unitsOnAttackingTeritory = 6;
+  private static final String ATTACK_PHASE = "attackPhase";
+  private static final String ATTACK_OCCUPY = "attackOccupy";
+  private static final String ATTACK_RESULT = "attackResult";
+  private static final String END_ATTACK = "endAttack";
+  private static final String ATTACKER = "attacker";
+  private static final String DEFENDER = "defender";
+  private static final String UNCLAIMED_UNITS = "unclaimedUnits";
+  private static final String TERRITORY_WINNER = "territoryWinner";
+  private static final String PLAYER = "player";
+  private static final String Message = "message";
   
-  //Game states for attack phase
-  private final Map<String, Object> stateBeforeAttackByA = ImmutableMap.<String, Object>of(
-      TURN, aId,
-      aId+"", initialTerritoriesOfA,
-      bId+"", initialTerritoriesOfB,
-      cId+"", initialTerritoriesOfC);
-  
-  private final Map<String, Object> stateAfterAttackByA = ImmutableMap.<String, Object>of(
-      TURN, aId,
-      aId+"", initialTerritoriesOfA,
-      bId+"", finalTerritoriesOfB,
-      cId+"", initialTerritoriesOfC,
-      WINNING_TERRITORY, attackToTerritory );
-  
-  private final Map<String, Object> stateAfterOccupancyByA = ImmutableMap.<String, Object>of(
-      TURN, aId,
-      aId+"", finalTerritoriesOfA,
-      bId+"", finalTerritoriesOfB,
-      cId+"", initialTerritoriesOfC,
-      WINNING_TERRITORY, attackToTerritory );
-  
-  private final List<Operation> attackOperationsOfAOnB = ImmutableList.<Operation>of(
-      new Set(TURN, aId),
-      new Set(ATTACK_TO_TERRITORY, attackToTerritory),
-      new Set(ATTACK_FROM_TERRITORY, attackFromTerritory),
-      new Set(DICE_ROLL, ImmutableMap.<String, Object>of(
-          aId+"", ImmutableList.<Integer>of(5, 6, 6),
-          bId+"", ImmutableList.<Integer>of(4))));
-  
-  //Game operations in attack phase
-  private final List<Operation> occupancyOperationsOfA = ImmutableList.<Operation>of(
-      new Set(TURN, aId),
-      new Set(MOVEMENT_FROM_TERRITORY, attackFromTerritory),
-      new Set(MOVEMENT_TO_TERRITORY, attackToTerritory),
-      new Set(UNITS_FROM_TERRITORY, 4),
-      new Set(UNITS_TO_TERRITORY, 2));
-  
-  @BeforeClass
-  private static void setup() {
-    int i = 1;
-    int territoriesPerPerson = TOTAL_TERRITORIES/3; 
-    for( ; i <= territoriesPerPerson; ++i ) {
-      initialTerritoriesOfA.put(i + "", new Set(UNITS, 1));
+  private Map<String, Integer> getTerritoriesInRange
+      (int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+          throws Exception {
+    if( isTerritoryInRange(highestTerritoryIdInclusive) 
+        && isTerritoryInRange(lowestTerritoryIdInclusive)
+            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive ) {
+      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+      for(int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+        territoryMap.put(i + "", baseUnits);
+      }
+      return territoryMap;
     }
-    for( ; i <= territoriesPerPerson * 2; ++i ) {
-      initialTerritoriesOfB.put(i + "", new Set(UNITS, 1));
+    else {
+      throw new Exception("Invalid Territory ID");
     }
-    for( ; i <= territoriesPerPerson * 3; ++i ) {
-      initialTerritoriesOfC.put(i + "", new Set(UNITS, 1));
+  }
+  
+  private boolean isTerritoryInRange(int territoryId) {
+    if( territoryId >= 0 && territoryId < 42 ) {
+      return true;
     }
-    initialTerritoriesOfA.put(attackFromTerritory + "", new Set(UNITS, unitsOnAttackingTeritory));
-    
-    finalTerritoriesOfB.putAll(initialTerritoriesOfB);
-    finalTerritoriesOfB.remove(attackToTerritory);
-    
-    finalTerritoriesOfA.putAll(initialTerritoriesOfA);
-    finalTerritoriesOfA.put(attackToTerritory+"", new Set(UNITS, 4));
-    finalTerritoriesOfA.put(attackFromTerritory+"", new Set(UNITS, 2));
+    return false;
   }
   
   @Test
-  private void testAttackOfAOnB_AWins() {
-    assertMoveOk(move
-        (cId, playersInfo, stateAfterAttackByA, aId, stateBeforeAttackByA, attackOperationsOfAOnB));
-    assertMoveOk(move
-        (bId, playersInfo, stateAfterAttackByA, aId, stateBeforeAttackByA, attackOperationsOfAOnB));
+  public void testGetTerritoriesInRange() throws Exception {
+    Map<String, Integer> territoryMap = getTerritoriesInRange(0, 4, 2);
+    Assert.assertEquals(territoryMap.size(), 5);
+    for( int i = 0; i <= 4; ++i ) {
+      Assert.assertEquals(2, territoryMap.get(i+"").intValue());
+    }
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRange_withInvalidHighRange() throws Exception {
+    getTerritoriesInRange(0, 50, 2);
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRange_withInvalidLowRange() throws Exception {
+    getTerritoriesInRange(-1, 41, 2);
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRange_withLowGreaterThanHigh() throws Exception {
+    getTerritoriesInRange(23, 1, 2);
   }
   
   @Test
-  private void testOccupancyOfA_OnWinningTerritory() {
-    assertMoveOk(move(
-        cId, playersInfo, stateAfterOccupancyByA,
-        aId, stateAfterAttackByA, occupancyOperationsOfA));
-    assertMoveOk(move(
-        bId, playersInfo, stateAfterOccupancyByA,
-        aId, stateAfterAttackByA, occupancyOperationsOfA));
+  public void testAttackOfAOnB() throws Exception {
+    final List<Operation> attackOperationsOfAOnB = ImmutableList.<Operation>of(
+        new Set(PHASE, ATTACK_RESULT),
+        new SetRandomInteger(ATTACKER + DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(ATTACKER + DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(ATTACKER + DICE_ROLL + "3", 1, 7),
+        new Set(ATTACKER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_A,
+            TERRITORY, 10,
+            UNITS, 6)),
+        new SetRandomInteger(DEFENDER + DICE_ROLL + "1", 1, 7),
+        new Set(DEFENDER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_B,
+            TERRITORY, 15, 
+            UNITS, 1)));
+        
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_PHASE).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(0, 10, 6),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(11, 29, 1),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(0, 43)).build();
+    assertMoveOk(move(aId, state, attackOperationsOfAOnB));
+    assertHacker(move(aId, emptyState, attackOperationsOfAOnB));
+    assertHacker(move(aId, nonEmptyState, attackOperationsOfAOnB));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, attackOperationsOfAOnB));
+    assertHacker(move(cId, state, attackOperationsOfAOnB));
+  }
+  
+  @Test
+  public void testAttackOfAOnB_A_Wins() throws Exception {
+    
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
+    
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(0, 10, 6),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(11, 29, 1),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(0, 43)).
+        put(ATTACKER + DICE_ROLL + "1", 6).
+        put(ATTACKER + DICE_ROLL + "2", 6).
+        put(ATTACKER + DICE_ROLL + "3", 5).
+        put(ATTACKER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_A,
+            TERRITORY, 10, 
+            UNITS, 6)).
+        put(DEFENDER + DICE_ROLL + "1", 4).
+        put(DEFENDER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_B,
+            TERRITORY, 15, 
+            UNITS, 1)).build();
+    
+    //based on dice rolls
+    performDeltaOnTerritory(territoryMapB, "15", -1);
+    territoryMapB.remove("15");
+    
+    @SuppressWarnings("unchecked")
+    Map<String, Object> playerBMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_B));
+    
+    playerBMap.put(TERRITORY, territoryMapB);
+    
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, ATTACK_OCCUPY),
+        new Set(PLAYER_B, playerBMap),
+        new Set(UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(TERRITORY_WINNER, PLAYER_A),
+        new Delete(ATTACKER + DICE_ROLL + "1"),
+        new Delete(ATTACKER + DICE_ROLL + "2"),
+        new Delete(ATTACKER + DICE_ROLL + "3"),
+        new Delete(ATTACKER),
+        new Delete(DEFENDER + DICE_ROLL + "1"),
+        new Delete(DEFENDER));
+    
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
+  }
+  
+  @Test
+  public void testAttackOfAOnB_A_DoesNotWin() throws Exception {
+    
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 1);
+    
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(0, 10, 6),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(11, 29, 1),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(0, 43)).
+        put(ATTACKER + DICE_ROLL + "1", 4).
+        put(ATTACKER + DICE_ROLL + "2", 3).
+        put(ATTACKER + DICE_ROLL + "3", 3).
+        put(ATTACKER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_A,
+            TERRITORY, 10, 
+            UNITS, 6)).
+        put(DEFENDER + DICE_ROLL + "1", 6).
+        put(DEFENDER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_B,
+            TERRITORY, 15, 
+            UNITS, 1)).build();
+    
+    //based on dice rolls if the attacker loses then we again go back to the start of attack phase
+    //and the attacker decides to take a call
+    performDeltaOnTerritory(territoryMapA, "10", -1);
+    @SuppressWarnings("unchecked")
+    Map<String, Object> playerAMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+    playerAMap.put(TERRITORY, territoryMapA);
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, ATTACK_PHASE),
+        new Set(PLAYER_A, playerAMap),
+        new Delete(ATTACKER + DICE_ROLL + "1"),
+        new Delete(ATTACKER + DICE_ROLL + "2"),
+        new Delete(ATTACKER + DICE_ROLL + "3"),
+        new Delete(ATTACKER),
+        new Delete(DEFENDER + DICE_ROLL + "1"),
+        new Delete(DEFENDER));
+
+    //consequently the ATTACK_DETAILS will be removed while computing new state
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
+  }
+  
+  @Test
+  public void testAttackOfAOnB_A_Occupying() throws Exception {
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
+    performDeltaOnTerritory(territoryMapB, "15", -1);
+    territoryMapB.remove("15");
+     
+    //creating state after the attack of A
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_OCCUPY).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(0, 10, 6),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, territoryMapB,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(0, 43)).
+        put(UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)).
+        put(TERRITORY_WINNER, PLAYER_A).build();
+    
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
+    
+    //Giving 15 to A and also shifting soldiers from 10 to 15
+    territoryMapA.put("15", 0);
+    performDeltaOnTerritory(territoryMapA, "10", -3);
+    performDeltaOnTerritory(territoryMapA, "15", +3);
+    
+    //changing the territory map for A and going back to attack phase
+    @SuppressWarnings("unchecked")
+    Map<String, Object> playerAMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+    playerAMap.put(TERRITORY, territoryMapA);
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, ATTACK_PHASE),
+        new Set(PLAYER_A, playerAMap),
+        new Delete(UNCLAIMED_TERRITORY));
+    
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
+  }
+  @Test
+  public void testEndAttackByA() throws Exception {
+    
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
+    performDeltaOnTerritory(territoryMapB, "15", -1);
+    territoryMapB.remove("15");
+    
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
+    territoryMapA.put("15", 0);
+    performDeltaOnTerritory(territoryMapA, "10", -3);
+    performDeltaOnTerritory(territoryMapA, "15", +3);
+    
+    //creating state after the attack of A
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_OCCUPY).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, territoryMapA,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, territoryMapB,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(0, 43)).
+        put(TERRITORY_WINNER, PLAYER_A).build();
+    
+    //ending the Attack phase and since PLAYER_A won a territory, giving it a card.
+    @SuppressWarnings("unchecked")
+    Map<String, Object> playerAMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+    playerAMap.put(CARDS, ImmutableList.<Integer>of(0));
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, END_ATTACK),
+        new Set(PLAYER_A, playerAMap),
+        new Set(CARDS, getCardsInRange(1, 43)),
+        new Delete(TERRITORY_WINNER));
+    
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testAttackOfAOnB_A_WinsAndB_LosesTheGame() throws Exception {
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 14, 6);
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(15, 15, 1);
+    
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, territoryMapA,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, ImmutableList.<Integer>of(0, 1),
+            TERRITORY, territoryMapB,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, getTerritoriesInRange(30, 41, 3),
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(2, 43)).
+        put(ATTACKER + DICE_ROLL + "1", 6).
+        put(ATTACKER + DICE_ROLL + "2", 6).
+        put(ATTACKER + DICE_ROLL + "3", 5).
+        put(ATTACKER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_A,
+            TERRITORY, 10,
+            UNITS, 6)).
+        put(DEFENDER + DICE_ROLL + "1", 4).
+        put(DEFENDER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_B,
+            TERRITORY, 15,
+            UNITS, 1)).build();
+    
+    //based on dice rolls
+    //deleting the data of player B since it had just one territory. And giving the cards of B to A
+    
+    Map<String, Object> playerAMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+    playerAMap.put(CARDS, ImmutableList.<Integer>copyOf(
+        (List<Integer>)((Map<String, Object>)state.get(PLAYER_B)).get(CARDS)));
+    
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, ATTACK_OCCUPY),
+        new Set(PLAYER_A, playerAMap),
+        new Delete(PLAYER_B),
+        new Set(UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(TERRITORY_WINNER, PLAYER_A),
+        new Delete(ATTACKER + DICE_ROLL + "1"),
+        new Delete(ATTACKER + DICE_ROLL + "2"),
+        new Delete(ATTACKER + DICE_ROLL + "3"),
+        new Delete(ATTACKER),
+        new Delete(DEFENDER + DICE_ROLL + "1"),
+        new Delete(DEFENDER),
+        new Set(Message, PLAYER_B+" out of the game !"),
+        new Set(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_A)));
+    
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void testAttackOfAOnB_A_WinsTheGame() throws Exception {
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 40, 6);
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(41, 41, 1);
+    
+    Map<String, Object> state = ImmutableMap. <String, Object>builder().
+        put(TURN, PLAYER_A).
+        put(PHASE, ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            CARDS, emptyListInt,
+            TERRITORY, territoryMapA,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            CARDS, ImmutableList.<Integer>of(0, 1),
+            TERRITORY, territoryMapB,
+            UNCLAIMED_UNITS, 0,
+            CONTINENT, emptyListString)).
+        put(TURN_ORDER, ImmutableList.<String>of(PLAYER_B, PLAYER_A)).
+        put(CARDS, getCardsInRange(2, 43)).
+        put(ATTACKER + DICE_ROLL + "1", 6).
+        put(ATTACKER + DICE_ROLL + "2", 6).
+        put(ATTACKER + DICE_ROLL + "3", 5).
+        put(ATTACKER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_A,
+            TERRITORY, 10, 
+            UNITS,  6)).
+        put(DEFENDER + DICE_ROLL + "3", 4).
+        put(DEFENDER, ImmutableMap.<String, Object>of(
+            PLAYER, PLAYER_B,
+            TERRITORY, 15, 
+            UNITS, 1)).build();
+    
+    //based on dice rolls
+    //deleting the data of player B, giving B's cards to A and sending the victory message for A
+    Map<String, Object> playerAMap = 
+        new HashMap<String, Object>((Map<String, Object>)state.get(PLAYER_A));
+    playerAMap.put(CARDS, ImmutableList.<Integer>copyOf(
+        (List<Integer>)((Map<String, Object>)state.get(PLAYER_B)).get(CARDS)));
+    
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new Set(PHASE, END_GAME),
+        new Set(PLAYER_A, playerAMap),
+        new Delete(PLAYER_B),
+        new Set(UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(TERRITORY_WINNER, PLAYER_A),
+        new Delete(ATTACKER + DICE_ROLL + "1"),
+        new Delete(ATTACKER + DICE_ROLL + "2"),
+        new Delete(ATTACKER + DICE_ROLL + "3"),
+        new Delete(ATTACKER),
+        new Delete(DEFENDER + DICE_ROLL + "1"),
+        new Delete(DEFENDER),
+        new Set(Message, PLAYER_B+" out of the game ! and "+PLAYER_A+" wins !!!"));
+    
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertMoveOk(move(aId, state, movementOperations));
+    assertHacker(move(aId, emptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, movementOperations));
+    assertHacker(move(aId, nonEmptyState, emptyOperations));
+    assertHacker(move(bId, state, movementOperations));
+    assertHacker(move(cId, state, movementOperations));
   }
 }
