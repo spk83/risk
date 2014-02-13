@@ -13,6 +13,7 @@ import org.risk.client.GameApi.SetVisibility;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 @RunWith(JUnit4.class)
 public class ReinforcementPhaseTest extends AbstractTest {
@@ -30,9 +31,9 @@ public class ReinforcementPhaseTest extends AbstractTest {
   //private static final Map<String, Integer> territoryMapB = ImmutableMap.<String, Integer>of();
   //private static final Map<String, Integer> territoryMapC = ImmutableMap.<String, Integer>of();
   
-  private static final List<String> continentsA = ImmutableList.<String>of();
-  private static final List<String> continentsB = ImmutableList.<String>of();
-  private static final List<String> continentsC = ImmutableList.<String>of();
+  //private static final List<String> continentsA = ImmutableList.<String>of();
+  //private static final List<String> continentsB = ImmutableList.<String>of();
+  //private static final List<String> continentsC = ImmutableList.<String>of();
   
   //player C turn to trade cards
   
@@ -54,19 +55,20 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 CARDS, ImmutableList.<Integer>of(4),
                 TERRITORY, getTerritories(PLAYER_A),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsA),
+                CONTINENT, emptyListString),
             PLAYER_B, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(3),
                 TERRITORY, getTerritories(PLAYER_B),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsB),
+                CONTINENT, emptyListString),
             PLAYER_C, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(0, 1, 2),
                 CARD_VALUES, ImmutableMap.<String,String>of("RC0", "I1","RC1", "I4","RC2","I7"),
                 TERRITORY, getTerritories(PLAYER_C),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsC)),
+                CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
             CARDS, getCardsInRange(5, 43)));
      
   //  assertMoveOk(verifyMove);
@@ -81,18 +83,19 @@ public class ReinforcementPhaseTest extends AbstractTest {
             CARDS, ImmutableList.<Integer>of(4),
             TERRITORY, getTerritories(PLAYER_A),
             UNCLAIMED_UNITS, 0,
-            CONTINENT, continentsA),
+            CONTINENT, emptyListString),
           PLAYER_B, ImmutableMap.<String, Object>of(
               CARDS, ImmutableList.<Integer>of(3),
               TERRITORY, getTerritories(PLAYER_B),
               UNCLAIMED_UNITS, 0,
-              CONTINENT, continentsB),
+              CONTINENT, emptyListString),
           PLAYER_C, ImmutableMap.<String, Object>of(
-              CARDS, ImmutableList.<Integer>of(),
+              CARDS, emptyListInt,
               TERRITORY, getTerritories(PLAYER_C),
               UNCLAIMED_UNITS, 4,
-              CONTINENT, continentsC)),
+              CONTINENT, emptyListString)),
       BOARD, ImmutableMap.<String, Object>of(
+          TURN_ORDER, Lists.newArrayList(cId, bId, aId),
           CARDS, getCardsInRange(5, 43),
           CARDS_TRADED, ImmutableMap.<String,String>of("RC0", "I1","RC1", "I4","RC2","I7")));
   
@@ -239,18 +242,19 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 CARDS, ImmutableList.<Integer>of(4),
                 TERRITORY, getTerritories(PLAYER_A),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsA),
+                CONTINENT, emptyListString),
             PLAYER_B, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(3),
                 TERRITORY, getTerritories(PLAYER_B),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsB),
+                CONTINENT, emptyListString),
             PLAYER_C, ImmutableMap.<String, Object>of(
-                CARDS, ImmutableList.<Integer>of(),
+                CARDS, emptyListInt,
                 TERRITORY, getTerritories(PLAYER_C),
                 UNCLAIMED_UNITS, 4, // Got from Trading cards
-                CONTINENT, continentsC)),
+                CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
             CARDS, getCardsInRange(5, 43)));
     
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
@@ -272,17 +276,17 @@ public class ReinforcementPhaseTest extends AbstractTest {
                 CARDS, ImmutableList.<Integer>of(4),
                 TERRITORY, getTerritories(PLAYER_A),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsA),
+                CONTINENT, emptyListString),
             PLAYER_B, ImmutableMap.<String, Object>of(
                 CARDS, ImmutableList.<Integer>of(3),
                 TERRITORY, getTerritories(PLAYER_B),
                 UNCLAIMED_UNITS, 0,
-                CONTINENT, continentsB),
+                CONTINENT, emptyListString),
             PLAYER_C, ImmutableMap.<String, Object>of(
-                CARDS, ImmutableList.<Integer>of(),
+                CARDS, emptyListInt,
                 TERRITORY, getTerritories(PLAYER_C),
                 UNCLAIMED_UNITS, 7,
-                CONTINENT, continentsC)),
+                CONTINENT, emptyListString)),
         BOARD, ImmutableMap.<String, Object>of(
             CARDS, getCardsInRange(0,2).addAll(getCardsInRange(5, 43))));
     

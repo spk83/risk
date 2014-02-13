@@ -15,4 +15,6 @@ public class GameConstants {
   public static int getInitialNumberOfUnits(int numberOfPlayers) {
     return PLAYERS_UNIT_MAP.get(numberOfPlayers);
   }
+  
+  // Add adjecent territory map
 }

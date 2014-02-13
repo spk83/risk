@@ -22,9 +22,12 @@ public class InitialSetupTest extends AbstractTest {
   private List<Operation> getInitialOperations() {
     List<Operation> operations = Lists.newArrayList();
 
-    // Shuffle playerIds and assign that list as turns
+    // Shuffle playerIds, assign that list as turnOrder
+    List<String> turnOrder = new Shuffle(getPlayerIds()).getKeys();
     operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds())));
-
+    
+    // set TURN to first from that shuffled list
+    operations.add(new Set(TURN, turnOrder.get(0)));
     
     // Assign initial army units to all the players
     operations.add(new Set(UNITS, assignInitialUnits()));
@@ -59,7 +62,7 @@ public class InitialSetupTest extends AbstractTest {
   
   @Test
   public void testgetInitialOperations(){
-    assertEquals( 1 + 1 + 44 + 1, getInitialOperations().size());
+    assertEquals( 1 + 1 + 1 + 44 + 1, getInitialOperations().size());
   }
   
   @Test

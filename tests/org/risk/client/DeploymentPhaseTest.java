@@ -9,25 +9,89 @@ import org.risk.client.GameApi.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class DeploymentPhaseTest extends AbstractTest{
-  Map<String, Object> initialState = ImmutableMap.<String, Object>of(
-      TURN, aId+"",
-      PLAYERS, ImmutableMap.<String, Object>of(
-          PLAYER_A, ImmutableMap.<String, Object>of(
-              CARDS, emptyListInt,
-              TERRITORY, emptyMap,
-              CONTINENT, emptyListString),
-          PLAYER_B, ImmutableMap.<String, Object>of(
-              CARDS, emptyListInt,
-              TERRITORY, emptyMap,
-              CONTINENT, emptyListString),
-          PLAYER_C, ImmutableMap.<String, Object>of(
-              CARDS, emptyListInt,
-              TERRITORY, emptyMap,
-              CONTINENT, emptyListString),
-      BOARD, ImmutableMap.<String, Object>of(
-          CARDS, emptyListString)));
+  
+  @Test
+  public void testClaimTerritory(){
+    Map<String, Object> stateTurn1 = ImmutableMap.<String, Object>of(
+        TURN, cId+"",
+        PLAYERS, ImmutableMap.<String, Object>of(
+            PLAYER_A, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+            PLAYER_B, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+            PLAYER_C, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+        BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+            CARDS, getCardsInRange(0, 43))));
+
+    List<Operation> claimTerritoryByC = Lists.newArrayList();
+    claimTerritoryByC.add(new Set(TURN, bId));
+    claimTerritoryByC.add(new Set(CLAIM_TERRITORY, 1));
+    
+    assertMoveOk(move(cId, stateTurn1, claimTerritoryByC));
+    assertHacker(move(bId, stateTurn1, claimTerritoryByC));
+    assertHacker(move(cId, emptyState, claimTerritoryByC));
+    assertHacker(move(cId, nonEmptyState, claimTerritoryByC));
+    
+    claimTerritoryByC.add(new Set(CLAIM_TERRITORY, 12));
+    assertHacker(move(cId, stateTurn1, claimTerritoryByC));
+    
+    Map<String, Object> stateTurn2 = ImmutableMap.<String, Object>of(
+        TURN, cId+"",
+        PLAYERS, ImmutableMap.<String, Object>of(
+            PLAYER_A, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+            PLAYER_B, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+            PLAYER_C, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, ImmutableMap.<String, Object>of("1",1),
+                CONTINENT, emptyListString),
+        BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+            CARDS, getCardsInRange(0, 43))));
+    
+    List<Operation> claimTerritoryByB = ImmutableList.<Operation>of(
+        new Set(TURN, aId),
+        new Set(CLAIM_TERRITORY, 10));
+    
+    Map<String, Object> stateTurn3 = ImmutableMap.<String, Object>of(
+        TURN, cId+"",
+        PLAYERS, ImmutableMap.<String, Object>of(
+            PLAYER_A, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, emptyMap,
+                CONTINENT, emptyListString),
+            PLAYER_B, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, ImmutableMap.<String, Object>of("10",1),
+                CONTINENT, emptyListString),
+            PLAYER_C, ImmutableMap.<String, Object>of(
+                CARDS, emptyListInt,
+                TERRITORY, ImmutableMap.<String, Object>of("1",1),
+                CONTINENT, emptyListString),
+        BOARD, ImmutableMap.<String, Object>of(
+            TURN_ORDER, Lists.newArrayList(cId, bId, aId),
+            CARDS, getCardsInRange(0, 43))));
+    
+    List<Operation> claimTerritoryByA = ImmutableList.<Operation>of(
+        new Set(TURN, cId),
+        new Set(CLAIM_TERRITORY, 40));
+  }
   
   // Create state after A has claimed #1 territory 
   private final Map<String, Object> turnOfB_ClaimTerritory = ImmutableMap.<String, Object>of(
@@ -74,24 +138,11 @@ public class DeploymentPhaseTest extends AbstractTest{
       new Set(TURN, aId),
       new Set(CLAIM_TERRITORY, 3));
   
-  
-  
- 
-
-  @Test
-  public void testInitialMoveWithExtraOperation() {
-    List<Operation> initialOperations = getInitialOperations();
-    initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2)));
-    assertHacker(move(aId, emptyState, initialOperations));
-  }
-
   // tests for claiming territories
   @Test
   public void testClaimTerritoryFromEmptyBoard(){
-    assertMoveOk(move(aId, turnOfA_ClaimTerritory,
-            claimTerritoryByA));
-    assertMoveOk(move(aId, turnOfA_ClaimTerritory,
-            claimTerritoryByA));
+  //  assertMoveOk(move(aId, turnOfA_ClaimTerritory,       claimTerritoryByA));
+//    assertMoveOk(move(aId, turnOfA_ClaimTerritory,          claimTerritoryByA));
 
     assertMoveOk(move(bId, turnOfB_ClaimTerritory,
             claimTerritoryByB));
