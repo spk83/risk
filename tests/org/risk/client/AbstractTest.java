@@ -53,12 +53,21 @@ public class AbstractTest {
   protected static final int aId = 1; // Player A
   protected static final int bId = 2; // Player B
   protected static final int cId = 3; // Player C
-  final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(PLAYER_ID, aId);
-  final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(PLAYER_ID, bId);
-  final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(PLAYER_ID, cId);
-  final List<Map<String, Object>> playersInfo = ImmutableList.of(aInfo, bInfo,cInfo);
-  final Map<String, Object> emptyState = ImmutableMap.<String, Object>of();
-  final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of("k", "v");
+  protected static final String PLAYER_A = playerIdToString(aId);
+  protected static final String PLAYER_B = playerIdToString(bId);
+  protected static final String PLAYER_C = playerIdToString(cId);
+  
+  protected static final Map<String, Object> aInfo = ImmutableMap.<String, Object>of(PLAYER_ID, aId);
+  protected static final Map<String, Object> bInfo = ImmutableMap.<String, Object>of(PLAYER_ID, bId);
+  protected static final Map<String, Object> cInfo = ImmutableMap.<String, Object>of(PLAYER_ID, cId);
+  protected static final List<Map<String, Object>> playersInfo = ImmutableList.of(aInfo, bInfo,cInfo);
+  
+  protected static final Map<String, Object> emptyState = ImmutableMap.<String, Object>of();
+  protected static final Map<String, Object> nonEmptyState = ImmutableMap.<String, Object>of("k", "v");
+  
+  protected static final Map<String, Object> emptyMap = ImmutableMap.<String, Object>of();
+  protected static final List<String> emptyListString = ImmutableList.<String>of();
+  protected static final List<Integer> emptyListInt = ImmutableList.<Integer>of();
   
   protected void assertMoveOk(VerifyMove verifyMove) {
     VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);

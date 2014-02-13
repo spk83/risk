@@ -1,5 +1,5 @@
 package org.risk.client;
 
-public class RiskLogicTest {
+public class EndGameTest {
 
 }

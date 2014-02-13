@@ -11,4 +11,8 @@ public class GameConstants {
       4, 30,
       5, 25,
       6, 20);
+
+  public static int getInitialNumberOfUnits(int numberOfPlayers) {
+    return PLAYERS_UNIT_MAP.get(numberOfPlayers);
+  }
 }

@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 @RunWith(JUnit4.class)
-public class AttackPhaseTests extends AbstractTest {
+public class AttackPhaseTest extends AbstractTest {
   
   //creating objects for initial territories of players
   private static final Map<String, Object> initialTerritoriesOfA =ImmutableMap.<String, Object>of();
