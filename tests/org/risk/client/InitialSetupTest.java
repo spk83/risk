@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
+import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.Shuffle;
 
 import com.google.common.collect.ImmutableMap;
@@ -35,7 +36,7 @@ public class InitialSetupTest extends AbstractTest {
     operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds()).getKeys()));
     
     // set TURN to first from that shuffled list
-    operations.add(new Set(TURN, turnOrder.get(0)));
+    operations.add(new SetTurn(playerIdStringToInt(turnOrder.get(0))));
     
     // Assign initial army units to all the players
     operations.add(new Set(UNITS, assignInitialUnits()));

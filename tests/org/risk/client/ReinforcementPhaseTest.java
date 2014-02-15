@@ -109,13 +109,13 @@ public class ReinforcementPhaseTest extends AbstractTest {
     
     // Check valid move
     assertMoveOk(new VerifyMove(
-        CID, PLAYERSINFO, newStateAtA, lastStateAtC, tradeCardsMoveByC, CID));
+        PLAYERSINFO, newStateAtA, lastStateAtC, tradeCardsMoveByC, CID, null));
     
     // Check invalid move
     assertHacker(new VerifyMove(
-        CID, PLAYERSINFO, newStateAtA, EMPTYSTATE, tradeCardsMoveByC, CID));
+        PLAYERSINFO, newStateAtA, EMPTYSTATE, tradeCardsMoveByC, CID, null));
     assertHacker(new VerifyMove(
-        CID, PLAYERSINFO, newStateAtA, lastStateAtC, tradeCardsMoveByC, BID));
+        PLAYERSINFO, newStateAtA, lastStateAtC, tradeCardsMoveByC, BID, null));
 
     Map<String, Object> lastStateAtC1 = ImmutableMap.<String, Object>builder()
         .put(TURN, PLAYER_C)
@@ -145,7 +145,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     
     // Check if hacker is trading invalid pair of cards
     assertHacker(new VerifyMove(
-        CID, PLAYERSINFO, newStateAtA, lastStateAtC1, tradeCardsMoveByC, CID));
+        PLAYERSINFO, newStateAtA, lastStateAtC1, tradeCardsMoveByC, CID, null));
   }
   
   /*

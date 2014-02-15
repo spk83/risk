@@ -99,7 +99,7 @@ public class AbstractTest {
   protected VerifyMove move(
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        AID, PLAYERSINFO, EMPTYSTATE, lastState, lastMove, lastMovePlayerId);
+        PLAYERSINFO, EMPTYSTATE, lastState, lastMove, lastMovePlayerId, null);
   }
 
   /*
@@ -161,6 +161,22 @@ public class AbstractTest {
     assertEquals("P3", playerIdToString(CID));
   }
 
+  /*
+   * This is a helper method to convert player's ID from String to int.
+   */
+  protected static int playerIdStringToInt(String playerId) {
+    return Integer.parseInt(playerId.substring(1));
+  }
+  
+  /* 
+   * Test for playerIdToString.
+   */
+  @Test
+  public void testplayerIdStringToInt() {
+    assertEquals(1, playerIdStringToInt(PLAYER_A));
+    assertEquals(2, playerIdStringToInt(PLAYER_B));
+    assertEquals(3, playerIdStringToInt(PLAYER_C));
+  }
   /*
    * This is a helper method which returns a list of RISK cards of given range.
    */

@@ -355,6 +355,7 @@ public class AttackPhaseTest extends AbstractTest {
     playerAMap.put(CARDS, ImmutableList.<Integer>of(0));
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new Set(PHASE, END_ATTACK),
+        new Set(TURN, PLAYER_C),
         new Set(PLAYER_A, playerAMap),
         new Set(CARDS, getCardsInRange(1, 43)),
         new Delete(TERRITORY_WINNER));
