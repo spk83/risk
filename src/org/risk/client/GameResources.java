@@ -25,6 +25,10 @@ public class GameResources {
   }
   
   public static final int TOTAL_TERRITORIES = 42; // Number of territories
+  public static final int TOTAL_WILD_CARDS = 2;
+  public static final int TOTAL_RISK_CARDS = TOTAL_TERRITORIES + TOTAL_WILD_CARDS;
+  public static final int MAX_DICE_ROLL = 6;
+  public static final int MIN_DICE_ROLL = 1;
   public static final String PLAYER_ID = "playerId";
   public static final String TURN_ORDER = "turnOrder";
   public static final String TURN = "turn";
@@ -43,7 +47,6 @@ public class GameResources {
   public static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
   public static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
   public static final String UNCLAIMED_UNITS = "unclaimedUnits";
-  public static final int TOTAL_PLAYERS = 3; // Number of players playing
   public static final String CARDS = "cards";
   public static final String CARDS_TRADED = "cards_traded";
   public static final String DECK = "deck";
@@ -55,21 +58,8 @@ public class GameResources {
   public static final String END_GAME = "endGame";
   public static final String SET_TURN_ORDER = "setTurnOrder";
   public static final int START_PLAYER_ID = 1;
-  public static final int AID = 1; // Player A
-  public static final int BID = 2; // Player B
-  public static final int CID = 3; // Player C
-  public static final String PLAYER_A = playerIdToString(AID);
-  public static final String PLAYER_B = playerIdToString(BID);
-  public static final String PLAYER_C = playerIdToString(CID);
+  public static final int MAX_PLAYERS = 6;
   
-  public static final Map<String, Object> AINFO = ImmutableMap.<String, Object>of(
-      PLAYER_ID, AID);
-  public static final Map<String, Object> BINFO = ImmutableMap.<String, Object>of(
-      PLAYER_ID, BID);
-  public static final Map<String, Object> CINFO = ImmutableMap.<String, Object>of(
-      PLAYER_ID, CID);
-  public static final List<Map<String, Object>> PLAYERSINFO = ImmutableList.of(
-      AINFO, BINFO, CINFO);
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
@@ -77,19 +67,10 @@ public class GameResources {
   public static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
   public static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
   public static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
+  public static final Map<Integer, Integer> EMPTYINTMAP = ImmutableMap.<Integer, Integer>of();
   public static final int TOTAL_INITIAL_DICE_ROLL = 3;
   
-    /*
-   * This is a helper method to get list of player IDs.
-   */
-  public List<String> getPlayerIds() {
-    List<String> playerIds = Lists.newArrayList();
-    playerIds.add("P" + AID);
-    playerIds.add("P" + BID);
-    playerIds.add("P" + CID);
-    return playerIds;
-  }
-
+  
   /*
    * This is a helper method to get risk card value from its ID.
    */

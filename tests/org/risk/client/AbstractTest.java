@@ -255,7 +255,10 @@ public class AbstractTest {
    */
   protected Map<String, Integer> performDeltaOnTerritory(
       Map<String, Integer> currentMap, String territory, int delta) {
-    int oldValue = currentMap.get(territory);
+    Integer oldValue = currentMap.get(territory);
+    if (oldValue == null) {
+      oldValue = 0;
+    }
     int newValue = oldValue + delta;
     Map<String, Integer> newMap = new HashMap<String, Integer>();
     newMap.putAll(currentMap);
