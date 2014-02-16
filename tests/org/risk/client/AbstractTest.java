@@ -77,20 +77,22 @@ public class AbstractTest {
   protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
   protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
   
+  /** The object under test. */
+  RiskLogic riskLogic = new RiskLogic();
+
   /*
    * This method is used to check if verifyMove outcome is valid. 
    */
   protected void assertMoveOk(VerifyMove verifyMove) {
-    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-    assertEquals(new VerifyMoveDone(), verifyDone);
+    riskLogic.checkMoveIsLegal(verifyMove);
   }
 
   /*
    * This method is used to check if verifyMove outcome is invalid. 
    */
   protected void assertHacker(VerifyMove verifyMove) {
-    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-    assertEquals(new VerifyMoveDone(verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
+    VerifyMoveDone verifyDone = riskLogic.verify(verifyMove);
+    assertEquals(verifyMove.getLastMovePlayerId(), verifyDone.getHackerPlayerId());
   }
 
   /*
