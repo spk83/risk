@@ -93,4 +93,12 @@ public class Territory {
   public void setPlayer(String player) {
     this.playerId = player;
   }
+  
+  public static boolean isAttackPossible(int territory1, int territory2) {
+    return true;
+  }
+  
+  public static boolean isFortifyPossible(int territory1, int territory2) {
+    return true;
+  }
 }
