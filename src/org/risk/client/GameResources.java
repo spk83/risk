@@ -59,7 +59,12 @@ public class GameResources {
   public static final String SET_TURN_ORDER = "setTurnOrder";
   public static final int START_PLAYER_ID = 1;
   public static final int MAX_PLAYERS = 6;
-  
+  public static final String REINFORCE = "reinforce";
+  public static final String REINFORCE_UNITS = "reinforceUnits";
+  public static final String ADD_UNITS = "addUnits";
+  public static final String CARDS_BEING_TRADED = "cardsBeingTraded";
+  public static final String CARD_VALUES = "cardValues";
+  public static final String TRADE_NUMBER = "tradeNumber";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
@@ -178,5 +183,10 @@ public class GameResources {
        }
     }
     return true;
- }
+  }
+  
+  public int getNewReinforcementUnits(int totalTerritories) {
+    int units = totalTerritories/3;
+    return units < 3 ? 3 : units;
+  }
 }
