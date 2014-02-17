@@ -1,6 +1,7 @@
 package org.risk.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.Shuffle;
 import org.risk.client.GameApi.VerifyMove;
 import org.risk.client.GameApi.VerifyMoveDone;
+import org.risk.client.GameApi.SetVisibility;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
@@ -97,21 +99,41 @@ public class RiskLogic {
       RiskState newState) {
     List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
     Map<String, Card> visibleCards = newState.getCardMap();
-    Map<String, Card> tradedCards = new HashMap<String, Card>();
-    for (Integer cardId : playerCards) {
-      Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
-      if( card == null ) {
-        check(false, visibleCards, playerCards);
-      }
-      tradedCards.put(GameResources.RISK_CARD + cardId, card);
-    }
-    
-    
+    List<Card> tradedCards = Lists.newArrayList();
+    List<Integer> tradedCardsInt = Lists.newArrayList();
+    List<String> tradedCardsString = Lists.newArrayList();
+    Integer tradeNumber = lastState.getTradeNumber();
     check(playerCards.size() >= 3,
         lastState.getPlayersMap().get(playerIdToString));
+    for (Integer cardId : playerCards) {
+      Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
+      if (card != null) {
+        tradedCards.add(card);
+        tradedCardsInt.add(cardId);
+        tradedCardsString.add(GameResources.RISK_CARD + cardId);
+      }
+    }
+    int unclaimedUnits = Card.getUnits(tradedCards, tradeNumber);
+    Player player = lastState.getPlayersMap().get(playerIdToString);
+    player.setUnclaimedUnits(unclaimedUnits);
+    player.getCards().removeAll(tradedCardsInt);
+    Collections.sort(player.getCards());
+    Collections.sort(tradedCardsInt);
+    Collections.sort(tradedCardsString);
     List<Operation> move = Lists.newArrayList();
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
-    return null;
+    move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
+        GameResources.CARDS, player.getCards(),
+        GameResources.UNCLAIMED_UNITS, player.getUnclaimedUnits(),
+        GameResources.TERRITORY, player.getTerritoryUnitMap(),
+        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));
+    for (String tradedCardString : tradedCardsString) {
+      move.add(new SetVisibility(tradedCardString));
+    }
+    move.add(new Set(GameResources.CARDS_BEING_TRADED, tradedCardsInt));
+    move.add(new Set(GameResources.TRADE_NUMBER, lastState.getTradeNumber()));
+    move.add(new Set(GameResources.PHASE, GameResources.ADD_UNITS));
+    return move;
   }
 
   private List<Operation> performClaimTerritory(RiskState lastState,
@@ -236,6 +258,11 @@ public class RiskLogic {
             GameResources.RISK_CARD + i));
       }
     }
+    Integer tradeNumber = (Integer)lastApiState.get(GameResources.TRADE_NUMBER);
+    if (tradeNumber == null) {
+      tradeNumber = 0;
+    }
+    riskState.setTradeNumber(tradeNumber.intValue() + 1);
     riskState.setCardMap(cardsMap);
     riskState.setDeck((List<String>) lastApiState.get(GameResources.DECK));
     riskState.setUnclaimedTerritory((List<Integer>) lastApiState.get(

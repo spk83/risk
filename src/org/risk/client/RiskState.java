@@ -14,6 +14,7 @@ public class RiskState {
   private Map<String, List<Integer>> diceResult;
   private List<String> cardsVisibleToAll;
   private Map<String, Card> cardMap;
+  private int tradeNumber;
   
   public String getTurn() {
     return turn;
@@ -68,6 +69,12 @@ public class RiskState {
   }
   public void setCardMap(Map<String, Card> cardMap) {
     this.cardMap = cardMap;
+  }
+  public int getTradeNumber() {
+    return tradeNumber;
+  }
+  public void setTradeNumber(int tradeNumber) {
+    this.tradeNumber = tradeNumber;
   }
   
   

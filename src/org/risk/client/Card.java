@@ -56,7 +56,7 @@ public class Card {
   /*public static List<Card> getCardsFromList(List<Integer> cardsList) {
       return null;
   }*/
-  public int getUnits(List<Card> cards, int tradeNumber) {
+  public static int getUnits(List<Card> cards, int tradeNumber) {
     if( cards.size() == 3 ) {
       Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
       for (Card card : cards) {
