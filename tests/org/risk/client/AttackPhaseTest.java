@@ -72,18 +72,18 @@ public class AttackPhaseTest extends AbstractTest {
   public void testAttackOfAOnB() throws Exception {
     final List<Operation> attackOperationsOfAOnB = ImmutableList.<Operation>of(
         new SetTurn(AID),
-        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
-        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
-        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
         new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
             GameResources.TERRITORY, 10,
             GameResources.UNITS, 6)),
-        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
         new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
-            GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15, 
-            GameResources.UNITS, 1)),
+                GameResources.PLAYER, PLAYER_B,
+                GameResources.TERRITORY, 15, 
+                GameResources.UNITS, 1)),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
+        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
         new Set(GameResources.PHASE, GameResources.ATTACK_RESULT));
         
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
@@ -320,7 +320,7 @@ public class AttackPhaseTest extends AbstractTest {
     
     //creating state after the attack of A
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
-        put(GameResources.PHASE, GameResources.ATTACK_OCCUPY).
+        put(GameResources.PHASE, GameResources.ATTACK_PHASE).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, territoryMapA,

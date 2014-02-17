@@ -118,6 +118,33 @@ public class RiskLogic {
       return performReinforce(
           lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
     }
+    else if (lastState.getPhase().equals(GameResources.ATTACK_PHASE)) {
+      String nextPhase = ((Set) lastMove.get(lastMove.size() - 1)).getValue().toString();
+      if (nextPhase.equals(GameResources.ATTACK_RESULT)) {
+        Map<String, Object> attacker = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+        Map<String, Object> defender = (Map<String, Object>) ((Set) lastMove.get(2)).getValue();
+        return performAttack(
+            lastState, attacker, defender, GameResources.playerIdToString(lastMovePlayerId));
+      }
+      else if (nextPhase.equals(GameResources.FORTIFY)) {
+        return performEndAttack(
+            lastState, GameResources.playerIdToString(lastMovePlayerId));
+      }
+    }
+    return null;
+  }
+
+  private List<Operation> performEndAttack(RiskState lastState,
+      String playerIdToString) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private List<Operation> performAttack(RiskState lastState,
+      Map<String, Object> attacker, Map<String, Object> defender,
+      String playerIdToString) {
+    String playerIdOfAttacker = attacker.get(GameResources.PLAYER).toString();
+    check(playerIdOfAttacker)
     return null;
   }
 

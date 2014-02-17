@@ -3,8 +3,6 @@ package org.risk.client;
 import java.util.List;
 import java.util.Map;
 
-import sun.management.counter.Units;
-
 import com.google.common.collect.ImmutableMap;
 
 public class Continent {

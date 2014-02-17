@@ -25,35 +25,14 @@ import com.google.common.collect.Lists;
  */
 @RunWith(JUnit4.class)
 public class AbstractTest {
-  protected static final int TOTAL_TERRITORIES = 42; // Number of territories
   protected static final String PLAYER_ID = "playerId";
-//  protected static final String UNITS = "units";
-//  protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
-//  protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
-//  protected static final String DICE_ROLL = "diceRoll";
-//  protected static final String WINNING_TERRITORY = "winningTerritory";
-//  protected static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
-//  protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
-//  protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
-//  protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
-//  protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
-  protected static final int TOTAL_PLAYERS = 3; // Number of players playing
-//  protected static final String CARDS = "cards";
-//  protected static final String CARDS_TRADED = "cards_traded";
-//  protected static final String DEPLOYMENT = "deployment";
-//  protected static final String CLAIM_TERRITORY = "claimTerritory";
-//  protected static final String CARD_TRADE = "cardTrade";
-//  protected static final String ATTACK_PHASE = "attackPhase";
-//  protected static final String FORTIFY = "fortify";
-//  protected static final String END_GAME = "endGame";
-  
+  protected static final int TOTAL_PLAYERS = 3; // Number of players playing  
   protected static final int AID = 1; // Player A
   protected static final int BID = 2; // Player B
   protected static final int CID = 3; // Player C
   protected static final String PLAYER_A = playerIdToString(AID);
   protected static final String PLAYER_B = playerIdToString(BID);
   protected static final String PLAYER_C = playerIdToString(CID);
-  
   protected static final Map<String, Object> AINFO = ImmutableMap.<String, Object>of(
       PLAYER_ID, AID);
   protected static final Map<String, Object> BINFO = ImmutableMap.<String, Object>of(
@@ -62,13 +41,6 @@ public class AbstractTest {
       PLAYER_ID, CID);
   protected static final List<Map<String, Object>> PLAYERSINFO = ImmutableList.of(
       AINFO, BINFO, CINFO);
-  
-  //protected static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
- // protected static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
- //     "k", "v");
- // protected static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
- // protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
- // protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
   
   /** The object under test. */
   RiskLogic riskLogic = new RiskLogic();
