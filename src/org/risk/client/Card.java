@@ -1,6 +1,9 @@
 package org.risk.client;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Card {
   private String cardValue;
@@ -50,7 +53,35 @@ public class Card {
   public void setCardId(String cardId) {
     this.cardId = cardId;
   }
-  public static List<Card> getCardsFromList(List<Integer> cardsList) {
+  /*public static List<Card> getCardsFromList(List<Integer> cardsList) {
       return null;
+  }*/
+  public int getUnits(List<Card> cards, int tradeNumber) {
+    if( cards.size() == 3 ) {
+      Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
+      for (Card card : cards) {
+        Integer count = cardTypeCountMap.get(card.getCardType());
+        if (count == null) {
+          count = 0;
+        }
+        cardTypeCountMap.put(card.getCardType(), count + 1);
+      }
+      int validCount = 0;
+      for (Entry<Type, Integer> entry : cardTypeCountMap.entrySet()) {
+        if( (entry.getKey() != Type.WILD && (entry.getValue() == 1 || entry.getValue() == 3))
+            || (entry.getKey() == Type.WILD)) {
+          validCount+=entry.getValue();
+        }
+      }
+      if (validCount == 3) {
+        if (tradeNumber >= 1 && tradeNumber <= 5) {
+          return 4 + 2 * (tradeNumber - 1);
+        }
+        else if (tradeNumber >= 6) {
+          return 15 + (tradeNumber - 6) * 5;
+        }
+      }
+    }
+    return 0;
   }
 }

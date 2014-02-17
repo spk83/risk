@@ -23,8 +23,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
 public class RiskLogic {
-
-  
   
   public VerifyMoveDone verify(VerifyMove verifyMove) {
     try {
@@ -40,7 +38,8 @@ public class RiskLogic {
     Map<String, Object> lastState = verifyMove.getLastState();
     // Checking the operations are as expected.
     List<Operation> expectedOperations = getExpectedOperations(
-        lastState, lastMove, verifyMove.getPlayerIds(), verifyMove.getLastMovePlayerId());
+        lastState, lastMove, verifyMove.getPlayerIds(), verifyMove.getLastMovePlayerId(),
+        verifyMove.state);
     check(expectedOperations.equals(lastMove), expectedOperations, lastMove);
     // We use SetTurn, so we don't need to check that the correct player did the move.
     // However, we do need to check the first move is done by the white player (and then in the
@@ -54,7 +53,7 @@ public class RiskLogic {
   @SuppressWarnings("unchecked")
   List<Operation> getExpectedOperations(
       Map<String, Object> lastApiState, List<Operation> lastMove, List<Integer> playerIds,
-      int lastMovePlayerId) {
+      int lastMovePlayerId, Map<String, Object> newState) {
     if (lastApiState.isEmpty()) {
       return getInitialOperations(GameResources.getPlayerKeys(playerIds));
     }
@@ -76,6 +75,42 @@ public class RiskLogic {
       return performDeployment(
           lastState, territoryUnitMap, GameResources.playerIdToString(lastMovePlayerId));
     }
+    else if (lastState.getPhase().equals(GameResources.CARD_TRADE) ) {
+        try {
+        boolean isCardTrade = ((Set)lastMove.get(lastMove.size() - 3)).getKey().equals(
+            GameResources.CARDS_BEING_TRADED);
+        if (isCardTrade) {
+          Map<String, Object> playerValue = (Map<String, Object>)((Set) lastMove.get(1)).getValue();
+          return performTrade(
+              lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId),
+              gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } 
+    return null;
+  }
+
+  private List<Operation> performTrade(RiskState lastState,
+      Map<String, Object> playerValue, String playerIdToString,
+      RiskState newState) {
+    List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
+    Map<String, Card> visibleCards = newState.getCardMap();
+    Map<String, Card> tradedCards = new HashMap<String, Card>();
+    for (Integer cardId : playerCards) {
+      Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
+      if( card == null ) {
+        check(false, visibleCards, playerCards);
+      }
+      tradedCards.put(GameResources.RISK_CARD + cardId, card);
+    }
+    
+    
+    check(playerCards.size() >= 3,
+        lastState.getPlayersMap().get(playerIdToString));
+    List<Operation> move = Lists.newArrayList();
+    move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     return null;
   }
 
@@ -316,7 +351,7 @@ public class RiskLogic {
         GameResources.CONTINENT, GameResources.EMPTYLISTSTRING);
     return playerState;
   }  
-  
+
   private void check(boolean val, Object... debugArguments) {
     if (!val) {
       throw new RuntimeException("Hacker found");
