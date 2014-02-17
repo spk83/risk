@@ -27,32 +27,25 @@ import com.google.common.collect.Lists;
 public class AbstractTest {
   protected static final int TOTAL_TERRITORIES = 42; // Number of territories
   protected static final String PLAYER_ID = "playerId";
-  protected static final String TURN_ORDER = "turnOrder";
-  protected static final String TURN = "turn";
-  protected static final String PHASE = "phase"; // reinforce, attack, fortify
-  protected static final String RISK_CARD = "RC";
-  protected static final String TERRITORY = "territory";
-  protected static final String UNCLAIMED_TERRITORY = "unclaimedTerritory";
-  protected static final String CONTINENT = "continent";
-  protected static final String UNITS = "units";
-  protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
-  protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
-  protected static final String DICE_ROLL = "diceRoll";
-  protected static final String WINNING_TERRITORY = "winningTerritory";
-  protected static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
-  protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
-  protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
-  protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
-  protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
+//  protected static final String UNITS = "units";
+//  protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
+//  protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
+//  protected static final String DICE_ROLL = "diceRoll";
+//  protected static final String WINNING_TERRITORY = "winningTerritory";
+//  protected static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
+//  protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
+//  protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
+//  protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
+//  protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
   protected static final int TOTAL_PLAYERS = 3; // Number of players playing
-  protected static final String CARDS = "cards";
-  protected static final String CARDS_TRADED = "cards_traded";
-  protected static final String DEPLOYMENT = "deployment";
-  protected static final String CLAIM_TERRITORY = "claimTerritory";
-  protected static final String CARD_TRADE = "cardTrade";
-  protected static final String ATTACK_PHASE = "attackPhase";
-  protected static final String FORTIFY = "fortify";
-  protected static final String END_GAME = "endGame";
+//  protected static final String CARDS = "cards";
+//  protected static final String CARDS_TRADED = "cards_traded";
+//  protected static final String DEPLOYMENT = "deployment";
+//  protected static final String CLAIM_TERRITORY = "claimTerritory";
+//  protected static final String CARD_TRADE = "cardTrade";
+//  protected static final String ATTACK_PHASE = "attackPhase";
+//  protected static final String FORTIFY = "fortify";
+//  protected static final String END_GAME = "endGame";
   
   protected static final int AID = 1; // Player A
   protected static final int BID = 2; // Player B
@@ -70,12 +63,12 @@ public class AbstractTest {
   protected static final List<Map<String, Object>> PLAYERSINFO = ImmutableList.of(
       AINFO, BINFO, CINFO);
   
-  protected static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
-  protected static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
-      "k", "v");
-  protected static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
-  protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
-  protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
+  //protected static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
+ // protected static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
+ //     "k", "v");
+ // protected static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
+ // protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
+ // protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
   
   /** The object under test. */
   RiskLogic riskLogic = new RiskLogic();
@@ -101,7 +94,7 @@ public class AbstractTest {
   protected VerifyMove move(
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        PLAYERSINFO, EMPTYSTATE, lastState, lastMove, lastMovePlayerId, null);
+        PLAYERSINFO, GameResources.EMPTYSTATE, lastState, lastMove, lastMovePlayerId, null);
   }
 
   /*
@@ -185,7 +178,7 @@ public class AbstractTest {
   protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {
     List<String> keys = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
-      keys.add(RISK_CARD + i);
+      keys.add(GameResources.RISK_CARD + i);
     }
     return keys;
   }

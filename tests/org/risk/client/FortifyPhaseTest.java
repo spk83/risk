@@ -6,6 +6,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
+import org.risk.client.GameApi.SetTurn;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -23,87 +24,88 @@ public class FortifyPhaseTest extends AbstractTest {
   @Test
   public void testFortifyByC() {
     Map<String, Object> state = ImmutableMap.<String, Object>builder()
-        .put(TURN, PLAYER_C)
-        .put(PHASE, FORTIFY)
+        .put(GameResources.PHASE, GameResources.FORTIFY)
         .put(PLAYER_A, ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(0),
-            TERRITORY, getTerritories(PLAYER_A),
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING))
+            GameResources.CARDS, ImmutableList.<Integer>of(0),
+            GameResources.TERRITORY, getTerritories(PLAYER_A),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(1),
-            TERRITORY, getTerritories(PLAYER_B),
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING))
+            GameResources.CARDS, ImmutableList.<Integer>of(1),
+            GameResources.TERRITORY, getTerritories(PLAYER_B),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, EMPTYLISTINT,
-            TERRITORY, getTerritories(PLAYER_C),
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING))
-        .put(TURN_ORDER, ImmutableList.<String>of(PLAYER_C, PLAYER_B, PLAYER_A))
-        .put(CARDS, getCardsInRange(2, 43))
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritories(PLAYER_C),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
     
     Map<String, Integer> territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -2);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     
     List<Operation> fortifyTerritoryOfC = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TURN, PLAYER_B),
+        new SetTurn(BID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, EMPTYLISTINT,
-            TERRITORY, territoryC,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING)));
-
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryC,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+        new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    
+    // Check valid move
+    assertMoveOk(move(CID, state, fortifyTerritoryOfC));
+  
+    // Check invalid move - wrong turn, from invalid states
+    assertHacker(move(BID, state, fortifyTerritoryOfC));
+    assertHacker(move(CID, GameResources.EMPTYSTATE, fortifyTerritoryOfC));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, fortifyTerritoryOfC));
+  
     Map<String, Integer> territoryB = performDeltaOnTerritory(getTerritories(PLAYER_B), "15", -1);
     territoryB = performDeltaOnTerritory(territoryB, "16", 1);
     
     List<Operation> fortifyTerritoryOfBInWrongTurn = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TURN, PLAYER_B),
+        new SetTurn(BID),
         new Set(PLAYER_B, ImmutableMap.<String, Object>of(
-            CARDS, ImmutableList.<Integer>of(1),
-            TERRITORY, territoryB,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING)));
-
+            GameResources.CARDS, ImmutableList.<Integer>of(1),
+            GameResources.TERRITORY, territoryB,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+        new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    
+    assertHacker(move(CID, state, fortifyTerritoryOfBInWrongTurn));
+    
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     territoryC = performDeltaOnTerritory(territoryC, "41", 3);
 
     List<Operation> fortifyTerritoryOfCWithInvalidMove = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TURN, PLAYER_B),
+        new SetTurn(BID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, EMPTYLISTINT,
-            TERRITORY, territoryC,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING)));
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryC,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+        new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+            
+    
+    assertHacker(move(CID, state, fortifyTerritoryOfCWithInvalidMove));
     
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     
     List<Operation> fortifyTerritoryOfCWithIncorrectNumberOfUnits = ImmutableList.<Operation>of(
-        new Set(PHASE, CARD_TRADE),
-        new Set(TURN, PLAYER_B),
+        new SetTurn(BID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
-            CARDS, EMPTYLISTINT,
-            TERRITORY, territoryC,
-            UNCLAIMED_UNITS, 0,
-            CONTINENT, EMPTYLISTSTRING)));
-    
-    // Check valid move
-    assertMoveOk(move(CID, state, fortifyTerritoryOfC));
-    
-    // Check invalid move - wrong turn, invalid moves, from invalid states
-    assertHacker(move(BID, state, fortifyTerritoryOfC));
-    assertHacker(move(CID, state, fortifyTerritoryOfBInWrongTurn));
-    assertHacker(move(CID, EMPTYSTATE, fortifyTerritoryOfC));
-    assertHacker(move(CID, NONEMPTYSTATE, fortifyTerritoryOfC));
-    
-    // Check if invalid operations - invalid number of units, invalid territorys, invalid move
-    assertHacker(move(CID, state, fortifyTerritoryOfCWithInvalidMove));
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryC,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+        new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+
     assertHacker(move(CID, state, fortifyTerritoryOfCWithIncorrectNumberOfUnits));
   }
 }

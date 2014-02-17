@@ -39,7 +39,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.TERRITORY, GameResources.EMPTYMAP,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, EMPTYLISTINT,
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.UNCLAIMED_UNITS, 35,
             GameResources.TERRITORY, GameResources.EMPTYMAP,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
@@ -259,9 +259,9 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 21,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
-        .put(CARDS, getCardsInRange(0, 43))
-        .put(UNCLAIMED_TERRITORY, EMPTYLISTINT)
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.DECK, getCardsInRange(0, 43))
+        .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
 
     List<Operation> deploymentByC = Lists.newArrayList();
@@ -323,7 +323,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
         .put(GameResources.CARDS, getCardsInRange(0, 43))
-        .put(GameResources.UNCLAIMED_TERRITORY, EMPTYLISTINT)
+        .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
     
     List<Operation> changePhase = Lists.newArrayList();

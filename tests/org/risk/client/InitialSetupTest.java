@@ -45,12 +45,12 @@ public class InitialSetupTest extends AbstractTest {
     List<Operation> initialOperations = riskLogic.getInitialOperations(getPlayerIds());
 
     // Check valid move
-    assertMoveOk(move(AID, EMPTYSTATE, initialOperations));
+    assertMoveOk(move(AID, GameResources.EMPTYSTATE, initialOperations));
     
     // Check invalid moves - turn by wrong player, from invalid state, with additional operation
-    assertHacker(move(BID, EMPTYSTATE, initialOperations));
-    assertHacker(move(AID, NONEMPTYSTATE, initialOperations));
-    assertHacker(move(CID, NONEMPTYSTATE, initialOperations));
+    assertHacker(move(BID, GameResources.EMPTYSTATE, initialOperations));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, initialOperations));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, initialOperations));
      
     Builder<String, Object> stateBuilder = ImmutableMap.<String, Object>builder()
         .put(GameResources.PHASE, GameResources.SET_TURN_ORDER)
@@ -90,7 +90,7 @@ public class InitialSetupTest extends AbstractTest {
     
     // Check invalid moves - turn by wrong player, from invalid state, with additional operation
     assertHacker(move(BID, state, setupTurnOrder));
-    assertHacker(move(AID, EMPTYSTATE, setupTurnOrder));
-    assertHacker(move(AID, NONEMPTYSTATE, setupTurnOrder));
+    assertHacker(move(AID, GameResources.EMPTYSTATE, setupTurnOrder));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, setupTurnOrder));
   }
 }

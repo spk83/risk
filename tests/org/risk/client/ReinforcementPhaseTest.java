@@ -53,7 +53,6 @@ public class ReinforcementPhaseTest extends AbstractTest {
         new SetTurn(CID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.CARD_VALUES, GameResources.EMPTYMAP,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
@@ -241,8 +240,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
     
     // Check for invalid moves
     assertHacker(move(BID, state, addUnitsToC));
-    assertHacker(move(CID, EMPTYSTATE, addUnitsToC));
-    assertHacker(move(CID, NONEMPTYSTATE, addUnitsToC));
+    assertHacker(move(CID, GameResources.EMPTYSTATE, addUnitsToC));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, addUnitsToC));
     
     // add test case for hecker with wrong number of unclaimed units
     List<Operation> addWrongUnitsToC = ImmutableList.<Operation>of(
@@ -301,8 +300,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
     
     // Check for invalid moves
     assertHacker(move(BID, state, addUnitsToC));
-    assertHacker(move(CID, EMPTYSTATE, addUnitsToC));
-    assertHacker(move(CID, NONEMPTYSTATE, addUnitsToC));
+    assertHacker(move(CID, GameResources.EMPTYSTATE, addUnitsToC));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, addUnitsToC));
 
     // add test case for hecker with wrong number of unclaimed units
     List<Operation> addWrongUnitsToC = ImmutableList.<Operation>of(

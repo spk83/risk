@@ -29,7 +29,6 @@ public class GameResources {
   public static final int TOTAL_RISK_CARDS = TOTAL_TERRITORIES + TOTAL_WILD_CARDS;
   public static final int MAX_DICE_ROLL = 6;
   public static final int MIN_DICE_ROLL = 1;
-  public static final String PLAYER_ID = "playerId";
   public static final String TURN_ORDER = "turnOrder";
   public static final String TURN = "turn";
   public static final String PHASE = "phase"; // reinforce, attack, fortify
@@ -38,6 +37,14 @@ public class GameResources {
   public static final String UNCLAIMED_TERRITORY = "unclaimedTerritory";
   public static final String CONTINENT = "continent";
   public static final String UNITS = "units";
+  public static final String ATTACK_OCCUPY = "attackOccupy";
+  public static final String ATTACK_RESULT = "attackResult";
+  public static final String END_ATTACK = "endAttack";
+  public static final String ATTACKER = "attacker";
+  public static final String DEFENDER = "defender";
+  public static final String TERRITORY_WINNER = "territoryWinner";
+  public static final String PLAYER = "player";
+  public static final String MESSAGE = "message";
   public static final String ATTACK_TO_TERRITORY = "attackToTerritory";
   public static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
   public static final String DICE_ROLL = "diceRoll";
@@ -63,7 +70,6 @@ public class GameResources {
   public static final String REINFORCE_UNITS = "reinforceUnits";
   public static final String ADD_UNITS = "addUnits";
   public static final String CARDS_BEING_TRADED = "cardsBeingTraded";
-  public static final String CARD_VALUES = "cardValues";
   public static final String TRADE_NUMBER = "tradeNumber";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
