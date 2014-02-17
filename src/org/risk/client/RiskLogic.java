@@ -78,7 +78,7 @@ public class RiskLogic {
           lastState, territoryUnitMap, GameResources.playerIdToString(lastMovePlayerId));
     }
     else if (lastState.getPhase().equals(GameResources.CARD_TRADE) ) {
-        try {
+      if (lastMove.size() > 3) {
         boolean isCardTrade = ((Set)lastMove.get(lastMove.size() - 3)).getKey().equals(
             GameResources.CARDS_BEING_TRADED);
         if (isCardTrade) {
@@ -87,11 +87,21 @@ public class RiskLogic {
               lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId),
               gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
         }
-      } catch (Exception e) {
-        e.printStackTrace();
+      }
+      else {
+        return skipCardTrade(GameResources.playerIdToString(lastMovePlayerId));
       }
     } 
     return null;
+  }
+  
+  
+
+  private List<Operation> skipCardTrade(String playerIdToString) {
+    List<Operation> move = Lists.newArrayList();
+    move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
+    move.add(new Set(GameResources.PHASE, GameResources.ADD_UNITS));
+    return move;
   }
 
   private List<Operation> performTrade(RiskState lastState,

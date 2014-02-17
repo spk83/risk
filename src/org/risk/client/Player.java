@@ -1,5 +1,6 @@
 package org.risk.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class Player {
   @SuppressWarnings("unchecked")
   public Player(String playerId, Map<String, Object> playerMap) {
     this.playerId = playerId;
-    this.cards = (List<Integer>) playerMap.get(GameResources.CARDS);
+    this.cards = new ArrayList<Integer>((List<Integer>)playerMap.get(GameResources.CARDS));
     this.unclaimedUnits = (int) playerMap.get(GameResources.UNCLAIMED_UNITS);
     Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(GameResources.TERRITORY);
     this.territoryUnitMap = new HashMap<String, Integer>();
