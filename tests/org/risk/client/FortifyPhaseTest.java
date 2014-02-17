@@ -108,4 +108,40 @@ public class FortifyPhaseTest extends AbstractTest {
 
     assertHacker(move(CID, state, fortifyTerritoryOfCWithIncorrectNumberOfUnits));
   }
+  
+  @Test
+  public void testFortifySkippedByC() {
+    Map<String, Object> state = ImmutableMap.<String, Object>builder()
+        .put(GameResources.PHASE, GameResources.FORTIFY)
+        .put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0),
+            GameResources.TERRITORY, getTerritories(PLAYER_A),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(1),
+            GameResources.TERRITORY, getTerritories(PLAYER_B),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritories(PLAYER_C),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.DECK, getCardsInRange(2, 43))
+        .build();
+        
+    List<Operation> fortifyTerritoryOfC = ImmutableList.<Operation>of(
+        new SetTurn(BID),
+        new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    
+    // Check valid move
+    assertMoveOk(move(CID, state, fortifyTerritoryOfC));
+  
+    // Check invalid move - wrong turn, from invalid states
+    assertHacker(move(BID, state, fortifyTerritoryOfC));
+    assertHacker(move(CID, GameResources.EMPTYSTATE, fortifyTerritoryOfC));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, fortifyTerritoryOfC));
+  }
 }

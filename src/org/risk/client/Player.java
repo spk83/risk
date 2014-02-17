@@ -10,7 +10,6 @@ public class Player {
   private String playerId;
   private List<Integer> cards;
   private int unclaimedUnits;
-  //private Map<Integer, Territory> territoryMap;
   private Map<String, Integer> territoryUnitMap;
   private List<String> continent;
  
@@ -23,7 +22,6 @@ public class Player {
     this.territoryUnitMap = new HashMap<String, Integer>();
     for (Map.Entry<String, Integer> entry : territoryMap.entrySet()) {
       this.territoryUnitMap.put(entry.getKey(), entry.getValue());
-      //this.territoryMap.put(territoryId, new Territory(territoryId, units, playerId));
     }
     this.continent = (List<String>) playerMap.get(GameResources.CONTINENT);
   }
