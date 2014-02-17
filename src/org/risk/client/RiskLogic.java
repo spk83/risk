@@ -114,23 +114,11 @@ public class RiskLogic {
       }
     }
     else if (lastState.getPhase().equals(GameResources.REINFORCE)) {
-      if (lastMove.size() > 2) {
-        Map<String, Object> playerValue = (Map<String, Object>)((Set) lastMove.get(1)).getValue();
-        return performReinforce(
-            lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
-      }
-      else {
-        return performSkipReinforce(GameResources.playerIdToString(lastMovePlayerId));
-      }
+      Map<String, Object> playerValue = (Map<String, Object>)((Set) lastMove.get(1)).getValue();
+      return performReinforce(
+          lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
     }
     return null;
-  }
-
-  private List<Operation> performSkipReinforce(String playerIdToString) {
-    List<Operation> move = Lists.newArrayList();
-    move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
-    move.add(new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
-    return move;
   }
 
   @SuppressWarnings("unchecked")
@@ -139,9 +127,12 @@ public class RiskLogic {
     List<Operation> move = Lists.newArrayList();
     Player player = lastState.getPlayersMap().get(playerIdToString);
     int oldUnclaimedUnits = player.getUnclaimedUnits();
-    check(oldUnclaimedUnits >= 3, oldUnclaimedUnits);
+    check(oldUnclaimedUnits >= GameResources.MIN_ALLOCATED_UNITS, oldUnclaimedUnits);
     int differenceUnclaimedUnits = oldUnclaimedUnits - 
         Integer.parseInt(playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
+    int currentUnclaimedUnits = Integer.parseInt(
+        playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
+    check(currentUnclaimedUnits == 0, playerValue);
     Map<String, Integer> territoryUnitMap = 
         (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
     java.util.Set<String> newTerritorySet = new HashSet<String>(territoryUnitMap.keySet());
@@ -158,8 +149,8 @@ public class RiskLogic {
       reinforcedUnits += entry.getValue();
       oldTerritoryMap.put(entry.getKey(), oldTerritoryMap.get(entry.getKey()) + entry.getValue());
     }
-    check(reinforcedUnits == differenceUnclaimedUnits, reinforcedUnits, differenceUnclaimedUnits);
-    player.setUnclaimedUnits(oldUnclaimedUnits - reinforcedUnits);
+    check(reinforcedUnits <= differenceUnclaimedUnits, reinforcedUnits, differenceUnclaimedUnits);
+    player.setUnclaimedUnits(0);
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
         GameResources.CARDS, player.getCards(),
@@ -228,8 +219,8 @@ public class RiskLogic {
 
   private int calculateUnits(int size, List<String> continent) {
     int newUnits = size / 3;
-    if (newUnits < 3) {
-      newUnits = 3;
+    if (newUnits < GameResources.MIN_ALLOCATED_UNITS) {
+      newUnits = GameResources.MIN_ALLOCATED_UNITS;
     }
     for (String continentId : continent) {
       newUnits += Continent.unitsValue.get(continentId);
