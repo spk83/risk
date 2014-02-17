@@ -12,7 +12,7 @@ public class Player {
   private int unclaimedUnits;
   //private Map<Integer, Territory> territoryMap;
   private Map<String, Integer> territoryUnitMap;
-  //private List<Continent> continent;
+  private List<String> continent;
  
   @SuppressWarnings("unchecked")
   public Player(String playerId, Map<String, Object> playerMap) {
@@ -25,6 +25,7 @@ public class Player {
       this.territoryUnitMap.put(entry.getKey(), entry.getValue());
       //this.territoryMap.put(territoryId, new Territory(territoryId, units, playerId));
     }
+    this.continent = (List<String>) playerMap.get(GameResources.CONTINENT);
   }
   
   public int getUnclaimedUnits() {
@@ -58,5 +59,12 @@ public class Player {
     this.territoryUnitMap = territoryUnitMap;
   }
 
+  public List<String> getContinent() {
+    return continent;
+  }
+
+  public void setContinent(List<String> continent) {
+    this.continent = continent;
+  }
   
 }

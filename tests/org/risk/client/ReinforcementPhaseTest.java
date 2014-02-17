@@ -213,12 +213,13 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(5, 43))
-        .put(GameResources.TRADE_NUMBER, 1)
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .build();
     
-    List<String> deck = Lists.newArrayList("RC0", "RC1", "RC2");
-    deck.addAll(getCardsInRange(4, 43));
+    List<String> deck = Lists.newArrayList(getCardsInRange(5, 43));
+    deck.add("RC0");
+    deck.add("RC1");
+    deck.add("RC2");
     
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
         new SetTurn(CID),

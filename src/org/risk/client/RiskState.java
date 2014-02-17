@@ -15,6 +15,7 @@ public class RiskState {
   private List<String> cardsVisibleToAll;
   private Map<String, Card> cardMap;
   private int tradeNumber;
+  private List<Integer> cardsTraded;
   
   public String getTurn() {
     return turn;
@@ -76,6 +77,10 @@ public class RiskState {
   public void setTradeNumber(int tradeNumber) {
     this.tradeNumber = tradeNumber;
   }
-  
-  
+  public List<Integer> getCardsTraded() {
+    return cardsTraded;
+  }
+  public void setCardsTraded(List<Integer> cardsTraded) {
+    this.cardsTraded = cardsTraded;
+  }
 }

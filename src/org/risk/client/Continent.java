@@ -1,6 +1,11 @@
 package org.risk.client;
 
 import java.util.List;
+import java.util.Map;
+
+import sun.management.counter.Units;
+
+import com.google.common.collect.ImmutableMap;
 
 public class Continent {
 
@@ -8,6 +13,16 @@ public class Continent {
   private String continentName;
   private int unitValue;
   private List<Territory> territoryList;
+  
+  public static final Map<String, Integer> unitsValue = ImmutableMap.<String, Integer>builder()
+      .put("1", 2)
+      .put("2", 2)
+      .put("3", 2)
+      .put("4", 2)
+      .put("5", 2)
+      .put("6", 2)
+      .build();
+  
   public int getContinentId() {
     return continentId;
   }
@@ -32,6 +47,4 @@ public class Continent {
   public void setTerritoryList(List<Territory> territoryList) {
     this.territoryList = territoryList;
   }
-  
-  
 }
