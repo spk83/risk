@@ -236,7 +236,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, state.get(PLAYER_A)),
         new Set(PLAYER_B, playerBMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
-        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -259,7 +259,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, state.get(PLAYER_A)),
         new Set(PLAYER_B, playerBMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
-        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_B),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -274,7 +274,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, state.get(PLAYER_A)),
         new Set(PLAYER_B, state.get(PLAYER_B)),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
-        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -289,7 +289,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, state.get(PLAYER_A)),
         new Set(PLAYER_B, playerBMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
-        new Set(GameResources.LAST_ATTACKING_TERRITORY, "10"),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 10),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -398,7 +398,7 @@ public class AttackPhaseTest extends AbstractTest {
         put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
-        put(GameResources.LAST_ATTACKING_TERRITORY, "5").
+        put(GameResources.LAST_ATTACKING_TERRITORY, 5).
         put(GameResources.TERRITORY_WINNER, PLAYER_A).
         build();
     
@@ -588,7 +588,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, playerAMap),
         new Delete(PLAYER_B),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
-        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
