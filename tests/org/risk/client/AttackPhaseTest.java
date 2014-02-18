@@ -74,11 +74,11 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 10,
+            GameResources.TERRITORY, 5,
             GameResources.UNITS, 6)),
         new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15, 
+            GameResources.TERRITORY, 13, 
             GameResources.UNITS, 1)),
         new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
         new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
@@ -115,6 +115,75 @@ public class AttackPhaseTest extends AbstractTest {
     assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
     assertHacker(move(BID, state, attackOperationsOfAOnB));
     assertHacker(move(CID, state, attackOperationsOfAOnB));
+    
+    final List<Operation> attackFromInvalidTerritoryFromAOnB = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 10,
+            GameResources.UNITS, 6)),
+        new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 15, 
+            GameResources.UNITS, 1)),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
+        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
+        new Set(GameResources.PHASE, GameResources.ATTACK_RESULT));
+    
+    final List<Operation> attackWithInvalidUnitsByAOnB = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 5,
+            GameResources.UNITS, 1)),
+        new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 13, 
+            GameResources.UNITS, 1)),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
+        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
+        new Set(GameResources.PHASE, GameResources.ATTACK_RESULT));
+    
+    final List<Operation> attackWithInvalidDiceRollsByAOnB = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 5,
+            GameResources.UNITS, 2)),
+        new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 13, 
+            GameResources.UNITS, 2)),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
+        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
+        new Set(GameResources.PHASE, GameResources.ATTACK_RESULT));
+    
+    final List<Operation> attackFromAOnA = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 5,
+            GameResources.UNITS, 6)),
+        new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 1, 
+            GameResources.UNITS, 1)),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
+        new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
+        new SetRandomInteger(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 1, 7),
+        new Set(GameResources.PHASE, GameResources.ATTACK_RESULT));
+    
+    assertHacker(move(AID, state, attackFromInvalidTerritoryFromAOnB));
+    assertHacker(move(AID, state, attackWithInvalidUnitsByAOnB));
+    assertHacker(move(AID, state, attackWithInvalidDiceRollsByAOnB));
+    assertHacker(move(AID, state, attackFromAOnA));
   }
   
   @Test
@@ -144,17 +213,17 @@ public class AttackPhaseTest extends AbstractTest {
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
         put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 10, 
+            GameResources.TERRITORY, 5, 
             GameResources.UNITS, 6)).
         put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
         put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15, 
+            GameResources.TERRITORY, 13, 
             GameResources.UNITS, 1)).build();
     
     //based on dice rolls
-    territoryMapB = performDeltaOnTerritory(territoryMapB, "15", -1);
-    territoryMapB.remove("15");
+    territoryMapB = performDeltaOnTerritory(territoryMapB, "13", -1);
+    territoryMapB.remove("13");
     
     @SuppressWarnings("unchecked")
     Map<String, Object> playerBMap = 
@@ -166,7 +235,8 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, state.get(PLAYER_A)),
         new Set(PLAYER_B, playerBMap),
-        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -214,18 +284,18 @@ public class AttackPhaseTest extends AbstractTest {
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 3).
         put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 10, 
+            GameResources.TERRITORY, 5, 
             GameResources.UNITS, 6)).
         put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 6).
         put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15, 
+            GameResources.TERRITORY, 13, 
             GameResources.UNITS, 1)).
         build();
     
     //based on dice rolls if the attacker loses then we again go back to the start of attack phase
     //and the attacker decides to take a call
-    territoryMapA = performDeltaOnTerritory(territoryMapA, "10", -1);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -1);
     @SuppressWarnings("unchecked")
     Map<String, Object> playerAMap = 
         new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
@@ -255,8 +325,8 @@ public class AttackPhaseTest extends AbstractTest {
   @Test
   public void testAttackOfAOnBAOccupying() throws Exception {
     Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
-    territoryMapB = performDeltaOnTerritory(territoryMapB, "15", -1);
-    territoryMapB.remove("15");
+    territoryMapB = performDeltaOnTerritory(territoryMapB, "13", -1);
+    territoryMapB.remove("13");
      
     //creating state after the attack of A
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
@@ -278,15 +348,17 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
         put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
-        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)).
-        put(GameResources.TERRITORY_WINNER, PLAYER_A).build();
+        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
+        put(GameResources.LAST_ATTACKING_TERRITORY, "5").
+        put(GameResources.TERRITORY_WINNER, PLAYER_A).
+        build();
     
     Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
     
     //Giving 15 to A and also shifting soldiers from 10 to 15
-    territoryMapA.put("15", 0);
-    territoryMapA = performDeltaOnTerritory(territoryMapA, "10", -3);
-    territoryMapA = performDeltaOnTerritory(territoryMapA, "15", +3);
+    territoryMapA.put("13", 0);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +3);
     
     //changing the territory map for A and going back to attack phase
     @SuppressWarnings("unchecked")
@@ -296,7 +368,8 @@ public class AttackPhaseTest extends AbstractTest {
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
-        new Delete(GameResources.UNCLAIMED_TERRITORY),
+        new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
+        new Delete(GameResources.LAST_ATTACKING_TERRITORY),
         new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
@@ -311,13 +384,13 @@ public class AttackPhaseTest extends AbstractTest {
   public void testEndAttackByA() throws Exception {
     
     Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
-    territoryMapB = performDeltaOnTerritory(territoryMapB, "15", -1);
-    territoryMapB.remove("15");
+    territoryMapB = performDeltaOnTerritory(territoryMapB, "13", -1);
+    territoryMapB.remove("13");
     
     Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
-    territoryMapA.put("15", 0);
-    territoryMapA = performDeltaOnTerritory(territoryMapA, "10", -3);
-    territoryMapA = performDeltaOnTerritory(territoryMapA, "15", +3);
+    territoryMapA.put("13", 0);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +3);
     
     //creating state after the attack of A
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
@@ -366,8 +439,8 @@ public class AttackPhaseTest extends AbstractTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testAttackOfAOnBAWinsAndBLosesTheGame() throws Exception {
-    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 14, 6);
-    final Map<String, Integer> territoryMapB = getTerritoriesInRange(15, 15, 1);
+    final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 12, 6);
+    final Map<String, Integer> territoryMapB = getTerritoriesInRange(13, 13, 1);
     
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(GameResources.PHASE, GameResources.ATTACK_RESULT).
@@ -383,7 +456,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
+            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
         put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
@@ -393,12 +466,12 @@ public class AttackPhaseTest extends AbstractTest {
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
         put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 10,
+            GameResources.TERRITORY, 5,
             GameResources.UNITS, 6)).
         put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
         put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15,
+            GameResources.TERRITORY, 13,
             GameResources.UNITS, 1)).
         build();
     
@@ -414,7 +487,8 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Delete(PLAYER_B),
-        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -459,12 +533,12 @@ public class AttackPhaseTest extends AbstractTest {
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
         put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 10, 
+            GameResources.TERRITORY, 40, 
             GameResources.UNITS,  6)).
         put(GameResources.DEFENDER + GameResources.DICE_ROLL + "3", 4).
         put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 15, 
+            GameResources.TERRITORY, 41, 
             GameResources.UNITS, 1)).build();
     
     //based on dice rolls
@@ -478,7 +552,7 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Delete(PLAYER_B),
-        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41)),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),

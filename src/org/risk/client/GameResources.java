@@ -47,7 +47,7 @@ public class GameResources {
   public static final String PLAYER = "player";
   public static final String MESSAGE = "message";
   public static final String ATTACK_TO_TERRITORY = "attackToTerritory";
-  public static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
+  public static final String LAST_ATTACKING_TERRITORY = "lastAttackingTerritory";
   public static final String DICE_ROLL = "diceRoll";
   public static final String WINNING_TERRITORY = "winningTerritory";
   public static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
