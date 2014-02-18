@@ -116,11 +116,26 @@ public class Territory {
       .put(41, ImmutableList.<Integer>of(39, 40))
       .build();
 
-  public static boolean isAttackPossible(int territory1, int territory2) {
-    return true;
+  public static boolean isAttackPossible(int fromTerritory, int toTerritory) {
+    return connections.get(fromTerritory).contains(toTerritory);
   }
   
-  public static boolean isFortifyPossible(int territory1, int territory2) {
-    return true;
+  public static boolean isFortifyPossible(int fromTerritory, int toTerritory, List<Integer> territoryList) {
+    if (territoryList.contains(fromTerritory) && territoryList.contains(toTerritory)) {
+      if (connections.get(fromTerritory).contains(toTerritory)) {
+        return true;
+      } else {
+        territoryList.remove(territoryList.indexOf(fromTerritory));
+        for (int territory : connections.get(fromTerritory)) {
+          if (territoryList.contains(territory) && 
+              isFortifyPossible(territory, toTerritory, territoryList)) {
+            return true;
+          }
+        }
+      } 
+    } else {
+      return false;
+    }
+    return false;
   }
 }

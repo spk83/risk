@@ -23,6 +23,10 @@ public class FortifyPhaseTest extends AbstractTest {
    */
   @Test
   public void testFortifyByC() {
+    
+    Map<String, Integer> territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", 30);
+    Map<String, Integer> territoryB = performDeltaOnTerritory(getTerritories(PLAYER_B), "15", 1);
+    
     Map<String, Object> state = ImmutableMap.<String, Object>builder()
         .put(GameResources.PHASE, GameResources.FORTIFY)
         .put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -32,19 +36,19 @@ public class FortifyPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(PLAYER_B, ImmutableMap.<String, Object>of(
             GameResources.CARDS, ImmutableList.<Integer>of(1),
-            GameResources.TERRITORY, getTerritories(PLAYER_B),
+            GameResources.TERRITORY, territoryB,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritories(PLAYER_C),
+            GameResources.TERRITORY, territoryC,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
     
-    Map<String, Integer> territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -2);
+    territoryC = performDeltaOnTerritory(territoryC, "30", -2);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
     
     List<Operation> fortifyTerritoryOfC = ImmutableList.<Operation>of(
@@ -64,7 +68,7 @@ public class FortifyPhaseTest extends AbstractTest {
     assertHacker(move(CID, GameResources.EMPTYSTATE, fortifyTerritoryOfC));
     assertHacker(move(CID, GameResources.NONEMPTYSTATE, fortifyTerritoryOfC));
   
-    Map<String, Integer> territoryB = performDeltaOnTerritory(getTerritories(PLAYER_B), "15", -1);
+    territoryB = performDeltaOnTerritory(territoryB, "15", -1);
     territoryB = performDeltaOnTerritory(territoryB, "16", 1);
     
     List<Operation> fortifyTerritoryOfBInWrongTurn = ImmutableList.<Operation>of(
