@@ -128,7 +128,11 @@ public class RiskLogic {
             lastState, attacker, defender, GameResources.playerIdToString(lastMovePlayerId));
       }
       else if (nextPhase.equals(GameResources.FORTIFY)) {
-        return performEndAttack(lastState, GameResources.playerIdToString(lastMovePlayerId));
+        if (lastState.getTerritoryWinner() != null) {
+            return performEndAttack(lastState, GameResources.playerIdToString(lastMovePlayerId));
+        } else {
+            return performEndAttackWithNoCard(lastMovePlayerId);
+        }
       }
     }
     else if (lastState.getPhase().equals(GameResources.ATTACK_RESULT)) {
@@ -147,6 +151,13 @@ public class RiskLogic {
           GameResources.playerIdToString(lastMovePlayerId));
     }
     return null;
+  }
+
+  private List<Operation> performEndAttackWithNoCard(int playerId) {
+    List<Operation> endAttackOperations = Lists.newArrayList();
+    endAttackOperations.add(new SetTurn(playerId));
+    endAttackOperations.add(new Set(GameResources.PHASE, GameResources.FORTIFY));
+    return endAttackOperations;
   }
 
   @SuppressWarnings("unchecked")
@@ -274,8 +285,27 @@ public class RiskLogic {
 
   private List<Operation> performEndAttack(RiskState lastState,
       String playerIdToString) {
-    // TODO Auto-generated method stub
-    return null;
+    List<Operation> endAttackOperations = Lists.newArrayList();
+    int playerId = GameResources.playerIdToInt(playerIdToString);
+    check(lastState.getTerritoryWinner().equals(playerIdToString), lastState.getTerritoryWinner(), 
+        playerIdToString);
+    endAttackOperations.add(new SetTurn(playerId));
+    Player player = lastState.getPlayersMap().get(playerIdToString);
+    List<String> deck = lastState.getDeck();
+    int card = Integer.parseInt(deck.get(0).substring(2));
+    player.getCards().add(card);
+    deck.remove(0);
+    endAttackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
+        GameResources.CARDS, player.getCards(),
+        GameResources.TERRITORY, player.getTerritoryUnitMap(),
+        GameResources.UNCLAIMED_UNITS, player.getUnclaimedUnits(),
+        GameResources.CONTINENT, player.getContinent())));
+    endAttackOperations.add(new Set(GameResources.DECK, deck));
+    endAttackOperations.add(new SetVisibility(GameResources.RISK_CARD + card,
+        ImmutableList.<Integer>of(playerId)));
+    endAttackOperations.add(new Delete(GameResources.TERRITORY_WINNER));
+    endAttackOperations.add(new Set(GameResources.PHASE, GameResources.FORTIFY));
+    return endAttackOperations;
   }
 
   private List<Operation> performAttack(RiskState lastState,
@@ -643,6 +673,9 @@ public class RiskLogic {
     Integer lastAttackingTerritory = (Integer)lastApiState.get(
         GameResources.LAST_ATTACKING_TERRITORY);
     riskState.setLastAttackingTerritory(lastAttackingTerritory);
+    
+    String territoryWinner = (String) lastApiState.get(GameResources.TERRITORY_WINNER);    
+    riskState.setTerritoryWinner(territoryWinner);
     return riskState;
   }
   

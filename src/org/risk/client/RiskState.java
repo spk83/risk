@@ -18,7 +18,14 @@ public class RiskState {
   private List<Integer> cardsTraded;
   private Attack attack;
   private Integer lastAttackingTerritory;
+  private String territoryWinner;
   
+  public String getTerritoryWinner() {
+    return territoryWinner;
+  }
+  public void setTerritoryWinner(String territoryWinner) {
+    this.territoryWinner = territoryWinner;
+  }
   public Integer getLastAttackingTerritory() {
     return lastAttackingTerritory;
   }

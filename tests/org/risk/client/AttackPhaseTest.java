@@ -527,13 +527,71 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(GameResources.TERRITORY_WINNER),
         new Set(GameResources.PHASE, GameResources.FORTIFY));
     
-    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
     assertMoveOk(move(AID, state, movementOperations));
     assertHacker(move(AID, GameResources.EMPTYSTATE, movementOperations));
     assertHacker(move(AID, GameResources.NONEMPTYSTATE, movementOperations));
-    assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
     assertHacker(move(BID, state, movementOperations));
     assertHacker(move(CID, state, movementOperations));
+
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
+
+    // giving two cards to player
+    playerAMap.put(GameResources.CARDS, ImmutableList.<Integer>of(0,1));
+    final List<Operation> invalidMovementOperations = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, playerAMap),
+        new Set(GameResources.DECK, getCardsInRange(2, 43)),
+        new SetVisibility("RC0",ImmutableList.<Integer>of(AID)),
+        new Delete(GameResources.TERRITORY_WINNER),
+        new Set(GameResources.PHASE, GameResources.FORTIFY));
+    
+    assertHacker(move(AID, state, invalidMovementOperations));
+  }
+  
+  @Test
+  public void testEndAttackByAWithoutWinningAnyTerritory() throws Exception {
+   
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_PHASE).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(0, 10, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(11, 29, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.DECK, getCardsInRange(0, 43)).
+        build();
+    
+    //ending the Attack phase where PLAYER_A didnt win any territory
+    final List<Operation> movementOperations = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(GameResources.PHASE, GameResources.FORTIFY));
+    
+    assertMoveOk(move(AID, state, movementOperations));
+    assertHacker(move(AID, GameResources.EMPTYSTATE, movementOperations));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, movementOperations));
+    assertHacker(move(BID, state, movementOperations));
+    assertHacker(move(CID, state, movementOperations));
+ 
+    final List<Operation> emptyOperations = ImmutableList.<Operation>of();
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
+    
+    final List<Operation> invalidMovementOperations = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, state.get(PLAYER_A)),
+        new Set(GameResources.PHASE, GameResources.FORTIFY));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, invalidMovementOperations));
   }
   
   @SuppressWarnings("unchecked")
