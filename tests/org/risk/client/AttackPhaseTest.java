@@ -404,7 +404,6 @@ public class AttackPhaseTest extends AbstractTest {
     
     Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
     
-    //Giving 15 to A and also shifting soldiers from 10 to 15
     territoryMapA.put("13", 0);
     territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
     territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +3);
@@ -428,7 +427,59 @@ public class AttackPhaseTest extends AbstractTest {
     assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
     assertHacker(move(BID, state, movementOperations));
     assertHacker(move(CID, state, movementOperations));
+    
+    // Moving to wrong territory
+    territoryMapA = getTerritoriesInRange(0, 10, 6);
+    
+    //Giving 13 to A and also shifting soldiers from 5 to 13
+    territoryMapA.put("15", 0);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "15", +3);
+    playerAMap.put(GameResources.TERRITORY, territoryMapA);
+    final List<Operation> wrongTerritoryMovementOperations = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, playerAMap),
+        new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
+        new Delete(GameResources.LAST_ATTACKING_TERRITORY),
+        new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
+    
+    assertHacker(move(AID, state, wrongTerritoryMovementOperations));
+    
+    // Moving to with invalid number of units to new territory
+    territoryMapA = getTerritoriesInRange(0, 10, 6);
+    
+    //Giving 13 to A and also shifting soldiers from 5 to 13
+    territoryMapA.put("13", 0);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -2);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +2);
+    playerAMap.put(GameResources.TERRITORY, territoryMapA);
+    final List<Operation> invalidUnitsForMovement= ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, playerAMap),
+        new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
+        new Delete(GameResources.LAST_ATTACKING_TERRITORY),
+        new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
+    
+    assertHacker(move(AID, state, invalidUnitsForMovement));
+    
+    // Moving to with invalid number of units to new territory
+    territoryMapA = getTerritoriesInRange(0, 10, 6);
+    
+    //Giving 13 to A and also shifting soldiers from 5 to 13
+    territoryMapA.put("13", 0);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
+    territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +5);
+    playerAMap.put(GameResources.TERRITORY, territoryMapA);
+    final List<Operation> invalidUnitsDelta= ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, playerAMap),
+        new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
+        new Delete(GameResources.LAST_ATTACKING_TERRITORY),
+        new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
+    
+    assertHacker(move(AID, state, invalidUnitsDelta));
   }
+  
   @Test
   public void testEndAttackByA() throws Exception {
     
