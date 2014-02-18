@@ -211,10 +211,13 @@ public class GameResources {
     return units >= 2 ? 2 : 1;
   }
   
-  public static int getMaxUnitsToNewTerritory(int diceRolls, int remainingUnits) {
-    if (remainingUnits > diceRolls) {
-      return diceRolls;
+  public static int getMinUnitsToNewTerritory(int remainingUnits) {
+    if (remainingUnits < 2) {
+      return 0; //error
     }
-    return diceRolls - 1;
+    if (remainingUnits > 3) {
+      return 3;
+    }
+    return remainingUnits - 1;
   }
 }

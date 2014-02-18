@@ -609,6 +609,7 @@ public class AttackPhaseTest extends AbstractTest {
     assertHacker(move(CID, state, movementOperations));
   }
   
+  @Test
   @SuppressWarnings("unchecked")
   public void testAttackOfAOnBAWinsTheGame() throws Exception {
     final Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 40, 6);

@@ -17,7 +17,14 @@ public class RiskState {
   private int tradeNumber;
   private List<Integer> cardsTraded;
   private Attack attack;
+  private Integer lastAttackingTerritory;
   
+  public Integer getLastAttackingTerritory() {
+    return lastAttackingTerritory;
+  }
+  public void setLastAttackingTerritory(Integer lastAttackingTerritory) {
+    this.lastAttackingTerritory = lastAttackingTerritory;
+  }
   public Attack getAttack() {
     return attack;
   }

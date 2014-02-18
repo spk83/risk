@@ -149,11 +149,40 @@ public class RiskLogic {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
   private List<Operation> performAttackOccupy(RiskState lastState,
       Map<String, Object> playerMap, String playerIdToString) {
     int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
+    int attackingTerritory = lastState.getLastAttackingTerritory();
+    Map<String, Integer> territoryMap = 
+        (Map<String, Integer>)playerMap.get(GameResources.TERRITORY);
+    Player player = lastState.getPlayersMap().get(playerIdToString);
+    Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
+    int minMovingUnits = GameResources.getMinUnitsToNewTerritory
+        (oldTerritoryMap.get(attackingTerritory+""));
+    check(minMovingUnits != 0, oldTerritoryMap);
+    int newUnitsAtUnclaimed = territoryMap.get(unclaimedTerritory+"");
+    int newUnitsAtAttacking = territoryMap.get(attackingTerritory+"");
+    int oldUnitsAtUnclaimed = 0;
+    int oldUnitsAtAttacking = oldTerritoryMap.get(attackingTerritory+"");
+    check(newUnitsAtAttacking >= 1, territoryMap, lastState);
+    check(newUnitsAtUnclaimed >= minMovingUnits, territoryMap, lastState);
+    check( newUnitsAtAttacking + newUnitsAtUnclaimed 
+        == oldUnitsAtAttacking + oldUnitsAtUnclaimed, territoryMap, oldTerritoryMap);
+    oldTerritoryMap.put(attackingTerritory+"", newUnitsAtAttacking);
+    oldTerritoryMap.put(unclaimedTerritory+"", newUnitsAtUnclaimed);
     
-    return null;
+    List<Operation> attackOperations = Lists.newArrayList();
+    attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
+    attackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
+        GameResources.CARDS, player.getCards(),
+        GameResources.TERRITORY, player.getTerritoryUnitMap(),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, player.getContinent())));
+    attackOperations.add(new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT));
+    attackOperations.add(new Delete(GameResources.LAST_ATTACKING_TERRITORY));
+    attackOperations.add(new Set(GameResources.PHASE, GameResources.ATTACK_PHASE));
+    return attackOperations;
   }
 
   private List<Operation> performAttackResultOnLoss(RiskState lastState,
@@ -228,6 +257,8 @@ public class RiskLogic {
         GameResources.CONTINENT, defender.getContinent())));
     attackOperations.add(new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of
        (attack.getDefenderTerritoryId())));
+    attackOperations.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
+        attack.getAttackerTerritoryId()));
     attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
     for (int dice = 0; dice < attack.getAttackerDiceRolls().size(); ++dice) {
       attackOperations.add(new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + (dice+1)));
@@ -609,9 +640,12 @@ public class RiskLogic {
       List<Integer> defenderDiceRolls = getDiceRolls(lastApiState, GameResources.DEFENDER);
       riskState.setAttack(new Attack(attacker, defender, attackerDiceRolls, defenderDiceRolls));
     }
+    Integer lastAttackingTerritory = (Integer)lastApiState.get(
+        GameResources.LAST_ATTACKING_TERRITORY);
+    riskState.setLastAttackingTerritory(lastAttackingTerritory);
     return riskState;
   }
-
+  
   private List<Integer> getDiceRolls(Map<String, Object> lastApiState, String type) {
     List<Integer> diceRolls = new ArrayList<Integer>();
     boolean rolls = true;
