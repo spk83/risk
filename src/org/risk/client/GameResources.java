@@ -196,4 +196,18 @@ public class GameResources {
     int units = totalTerritories/3;
     return units < 3 ? 3 : units;
   }
+  
+  public static int getMaxDiceRollsForAttacker(int units) {
+    if(units  < 2) {
+      return 0;
+    }
+    return (units - 1) >= 3 ? 3 : (units - 1);
+  }
+  
+  public static int getMaxDiceRollsForDefender(int units) {
+    if(units  < 1) {
+      return 0;
+    }
+    return units >= 2 ? 2 : 1;
+  }
 }

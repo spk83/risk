@@ -77,9 +77,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, 10,
             GameResources.UNITS, 6)),
         new Set(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
-                GameResources.PLAYER, PLAYER_B,
-                GameResources.TERRITORY, 15, 
-                GameResources.UNITS, 1)),
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 15, 
+            GameResources.UNITS, 1)),
         new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 1, 7),
         new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 1, 7),
         new SetRandomInteger(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 1, 7),
@@ -119,9 +119,7 @@ public class AttackPhaseTest extends AbstractTest {
   
   @Test
   public void testAttackOfAOnBAWins() throws Exception {
-    
     Map<String, Integer> territoryMapB = getTerritoriesInRange(11, 29, 1);
-    
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(GameResources.PHASE, GameResources.ATTACK_RESULT).
         put(PLAYER_A, ImmutableMap.<String, Object>of(
@@ -165,7 +163,9 @@ public class AttackPhaseTest extends AbstractTest {
     playerBMap.put(GameResources.TERRITORY, territoryMapB);
     
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
-        new SetTurn(BID),
+        new SetTurn(AID),
+        new Set(PLAYER_A, state.get(PLAYER_A)),
+        new Set(PLAYER_B, playerBMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(15)),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
@@ -188,7 +188,7 @@ public class AttackPhaseTest extends AbstractTest {
   @Test
   public void testAttackOfAOnBADoesNotWin() throws Exception {
     
-    Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 1);
+    Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 10, 6);
     
     Map<String, Object> state = ImmutableMap.<String, Object>builder().
         put(GameResources.PHASE, GameResources.ATTACK_RESULT).
@@ -233,6 +233,7 @@ public class AttackPhaseTest extends AbstractTest {
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
+        new Set(PLAYER_B, state.get(PLAYER_B)),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),

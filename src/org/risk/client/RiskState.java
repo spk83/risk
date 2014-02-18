@@ -16,7 +16,14 @@ public class RiskState {
   private Map<String, Card> cardMap;
   private int tradeNumber;
   private List<Integer> cardsTraded;
+  private Attack attack;
   
+  public Attack getAttack() {
+    return attack;
+  }
+  public void setAttack(Attack attack) {
+    this.attack = attack;
+  }
   public String getTurn() {
     return turn;
   }
