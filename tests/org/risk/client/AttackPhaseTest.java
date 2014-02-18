@@ -694,7 +694,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.PLAYER, PLAYER_A,
             GameResources.TERRITORY, 40, 
             GameResources.UNITS,  6)).
-        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "3", 4).
+        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
         put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, PLAYER_B,
             GameResources.TERRITORY, 41, 
@@ -712,6 +712,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(PLAYER_A, playerAMap),
         new Delete(PLAYER_B),
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, 40),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
@@ -719,8 +720,6 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(GameResources.ATTACKER),
         new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.DEFENDER),
-        new Set(GameResources.MESSAGE, 
-            PLAYER_B + " out of the game ! and " + PLAYER_A + " wins !!!"),
         new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(AID)),
         new Set(GameResources.PHASE, GameResources.END_GAME));
     
