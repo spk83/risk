@@ -253,6 +253,55 @@ public class AttackPhaseTest extends AbstractTest {
     assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
     assertHacker(move(BID, state, movementOperations));
     assertHacker(move(CID, state, movementOperations));
+    
+    final List<Operation> declareWrongWinner = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, state.get(PLAYER_A)),
+        new Set(PLAYER_B, playerBMap),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.TERRITORY_WINNER, PLAYER_B),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
+        new Delete(GameResources.ATTACKER),
+        new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.DEFENDER),
+        new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY));
+    
+    final List<Operation> invalidDefenderTerritoryState = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, state.get(PLAYER_A)),
+        new Set(PLAYER_B, state.get(PLAYER_B)),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, "5"),
+        new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
+        new Delete(GameResources.ATTACKER),
+        new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.DEFENDER),
+        new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY));
+    
+    final List<Operation> invalidLastAttackingTerritoryState = ImmutableList.<Operation>of(
+        new SetTurn(AID),
+        new Set(PLAYER_A, state.get(PLAYER_A)),
+        new Set(PLAYER_B, playerBMap),
+        new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
+        new Set(GameResources.LAST_ATTACKING_TERRITORY, "10"),
+        new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
+        new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
+        new Delete(GameResources.ATTACKER),
+        new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
+        new Delete(GameResources.DEFENDER),
+        new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY));
+    
+    assertHacker(move(AID, state, declareWrongWinner));
+    assertHacker(move(AID, state, invalidDefenderTerritoryState));
+    assertHacker(move(AID, state, invalidLastAttackingTerritoryState));    
   }
   
   @Test
