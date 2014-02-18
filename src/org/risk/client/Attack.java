@@ -1,6 +1,5 @@
 package org.risk.client;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,19 @@ public class Attack {
     calculateAttackResults();
    }
   
+  private void calculateAttackResults() {
+    int count = 0;
+    while (count < attackerDiceRolls.size() && count < defenderDiceRolls.size()) {
+      if (defenderDiceRolls.get(count) >= attackerDiceRolls.get(count)) {
+        deltaAttack--;
+      }
+      else {
+        deltaDefend--;
+      }
+      count++;
+    }
+  }
+  
   public List<Integer> getAttackerDiceRolls() {
     return attackerDiceRolls;
   }
@@ -65,19 +77,6 @@ public class Attack {
 
   public void setDeltaDefend(int deltaDefend) {
     this.deltaDefend = deltaDefend;
-  }
-  
-  private void calculateAttackResults() {
-    int count = 0;
-    while (count < attackerDiceRolls.size() && count < defenderDiceRolls.size()) {
-      if (defenderDiceRolls.get(count) >= attackerDiceRolls.get(count)) {
-        deltaAttack--;
-      }
-      else {
-        deltaDefend--;
-      }
-      count++;
-    }
   }
   
   public int getAttackUnits() {

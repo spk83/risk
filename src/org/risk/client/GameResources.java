@@ -210,4 +210,11 @@ public class GameResources {
     }
     return units >= 2 ? 2 : 1;
   }
+  
+  public static int getMaxUnitsToNewTerritory(int diceRolls, int remainingUnits) {
+    if (remainingUnits > diceRolls) {
+      return diceRolls;
+    }
+    return diceRolls - 1;
+  }
 }

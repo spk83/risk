@@ -134,12 +134,25 @@ public class RiskLogic {
     else if (lastState.getPhase().equals(GameResources.ATTACK_RESULT)) {
       String nextPhase = ((Set) lastMove.get(lastMove.size() - 1)).getValue().toString();
       if (nextPhase.equals(GameResources.ATTACK_OCCUPY)) {
-          return performAttackResultOnTerritoryWin(lastState, GameResources.playerIdToString(lastMovePlayerId));
+          return performAttackResultOnTerritoryWin(lastState,
+              GameResources.playerIdToString(lastMovePlayerId));
       }
       if (nextPhase.equals(GameResources.ATTACK_PHASE)) {
-        return performAttackResultOnLoss(lastState, GameResources.playerIdToString(lastMovePlayerId));
+        return performAttackResultOnLoss(lastState, 
+            GameResources.playerIdToString(lastMovePlayerId));
       }
     }
+    else if (lastState.getPhase().equals(GameResources.ATTACK_OCCUPY)) {
+      return performAttackOccupy(lastState, (Map<String, Object>)((Set)lastMove.get(1)).getValue(),
+          GameResources.playerIdToString(lastMovePlayerId));
+    }
+    return null;
+  }
+
+  private List<Operation> performAttackOccupy(RiskState lastState,
+      Map<String, Object> playerMap, String playerIdToString) {
+    int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
+    
     return null;
   }
 
@@ -183,7 +196,6 @@ public class RiskLogic {
     //   (attack.getDefenderTerritoryId())));
     //attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
     //attackOperations.add(new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY)); 
-    
     return attackOperations;
   }
 
@@ -241,6 +253,7 @@ public class RiskLogic {
     String playerIdOfAttacker = attacker.get(GameResources.PLAYER).toString();
     Integer attackTerritory = (Integer)attacker.get(GameResources.TERRITORY);
     Integer attackUnits = (Integer)attacker.get(GameResources.UNITS);
+    check(attackUnits >= 2, attackUnits);
     String playerIdOfDefender = defender.get(GameResources.PLAYER).toString();
     Integer defendTerritory = (Integer)defender.get(GameResources.TERRITORY);
     Integer defendUnits = (Integer)defender.get(GameResources.UNITS);
