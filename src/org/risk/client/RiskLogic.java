@@ -18,6 +18,7 @@ import org.risk.client.GameApi.VerifyMove;
 import org.risk.client.GameApi.VerifyMoveDone;
 import org.risk.client.GameApi.SetVisibility;
 import org.risk.client.GameApi.Delete;
+import org.risk.client.GameApi.EndGame;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
@@ -166,7 +167,24 @@ public class RiskLogic {
         return performFortify(lastState, null, GameResources.playerIdToString(lastMovePlayerId));
       }
     }
+    else if(lastState.getPhase().equals(GameResources.END_GAME)) {
+      return performEndGame(lastState, GameResources.playerIdToString(lastMovePlayerId));
+    }
     return null;
+  }
+
+  private List<Operation> performEndGame(RiskState lastState,
+      String playerIdToString) {
+    List<Operation> endGameOperations = Lists.newArrayList();
+    check(lastState.getTurnOrder().size() == 1);
+    check(lastState.getTerritoryWinner().equals(playerIdToString));
+    check(lastState.getPlayersMap().size() == 1);
+    check(lastState.getUnclaimedTerritory().size() == 1);
+    Player player = lastState.getPlayersMap().get(playerIdToString);
+    check(player.getContinent().size() == Continent.continentName.size() - 1);
+    check(player.getTerritoryUnitMap().size() == GameResources.TOTAL_TERRITORIES - 1);
+    endGameOperations.add(new EndGame(GameResources.playerIdToInt(playerIdToString)));
+    return endGameOperations;
   }
 
   @SuppressWarnings("unchecked")
@@ -334,12 +352,6 @@ public class RiskLogic {
     }
     attackOperations.add(new Delete(GameResources.DEFENDER));
     attackOperations.add(new Set(GameResources.PHASE, GameResources.ATTACK_PHASE)); 
-    //check(defenderUnits + attack.getDeltaDefend() == 0, attacker, defender, attack);
-    //defenderTerritoryMap.remove(attack.getDefenderTerritoryId()+"");
-    //attackOperations.add(new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of
-    //   (attack.getDefenderTerritoryId())));
-    //attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
-    //attackOperations.add(new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY)); 
     return attackOperations;
   }
 
@@ -634,8 +646,6 @@ public class RiskLogic {
     playerMap.setTerritoryUnitMap(oldTerritoryMap);
     playerMap.setUnclaimedUnits(playerMap.getUnclaimedUnits() - 1);
     check(playerMap.getUnclaimedUnits() > 0, playerMap.getUnclaimedUnits());
-    //lastState.getPlayersMap().put(playerKey, playerMap);
-    
     List<Operation> move = Lists.newArrayList();
     List<Integer> turnOrder = lastState.getTurnOrder();
     int index = turnOrder.indexOf(GameResources.playerIdToInt(playerKey));

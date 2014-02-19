@@ -4,14 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.risk.client.GameApi.Delete;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
 import org.risk.client.GameApi.SetRandomInteger;
-import org.risk.client.GameApi.Delete;
 import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.SetVisibility;
 
@@ -21,52 +20,6 @@ import com.google.common.collect.ImmutableMap;
 @RunWith(JUnit4.class)
 public class AttackPhaseTest extends AbstractTest {
   
-  private Map<String, Integer> getTerritoriesInRange(
-      int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
-          throws Exception {
-    if (isTerritoryInRange(highestTerritoryIdInclusive) 
-        && isTerritoryInRange(lowestTerritoryIdInclusive)
-            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
-      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-      for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
-        territoryMap.put(i + "", baseUnits);
-      }
-      return territoryMap;
-    } else {
-      throw new Exception("Invalid Territory ID");
-    }
-  }
-  
-  private boolean isTerritoryInRange(int territoryId) {
-    if (territoryId >= 0 && territoryId < 42) {
-      return true;
-    }
-    return false;
-  }
-  
-  @Test
-  public void testGetTerritoriesInRange() throws Exception {
-    Map<String, Integer> territoryMap = getTerritoriesInRange(0, 4, 2);
-    Assert.assertEquals(territoryMap.size(), 5);
-    for (int i = 0; i <= 4; ++i) {
-      Assert.assertEquals(2, territoryMap.get(i + "").intValue());
-    }
-  }
-  
-  @Test(expected = Exception.class)
-  public void testGetTerritoriesInRangeWithInvalidHighRange() throws Exception {
-    getTerritoriesInRange(0, 50, 2);
-  }
-  
-  @Test(expected = Exception.class)
-  public void testGetTerritoriesInRangeWithInvalidLowRange() throws Exception {
-    getTerritoriesInRange(-1, 41, 2);
-  }
-  
-  @Test(expected = Exception.class)
-  public void testGetTerritoriesInRangeWithLowGreaterThanHigh() throws Exception {
-    getTerritoriesInRange(23, 1, 2);
-  }
   
   @Test
   public void testAttackOfAOnB() throws Exception {
