@@ -304,7 +304,14 @@ public class RiskLogic {
         == oldUnitsAtAttacking + oldUnitsAtUnclaimed, territoryMap, oldTerritoryMap);
     oldTerritoryMap.put(attackingTerritory+"", newUnitsAtAttacking);
     oldTerritoryMap.put(unclaimedTerritory+"", newUnitsAtUnclaimed);
-    
+    java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
+    for (int i = 0; i < GameResources.TOTAL_CONTINENTS; i++) {
+      if (oldTerritorySet.containsAll(Continent.territorySet.get(i + ""))) {
+        if (!player.getContinent().contains(i + "")) {
+          player.getContinent().add(i + "");
+        }
+      }
+    }
     List<Operation> attackOperations = Lists.newArrayList();
     attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     attackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
@@ -643,6 +650,14 @@ public class RiskLogic {
     unclaimedTerritory.remove(unclaimedTerritory.indexOf(Integer.parseInt(newTerritory)));
     check(territoryUnitMap.get(newTerritory) == 1, territoryUnitMap, newTerritory);
     oldTerritoryMap.put(newTerritory, 1);
+    oldTerritorySet = oldTerritoryMap.keySet();
+    for (int i = 0; i < GameResources.TOTAL_CONTINENTS; i++) {
+      if (oldTerritorySet.containsAll(Continent.territorySet.get(i + ""))) {
+        if (!playerMap.getContinent().contains(i + "")) {
+          playerMap.getContinent().add(i + "");
+        }
+      }
+    }
     playerMap.setTerritoryUnitMap(oldTerritoryMap);
     playerMap.setUnclaimedUnits(playerMap.getUnclaimedUnits() - 1);
     check(playerMap.getUnclaimedUnits() > 0, playerMap.getUnclaimedUnits());

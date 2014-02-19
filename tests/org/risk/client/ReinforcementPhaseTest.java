@@ -210,7 +210,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 4,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+            GameResources.CONTINENT, ImmutableList.<String>of("5")))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(5, 43))
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
@@ -226,8 +226,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
-            GameResources.UNCLAIMED_UNITS, 8,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+            GameResources.UNCLAIMED_UNITS, 10,
+            GameResources.CONTINENT, ImmutableList.<String>of("5"))),
         new Delete(GameResources.CARDS_BEING_TRADED),
         new SetVisibility("RC0", GameResources.EMPTYLISTINT),
         new SetVisibility("RC1", GameResources.EMPTYLISTINT),
@@ -281,7 +281,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2),
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+            GameResources.CONTINENT, ImmutableList.<String>of("5")))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, 43))
         .put(GameResources.TRADE_NUMBER, 1)
@@ -292,8 +292,8 @@ public class ReinforcementPhaseTest extends AbstractTest {
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2),
             GameResources.TERRITORY, getTerritories(PLAYER_C),
-            GameResources.UNCLAIMED_UNITS, 4,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
+            GameResources.UNCLAIMED_UNITS, 6,
+            GameResources.CONTINENT, ImmutableList.<String>of("5"))),
         new Set(GameResources.PHASE, GameResources.REINFORCE));
     
     // Check if valid move

@@ -26,6 +26,7 @@ public class GameResources {
   
   public static final int MIN_ALLOCATED_UNITS = 3;
   public static final int TOTAL_TERRITORIES = 42; // Number of territories
+  public static final int TOTAL_CONTINENTS = 6;
   public static final int TOTAL_WILD_CARDS = 2;
   public static final int TOTAL_RISK_CARDS = TOTAL_TERRITORIES + TOTAL_WILD_CARDS;
   public static final int MAX_DICE_ROLL = 6;
