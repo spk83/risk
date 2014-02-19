@@ -11,11 +11,6 @@ import org.risk.client.GameApi.SetTurn;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-/**
- * This class test the operations that can be performed in fortify phase.
- * @author vishal
- *
- */
 public class FortifyPhaseTest extends AbstractTest {
   
   /*

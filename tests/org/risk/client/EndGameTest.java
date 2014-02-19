@@ -11,11 +11,6 @@ import org.risk.client.GameApi.EndGame;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-/**
- * This class checks for endgame operations.
- * @author vishal
- *
- */
 public class EndGameTest extends AbstractTest {
   /*
    * This test checks for valid end game scenario

@@ -12,11 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-/**
- * This class test the operations performed in the deployment phase of the game.
- * @author vishal
- *
- */
 public class DeploymentPhaseTest extends AbstractTest {
   
   /*

@@ -19,11 +19,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-/**
- * This class provides helper methods and define variables that are used by all the test classes.
- * @author vishal
- *
- */
 @RunWith(JUnit4.class)
 public class AbstractTest {
   protected static final String PLAYER_ID = "playerId";

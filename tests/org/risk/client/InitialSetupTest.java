@@ -17,11 +17,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 
-/**
- * This class test the operations performed for initial setup of the game.
- * @author vishal
- *
- */
 @RunWith(JUnit4.class)
 public class InitialSetupTest extends AbstractTest {
   
