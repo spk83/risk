@@ -59,15 +59,15 @@ public class FortifyPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
         new Set(GameResources.PHASE, GameResources.CARD_TRADE));
-    
+
     // Check valid move
     assertMoveOk(move(CID, state, fortifyTerritoryOfC));
-  
+
     // Check invalid move - wrong turn, from invalid states
     assertHacker(move(BID, state, fortifyTerritoryOfC));
     assertHacker(move(CID, GameResources.EMPTYSTATE, fortifyTerritoryOfC));
     assertHacker(move(CID, GameResources.NONEMPTYSTATE, fortifyTerritoryOfC));
-  
+
     territoryB = performDeltaOnTerritory(territoryB, "15", -1);
     territoryB = performDeltaOnTerritory(territoryB, "16", 1);
     
@@ -94,13 +94,12 @@ public class FortifyPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
         new Set(GameResources.PHASE, GameResources.CARD_TRADE));
-            
-    
+
     assertHacker(move(CID, state, fortifyTerritoryOfCWithInvalidMove));
-    
+
     territoryC = performDeltaOnTerritory(getTerritories(PLAYER_C), "30", -5);
     territoryC = performDeltaOnTerritory(territoryC, "38", 2);
-    
+
     List<Operation> fortifyTerritoryOfCWithIncorrectNumberOfUnits = ImmutableList.<Operation>of(
         new SetTurn(BID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(

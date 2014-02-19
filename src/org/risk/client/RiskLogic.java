@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -155,7 +156,54 @@ public class RiskLogic {
       return performAttackOccupy(lastState, (Map<String, Object>)((Set)lastMove.get(1)).getValue(),
           GameResources.playerIdToString(lastMovePlayerId));
     }
+    else if (lastState.getPhase().equals(GameResources.FORTIFY)) {
+      String playerIdString = GameResources.playerIdToString(lastMovePlayerId);
+      if (((Set)lastMove.get(1)).getKey().equals(playerIdString)) {
+        return performFortify(lastState, (Map<String, Object>)((Set)lastMove.get(1)).getValue(),
+            GameResources.playerIdToString(lastMovePlayerId));
+      }
+      else {
+        return performFortify(lastState, null, GameResources.playerIdToString(lastMovePlayerId));
+      }
+    }
     return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Operation> performFortify(RiskState lastState,
+      Map<String, Object> value, String playerIdToString) {
+    List<Operation> attackOperations = Lists.newArrayList();
+    List<Integer> turnOrder = lastState.getTurnOrder();
+    int nextPlayerId = turnOrder.get((turnOrder.indexOf(
+        GameResources.playerIdToInt(playerIdToString)) + 1)%turnOrder.size());
+    attackOperations.add(new SetTurn(nextPlayerId));
+    if (value != null) {
+      Player player = lastState.getPlayersMap().get(playerIdToString);
+      Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
+      Map<String, Integer> territoryMap = (Map<String, Integer>) value.get(GameResources.TERRITORY);
+      check(oldTerritoryMap.size() == territoryMap.size(), oldTerritoryMap, territoryMap);
+      Map<String, Integer> differenceMap = differenceTerritoryMap(oldTerritoryMap, territoryMap);
+      check(differenceMap.size() == 2, oldTerritoryMap, territoryMap, differenceMap);
+      Iterator<Entry<String, Integer>> iterator = differenceMap.entrySet().iterator();
+      Entry<String, Integer> territoryEntry1 = iterator.next();
+      Entry<String, Integer> territoryEntry2 = iterator.next();
+      String territory1 = territoryEntry1.getKey();
+      int territoryDelta1 = territoryEntry1.getValue();
+      String territory2 = territoryEntry2.getKey();
+      int territoryDelta2 = territoryEntry2.getValue();
+      check((territoryDelta1 + territoryDelta2) == 0, oldTerritoryMap, territoryMap, differenceMap);
+      check(Territory.isFortifyPossible(Integer.parseInt(territory1), Integer.parseInt(territory2), 
+          new ArrayList<String>(oldTerritoryMap.keySet())));
+      oldTerritoryMap.put(territory1, territoryDelta1 + oldTerritoryMap.get(territory1));
+      oldTerritoryMap.put(territory2, territoryDelta2 + oldTerritoryMap.get(territory2));
+      attackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
+          GameResources.CARDS, player.getCards(),
+          GameResources.TERRITORY, player.getTerritoryUnitMap(),
+          GameResources.UNCLAIMED_UNITS, 0,
+          GameResources.CONTINENT, player.getContinent())));
+    }
+    attackOperations.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    return attackOperations;
   }
 
   private List<Operation> performAttackResultOnEndGame(RiskState lastState,

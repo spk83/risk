@@ -286,16 +286,19 @@ public class AbstractTest {
   
   @Test
   public void testIsFortifyPossible(){
-    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList(1, 2)));
-    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList(0, 1, 2)));
-    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList(0, 1, 2, 39))); 
+    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList("1", "2")));
+    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList("0", "1", "2")));
+    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList("0", "1", "2", "39"))); 
     assertEquals(true, Territory.isFortifyPossible(0, 19, 
-        Lists.newArrayList(0, 1, 5, 13, 15, 16, 17, 19, 26, 33, 34, 37, 2, 39))); 
+        Lists.newArrayList("0", "1", "5", "13", "15", "16", "17", "19", "26", "33", 
+        "34", "37", "2", "39"))); 
     assertEquals(true, Territory.isFortifyPossible(0, 19, 
-        Lists.newArrayList(0, 1, 5, 13, 15, 16, 17, 19, 26, 33, 34, 37, 39))); 
+        Lists.newArrayList("0", "1", "5", "13", "15", "16", "17", "19", "26", "33", 
+        "34", "37", "39"))); 
     assertEquals(true, Territory.isFortifyPossible(0, 19, 
-        Lists.newArrayList(0, 1, 5, 13, 16, 17, 19, 26, 33, 34, 37, 2, 39))); 
+        Lists.newArrayList("0", "1", "5", "13", "16", "17", "19", "26", "33", "34",
+            "37", "2", "39"))); 
     assertEquals(false, Territory.isFortifyPossible(0, 19, 
-        Lists.newArrayList(0, 1, 5, 16, 17, 19, 26, 33, 34, 37, 2, 39))); 
+        Lists.newArrayList("0", "1", "5", "16", "17", "19", "26", "33", "34", "37", "2", "39"))); 
   }
 }

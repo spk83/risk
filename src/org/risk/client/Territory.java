@@ -120,14 +120,15 @@ public class Territory {
     return connections.get(fromTerritory).contains(toTerritory);
   }
   
-  public static boolean isFortifyPossible(int fromTerritory, int toTerritory, List<Integer> territoryList) {
-    if (territoryList.contains(fromTerritory) && territoryList.contains(toTerritory)) {
+  public static boolean isFortifyPossible(int fromTerritory, int toTerritory, 
+      List<String> territoryList) {
+    if (territoryList.contains(fromTerritory+"") && territoryList.contains(toTerritory+"")) {
       if (connections.get(fromTerritory).contains(toTerritory)) {
         return true;
       } else {
-        territoryList.remove(territoryList.indexOf(fromTerritory));
+        territoryList.remove(territoryList.indexOf(fromTerritory+""));
         for (int territory : connections.get(fromTerritory)) {
-          if (territoryList.contains(territory) && 
+          if (territoryList.contains(territory+"") && 
               isFortifyPossible(territory, toTerritory, territoryList)) {
             return true;
           }
