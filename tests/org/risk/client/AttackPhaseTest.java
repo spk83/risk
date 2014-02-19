@@ -148,12 +148,12 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, getTerritoriesInRange(0, 10, 6),
             GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+            GameResources.CONTINENT, ImmutableList.<String>of("0"))).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, getTerritoriesInRange(11, 29, 1),
             GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+            GameResources.CONTINENT, ImmutableList.<String>of("2"))).
         put(PLAYER_C, ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
@@ -183,6 +183,7 @@ public class AttackPhaseTest extends AbstractTest {
         new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_B));
     
     playerBMap.put(GameResources.TERRITORY, territoryMapB);
+    playerBMap.put(GameResources.CONTINENT, GameResources.EMPTYLISTSTRING);
     
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),

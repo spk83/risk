@@ -377,6 +377,14 @@ public class RiskLogic {
         attack.getDefenderTerritoryId()+"", defenderUnits + attack.getDeltaDefend());
     check(defenderUnits + attack.getDeltaDefend() == 0, attacker, defender, attack);
     defenderTerritoryMap.remove(attack.getDefenderTerritoryId()+"");
+    java.util.Set<String> defenderTerritorySet = defenderTerritoryMap.keySet();
+    List<String> defenderContinentList = Lists.newArrayList(defender.getContinent());
+    for (String continentId : defender.getContinent()) {
+      if (!defenderTerritorySet.containsAll(Continent.territorySet.get(continentId))) {
+        defenderContinentList.remove(continentId);
+      }
+    }
+    defender.setContinent(defenderContinentList);
     List<Operation> attackOperations = Lists.newArrayList();
     attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     attackOperations.add(new Set(attack.getAttackerPlayerId(), ImmutableMap.<String, Object>of(
