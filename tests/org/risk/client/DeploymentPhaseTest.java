@@ -209,7 +209,7 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 21,
         GameResources.TERRITORY, getTerritories(PLAYER_A),
-        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1"))));
     changePhase.add(new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT));
     changePhase.add(new Set(GameResources.PHASE, GameResources.DEPLOYMENT));
     

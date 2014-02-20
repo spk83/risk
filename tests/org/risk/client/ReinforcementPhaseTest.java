@@ -1,5 +1,6 @@
 package org.risk.client;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -220,7 +221,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     deck.add("RC0");
     deck.add("RC1");
     deck.add("RC2");
-    
+    Collections.sort(deck);
     List<Operation> addUnitsToC = ImmutableList.<Operation>of(
         new SetTurn(CID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
@@ -244,7 +245,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     assertHacker(move(CID, GameResources.EMPTYSTATE, addUnitsToC));
     assertHacker(move(CID, GameResources.NONEMPTYSTATE, addUnitsToC));
     
-    // add test case for hecker with wrong number of unclaimed units
+    // add test case for hacker with wrong number of unclaimed units
     List<Operation> addWrongUnitsToC = ImmutableList.<Operation>of(
         new SetTurn(CID),
         new Set(PLAYER_C, ImmutableMap.<String, Object>of(
@@ -356,7 +357,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
     // Check valid move
     assertMoveOk(move(CID, state, reinforceTerritoryOfC));
     
-    // Check for hecker - wrong turn, from invalid states
+    // Check for hacker - wrong turn, from invalid states
     assertHacker(move(BID, state, reinforceTerritoryOfC));
     assertHacker(move(CID, GameResources.EMPTYSTATE, reinforceTerritoryOfC));
     assertHacker(move(CID, GameResources.NONEMPTYSTATE, reinforceTerritoryOfC));

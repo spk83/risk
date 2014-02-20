@@ -53,9 +53,7 @@ public class Card {
   public void setCardId(String cardId) {
     this.cardId = cardId;
   }
-  /*public static List<Card> getCardsFromList(List<Integer> cardsList) {
-      return null;
-  }*/
+
   public static int getUnits(List<Card> cards, int tradeNumber) {
     if( cards.size() == 3 ) {
       Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
@@ -67,13 +65,17 @@ public class Card {
         cardTypeCountMap.put(card.getCardType(), count + 1);
       }
       int validCount = 0;
+      int twoPlusWild = 0;
       for (Entry<Type, Integer> entry : cardTypeCountMap.entrySet()) {
         if( (entry.getKey() != Type.WILD && (entry.getValue() == 1 || entry.getValue() == 3))
             || (entry.getKey() == Type.WILD)) {
           validCount+=entry.getValue();
         }
+        if ((entry.getKey() != Type.WILD && entry.getValue() == 2)||(entry.getKey() == Type.WILD)) {
+          twoPlusWild += entry.getValue();
+        }
       }
-      if (validCount == 3) {
+      if (validCount == 3 || twoPlusWild == 3) {
         if (tradeNumber >= 1 && tradeNumber <= 5) {
           return 4 + 2 * (tradeNumber - 1);
         }

@@ -19,7 +19,14 @@ public class RiskState {
   private Attack attack;
   private Integer lastAttackingTerritory;
   private String territoryWinner;
+  private int continuousTrade;
   
+  public int getContinuousTrade() {
+    return continuousTrade;
+  }
+  public void setContinuousTrade(int continuousTrade) {
+    this.continuousTrade = continuousTrade;
+  }
   public String getTerritoryWinner() {
     return territoryWinner;
   }

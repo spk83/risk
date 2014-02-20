@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+
 public class Player {
 
   private String playerId;
@@ -19,11 +21,8 @@ public class Player {
     this.cards = new ArrayList<Integer>((List<Integer>)playerMap.get(GameResources.CARDS));
     this.unclaimedUnits = (int) playerMap.get(GameResources.UNCLAIMED_UNITS);
     Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(GameResources.TERRITORY);
-    this.territoryUnitMap = new HashMap<String, Integer>();
-    for (Map.Entry<String, Integer> entry : territoryMap.entrySet()) {
-      this.territoryUnitMap.put(entry.getKey(), entry.getValue());
-    }
-    this.continent = (List<String>) playerMap.get(GameResources.CONTINENT);
+    this.territoryUnitMap = new HashMap<String, Integer>(territoryMap);
+    this.continent = Lists.newArrayList((List<String>) playerMap.get(GameResources.CONTINENT));
   }
   
   public int getUnclaimedUnits() {

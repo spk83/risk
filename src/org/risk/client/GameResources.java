@@ -73,6 +73,9 @@ public class GameResources {
   public static final String ADD_UNITS = "addUnits";
   public static final String CARDS_BEING_TRADED = "cardsBeingTraded";
   public static final String TRADE_NUMBER = "tradeNumber";
+  public static final String ATTACK_TRADE = "attackTrade";
+  public static final String ATTACK_REINFORCE = "attackReinforce";
+  public static final String CONTINUOUS_TRADE = "continuousTrade";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
