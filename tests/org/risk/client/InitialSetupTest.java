@@ -69,7 +69,7 @@ public class InitialSetupTest extends AbstractTest {
     
     List<Integer> diceValues = Lists.newArrayList(2,3,1,4,2,4,5,2,4);
     int i = 0;
-    for (String diceRoll : RiskLogic.getDiceRolls(getPlayerIds())) {
+    for (String diceRoll : GameResources.getDiceRollKeys(getPlayerIds())) {
       stateBuilder.put(diceRoll, diceValues.get(i++));
     }
     

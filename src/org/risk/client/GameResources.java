@@ -2,6 +2,8 @@ package org.risk.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -159,5 +161,56 @@ public class GameResources {
       return 3;
     }
     return remainingUnits - 1;
+  }
+
+  public static int getNewUnits(int territories, List<String> continent) {
+    int newUnits = territories / 3;
+    if (newUnits < GameResources.MIN_ALLOCATED_UNITS) {
+      newUnits = GameResources.MIN_ALLOCATED_UNITS;
+    }
+    for (String continentId : continent) {
+      newUnits += Continent.unitsValue.get(continentId);
+    }
+    return newUnits;
+  }
+  
+  //Assumes both map have equal size
+  public static Map<String, Integer> differenceTerritoryMap
+      (Map<String, Integer> oldTerritories, Map<String, Integer> newTerritories) {
+    Map<String, Integer> differenceMap = new HashMap<String, Integer>();
+    for (Map.Entry<String, Integer> oldEntry : oldTerritories.entrySet()) {
+      int difference = newTerritories.get(oldEntry.getKey()) - oldEntry.getValue();
+      if (difference != 0) {
+        differenceMap.put(oldEntry.getKey(), difference);
+      }
+    }
+    return differenceMap;
+  }
+  
+  public static List<Integer> getDiceRolls(Map<String, Object> lastApiState, String type) {
+    List<Integer> diceRolls = new ArrayList<Integer>();
+    boolean rolls = true;
+    int count = 0;
+    while(rolls) {
+      Integer diceRoll = (Integer)lastApiState.get(
+          type + GameResources.DICE_ROLL + (++count));
+      if (diceRoll != null) {
+        diceRolls.add(diceRoll);
+      }
+      else {
+        rolls = false;
+      }
+    }
+    return diceRolls;
+  }
+  
+  public static List<String> getDiceRollKeys(List<String> playerIds){
+    List<String> diceRollList = new ArrayList<String>();
+    for (String playerId : playerIds) {
+      for (int i = 0; i< GameResources.TOTAL_INITIAL_DICE_ROLL; i++) {
+        diceRollList.add(GameResources.DICE_ROLL + "_" + playerId + "_" + i);
+      }
+    }
+   return diceRollList;
   }
 }

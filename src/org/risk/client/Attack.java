@@ -29,6 +29,8 @@ public class Attack {
     defenderTerritoryId = (int)defender.get(GameResources.TERRITORY);
     this.attackerDiceRolls = attackerDiceRolls;
     this.defenderDiceRolls = defenderDiceRolls;
+    
+    //sorting the dice rolls so that the comparison becomes easy
     Collections.sort(attackerDiceRolls, Collections.reverseOrder());
     Collections.sort(defenderDiceRolls, Collections.reverseOrder());
     calculateAttackResults();
