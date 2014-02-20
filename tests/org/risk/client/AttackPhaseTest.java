@@ -413,7 +413,7 @@ public class AttackPhaseTest extends AbstractTest {
     territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -2);
     territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +2);
     playerAMap.put(GameResources.TERRITORY, territoryMapA);
-    final List<Operation> invalidUnitsForMovement= ImmutableList.<Operation>of(
+    final List<Operation> invalidUnitsForMovement = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
@@ -430,7 +430,7 @@ public class AttackPhaseTest extends AbstractTest {
     territoryMapA = performDeltaOnTerritory(territoryMapA, "5", -3);
     territoryMapA = performDeltaOnTerritory(territoryMapA, "13", +5);
     playerAMap.put(GameResources.TERRITORY, territoryMapA);
-    final List<Operation> invalidUnitsDelta= ImmutableList.<Operation>of(
+    final List<Operation> invalidUnitsDelta = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
@@ -483,7 +483,7 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.DECK, getCardsInRange(1, 43)),
-        new SetVisibility("RC0",ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
         new Delete(GameResources.TERRITORY_WINNER),
         new Set(GameResources.PHASE, GameResources.FORTIFY));
     
@@ -497,12 +497,12 @@ public class AttackPhaseTest extends AbstractTest {
     assertHacker(move(AID, GameResources.NONEMPTYSTATE, emptyOperations));
 
     // giving two cards to player
-    playerAMap.put(GameResources.CARDS, ImmutableList.<Integer>of(0,1));
+    playerAMap.put(GameResources.CARDS, ImmutableList.<Integer>of(0, 1));
     final List<Operation> invalidMovementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.DECK, getCardsInRange(2, 43)),
-        new SetVisibility("RC0",ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
         new Delete(GameResources.TERRITORY_WINNER),
         new Set(GameResources.PHASE, GameResources.FORTIFY));
     
@@ -670,8 +670,8 @@ public class AttackPhaseTest extends AbstractTest {
     
     Map<String, Object> playerAMap = 
         new HashMap<String, Object>((Map<String, Object>) state.get(PLAYER_A));
-    List<Integer> playerACards = new ArrayList<Integer>
-        ((List<Integer>) ((Map<String, Object>) state.get(PLAYER_A)).get(GameResources.CARDS));
+    List<Integer> playerACards = new ArrayList<Integer>((List<Integer>) ((
+        Map<String, Object>) state.get(PLAYER_A)).get(GameResources.CARDS));
     playerACards.addAll((List<Integer>) 
         ((Map<String, Object>) state.get(PLAYER_B)).get(GameResources.CARDS));
     playerAMap.put(GameResources.CARDS, playerACards);
@@ -726,7 +726,7 @@ public class AttackPhaseTest extends AbstractTest {
         build();
     
     //trading cards
-    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>)state.get(PLAYER_A));
+    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>) state.get(PLAYER_A));
     List<Integer> newCardList = Lists.newArrayList(3, 4, 5);
     newPlayerMap.put(GameResources.CARDS, newCardList);
     newPlayerMap.put(GameResources.UNCLAIMED_UNITS, 4);
@@ -755,9 +755,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(6, GameResources.TOTAL_RISK_CARDS - 1))
-        .put("RC0","I1")
-        .put("RC1","I4")
-        .put("RC2","I7")
+        .put("RC0", "I1")
+        .put("RC1", "I4")
+        .put("RC2", "I7")
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .put(GameResources.TRADE_NUMBER, 1)
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))
@@ -795,7 +795,7 @@ public class AttackPhaseTest extends AbstractTest {
         build();
     
     //trading cards
-    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>)state.get(PLAYER_A));
+    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>) state.get(PLAYER_A));
     List<Integer> newCardList = Lists.newArrayList(3, 4, 5, 6, 7, 8);
     newPlayerMap.put(GameResources.CARDS, newCardList);
     newPlayerMap.put(GameResources.UNCLAIMED_UNITS, 4);
@@ -824,9 +824,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(9, GameResources.TOTAL_RISK_CARDS - 1))
-        .put("RC0","I1")
-        .put("RC1","I4")
-        .put("RC2","I7")
+        .put("RC0", "I1")
+        .put("RC1", "I4")
+        .put("RC2", "I7")
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .put(GameResources.TRADE_NUMBER, 1)
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))
@@ -856,9 +856,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.DECK, getCardsInRange(9, 43))
-        .put("RC0","I1")
-        .put("RC1","I4")
-        .put("RC2","I7")
+        .put("RC0", "I1")
+        .put("RC1", "I4")
+        .put("RC2", "I7")
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .put(GameResources.TRADE_NUMBER, 1)
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))
@@ -868,7 +868,7 @@ public class AttackPhaseTest extends AbstractTest {
         .build();
     
     //trading cards
-    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>)state.get(PLAYER_A));
+    Map<String, Object> newPlayerMap = Maps.newHashMap((Map<String, Object>) state.get(PLAYER_A));
     List<Integer> newCardList = Lists.newArrayList(6, 7, 8);
     newPlayerMap.put(GameResources.CARDS, newCardList);
     newPlayerMap.put(GameResources.UNCLAIMED_UNITS, 10);
@@ -908,9 +908,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(9, GameResources.TOTAL_RISK_CARDS - 1))
-        .put("RC3","W1")
-        .put("RC4","C2")
-        .put("RC5","A0")
+        .put("RC3", "W1")
+        .put("RC4", "C2")
+        .put("RC5", "A0")
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(3, 4, 5))
         .put(GameResources.TRADE_NUMBER, 2)
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))
@@ -950,9 +950,9 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(6, GameResources.TOTAL_RISK_CARDS - 1))
-        .put("RC0","W1")
-        .put("RC1","C2")
-        .put("RC2","A0")
+        .put("RC0", "W1")
+        .put("RC1", "C2")
+        .put("RC2", "A0")
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .put(GameResources.TRADE_NUMBER, 2)
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))

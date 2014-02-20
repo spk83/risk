@@ -13,20 +13,20 @@ public class Card {
 
   public Card(String cardValue, String cardId) {
     this.cardId = cardId;
-    switch(cardValue.charAt(0)){
-    case 'I':{
-        this.cardType = Type.INFANTRY;
-        break;
-      }
-    case 'C':{
+    switch(cardValue.charAt(0)) {
+    case 'I': {
+      this.cardType = Type.INFANTRY;
+      break;
+    }
+    case 'C': {
       this.cardType = Type.CAVALRY;
       break;
     }
-    case 'A':{
+    case 'A': {
       this.cardType = Type.ARTILLERY;
       break;
     }
-    case 'W':{
+    case 'W': {
       this.cardType = Type.WILD;
       break;
     }
@@ -39,7 +39,7 @@ public class Card {
   }
 
   public static int getUnits(List<Card> cards, int tradeNumber) {
-    if( cards.size() == 3 ) {
+    if (cards.size() == 3) {
       Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
       for (Card card : cards) {
         Integer count = cardTypeCountMap.get(card.getCardType());
@@ -51,19 +51,19 @@ public class Card {
       int validCount = 0;
       int twoPlusWild = 0;
       for (Entry<Type, Integer> entry : cardTypeCountMap.entrySet()) {
-        if( (entry.getKey() != Type.WILD && (entry.getValue() == 1 || entry.getValue() == 3))
+        if ((entry.getKey() != Type.WILD && (entry.getValue() == 1 || entry.getValue() == 3))
             || (entry.getKey() == Type.WILD)) {
-          validCount+=entry.getValue();
+          validCount += entry.getValue();
         }
-        if ((entry.getKey() != Type.WILD && entry.getValue() == 2)||(entry.getKey() == Type.WILD)) {
+        if ((entry.getKey() != Type.WILD && entry.getValue() == 2) || (
+            entry.getKey() == Type.WILD)) {
           twoPlusWild += entry.getValue();
         }
       }
       if (validCount == 3 || twoPlusWild == 3) {
         if (tradeNumber >= 1 && tradeNumber <= 5) {
           return 4 + 2 * (tradeNumber - 1);
-        }
-        else if (tradeNumber >= 6) {
+        } else if (tradeNumber >= 6) {
           return 15 + (tradeNumber - 6) * 5;
         }
       }

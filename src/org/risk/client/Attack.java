@@ -17,16 +17,17 @@ public class Attack {
   private int deltaAttack;
   private int deltaDefend;
 
-  public Attack() {}
+  public Attack() {
+  }
   
   public Attack(Map<String, Object> attacker, Map<String, Object> defender,
       List<Integer> attackerDiceRolls, List<Integer> defenderDiceRolls) {
-    attackUnits = (int)attacker.get(GameResources.UNITS);
-    defendUnits = (int)defender.get(GameResources.UNITS);
-    attackerPlayerId = (String)attacker.get(GameResources.PLAYER);
-    defenderPlayerId = (String)defender.get(GameResources.PLAYER);
-    attackerTerritoryId = (int)attacker.get(GameResources.TERRITORY);
-    defenderTerritoryId = (int)defender.get(GameResources.TERRITORY);
+    attackUnits = (int) attacker.get(GameResources.UNITS);
+    defendUnits = (int) defender.get(GameResources.UNITS);
+    attackerPlayerId = (String) attacker.get(GameResources.PLAYER);
+    defenderPlayerId = (String) defender.get(GameResources.PLAYER);
+    attackerTerritoryId = (int) attacker.get(GameResources.TERRITORY);
+    defenderTerritoryId = (int) defender.get(GameResources.TERRITORY);
     this.attackerDiceRolls = attackerDiceRolls;
     this.defenderDiceRolls = defenderDiceRolls;
     
@@ -41,8 +42,7 @@ public class Attack {
     while (count < attackerDiceRolls.size() && count < defenderDiceRolls.size()) {
       if (defenderDiceRolls.get(count) >= attackerDiceRolls.get(count)) {
         deltaAttack--;
-      }
-      else {
+      } else {
         deltaDefend--;
       }
       count++;

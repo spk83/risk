@@ -27,7 +27,8 @@ public class InitialSetupTest extends AbstractTest {
    */
   @Test
   public void testgetInitialOperations() {
-    assertEquals(1 + 1 + 3 + 44 + 1 + 1 + 1 + 9, riskLogic.getInitialOperations(getPlayerIds()).size());
+    assertEquals(1 + 1 + 3 + 44 + 1 + 1 + 1 + 9, riskLogic.getInitialOperations(
+        getPlayerIds()).size());
   }
   
   /*
@@ -67,7 +68,7 @@ public class InitialSetupTest extends AbstractTest {
         .put(GameResources.DECK, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, getTerritoriesInRange(0, 41));
     
-    List<Integer> diceValues = Lists.newArrayList(2,3,1,4,2,4,5,2,4);
+    List<Integer> diceValues = Lists.newArrayList(2, 3, 1, 4, 2, 4, 5, 2, 4);
     int i = 0;
     for (String diceRoll : GameResources.getDiceRollKeys(getPlayerIds())) {
       stateBuilder.put(diceRoll, diceValues.get(i++));

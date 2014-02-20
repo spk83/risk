@@ -135,14 +135,14 @@ public class RiskState {
     Map<String, Card> cardsMap = new HashMap<String, Card>();
     for (int i = 0; i <= 43; i++) { 
       Object cardValue = lastApiState.get(GameResources.RISK_CARD + i);
-      if ( cardValue != null) {
+      if (cardValue != null) {
         cardsMap.put(
             GameResources.RISK_CARD + i, 
             new Card(cardValue.toString(), 
             GameResources.RISK_CARD + i));
       }
     }
-    Integer tradeNumber = (Integer)lastApiState.get(GameResources.TRADE_NUMBER);
+    Integer tradeNumber = (Integer) lastApiState.get(GameResources.TRADE_NUMBER);
     if (tradeNumber == null) {
       tradeNumber = 0;
     }
@@ -168,9 +168,9 @@ public class RiskState {
     }
     riskState.setDiceResult(diceResultMap);
     
-    if( lastApiState.get(GameResources.TURN_ORDER) != null ) {
-      riskState.setTurnOrder(new ArrayList<Integer>
-          ((List<Integer>) lastApiState.get(GameResources.TURN_ORDER)));
+    if (lastApiState.get(GameResources.TURN_ORDER) != null) {
+      riskState.setTurnOrder(new ArrayList<Integer>((List<Integer>) lastApiState.get(
+          GameResources.TURN_ORDER)));
     }
     riskState.setCardsTraded((List<Integer>) lastApiState.get(GameResources.CARDS_BEING_TRADED));
     Map<String, Object> attacker = (Map<String, Object>) lastApiState.get(GameResources.ATTACKER);
@@ -182,7 +182,7 @@ public class RiskState {
           GameResources.getDiceRolls(lastApiState, GameResources.DEFENDER);
       riskState.setAttack(new Attack(attacker, defender, attackerDiceRolls, defenderDiceRolls));
     }
-    Integer lastAttackingTerritory = (Integer)lastApiState.get(
+    Integer lastAttackingTerritory = (Integer) lastApiState.get(
         GameResources.LAST_ATTACKING_TERRITORY);
     riskState.setLastAttackingTerritory(lastAttackingTerritory);
     

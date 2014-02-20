@@ -298,7 +298,7 @@ public class DeploymentPhaseTest extends AbstractTest {
   }
   
   @Test
-  public void testDeploymentLastTurn(){
+  public void testDeploymentLastTurn() {
     Map<String, Object> stateTurnLast = ImmutableMap.<String, Object>builder()
         .put(GameResources.PHASE, GameResources.DEPLOYMENT)
         .put(PLAYER_A, ImmutableMap.<String, Object>of(

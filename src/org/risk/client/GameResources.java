@@ -169,7 +169,7 @@ public class GameResources {
       newUnits = GameResources.MIN_ALLOCATED_UNITS;
     }
     for (String continentId : continent) {
-      newUnits += Continent.unitsValue.get(continentId);
+      newUnits += Continent.UNITS_VALUE.get(continentId);
     }
     return newUnits;
   }

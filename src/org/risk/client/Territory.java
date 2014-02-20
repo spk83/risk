@@ -6,9 +6,13 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class Territory {
+public final class Territory {
   
-  public static final Map<Integer, String> territoryName = ImmutableMap.<Integer, String>builder()
+  private Territory() {
+    
+  }
+  
+  public static final Map<Integer, String> TERRITORY_NAME = ImmutableMap.<Integer, String>builder()
       .put(0, "Alaska")
       .put(1, "North West Territory")
       .put(2, "Alberta")
@@ -71,7 +75,8 @@ public class Territory {
     }
   }
   
-  public static final Map<Integer, List<Integer>> connections = ImmutableMap.<Integer, List<Integer>>builder()
+  public static final Map<Integer, List<Integer>> CONNECTIONS
+    = ImmutableMap.<Integer, List<Integer>>builder()
       .put(0, ImmutableList.<Integer>of(1, 2, 37))
       .put(1, ImmutableList.<Integer>of(0, 2, 6, 5))
       .put(2, ImmutableList.<Integer>of(0, 1, 6, 4))
@@ -117,19 +122,19 @@ public class Territory {
       .build();
 
   public static boolean isAttackPossible(int fromTerritory, int toTerritory) {
-    return connections.get(fromTerritory).contains(toTerritory);
+    return CONNECTIONS.get(fromTerritory).contains(toTerritory);
   }
   
   public static boolean isFortifyPossible(int fromTerritory, int toTerritory, 
       List<String> territoryList) {
-    if (territoryList.contains(fromTerritory+"") && territoryList.contains(toTerritory+"")) {
-      if (connections.get(fromTerritory).contains(toTerritory)) {
+    if (territoryList.contains(fromTerritory + "") && territoryList.contains(toTerritory + "")) {
+      if (CONNECTIONS.get(fromTerritory).contains(toTerritory)) {
         return true;
       } else {
-        territoryList.remove(territoryList.indexOf(fromTerritory+""));
-        for (int territory : connections.get(fromTerritory)) {
-          if (territoryList.contains(territory+"") && 
-              isFortifyPossible(territory, toTerritory, territoryList)) {
+        territoryList.remove(territoryList.indexOf(fromTerritory + ""));
+        for (int territory : CONNECTIONS.get(fromTerritory)) {
+          if (territoryList.contains(territory + "") 
+              && isFortifyPossible(territory, toTerritory, territoryList)) {
             return true;
           }
         }

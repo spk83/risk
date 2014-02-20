@@ -18,9 +18,10 @@ public class Player {
   @SuppressWarnings("unchecked")
   public Player(String playerId, Map<String, Object> playerMap) {
     this.playerId = playerId;
-    this.cards = new ArrayList<Integer>((List<Integer>)playerMap.get(GameResources.CARDS));
+    this.cards = new ArrayList<Integer>((List<Integer>) playerMap.get(GameResources.CARDS));
     this.unclaimedUnits = (int) playerMap.get(GameResources.UNCLAIMED_UNITS);
-    Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(GameResources.TERRITORY);
+    Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(
+        GameResources.TERRITORY);
     this.territoryUnitMap = new HashMap<String, Integer>(territoryMap);
     this.continent = Lists.newArrayList((List<String>) playerMap.get(GameResources.CONTINENT));
   }
