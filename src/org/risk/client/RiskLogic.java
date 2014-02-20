@@ -192,16 +192,15 @@ public class RiskLogic {
   }
 
   private List<Operation> performAttackTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString,
-      RiskState newState) {
+      Map<String, Object> playerValue, String playerIdToString, RiskState newState) {
+    
     List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
     Map<String, Card> visibleCards = newState.getCardMap();
     List<Card> tradedCards = Lists.newArrayList();
     List<Integer> tradedCardsInt = Lists.newArrayList();
     List<String> tradedCardsString = Lists.newArrayList();
     Integer tradeNumber = lastState.getTradeNumber();
-    check(playerCards.size() >= 6,
-        lastState.getPlayersMap().get(playerIdToString));
+    check(playerCards.size() >= 6, lastState.getPlayersMap().get(playerIdToString));
     for (Integer cardId : playerCards) {
       Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
       if (card != null) {
@@ -245,7 +244,8 @@ public class RiskLogic {
     move.add(new Set(GameResources.CARDS_BEING_TRADED, tradedCardsInt));
     move.add(new Set(GameResources.TRADE_NUMBER, lastState.getTradeNumber()));
     move.add(new Set(GameResources.UNCLAIMED_TERRITORY, lastState.getUnclaimedTerritory()));
-    move.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, lastState.getLastAttackingTerritory()));
+    move.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
+        lastState.getLastAttackingTerritory()));
     move.add(new Set(GameResources.TERRITORY_WINNER, lastState.getTerritoryWinner()));
     if (continuousTradeNumber >= 1) {
       move.add(new Shuffle(deck));

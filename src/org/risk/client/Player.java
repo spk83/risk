@@ -36,16 +36,8 @@ public class Player {
     return playerId;
   }
 
-  public void setPlayerId(String playerId) {
-    this.playerId = playerId;
-  }
-
   public List<Integer> getCards() {
     return cards;
-  }
-
-  public void setCards(List<Integer> cards) {
-    this.cards = cards;
   }
 
   public Map<String, Integer> getTerritoryUnitMap() {

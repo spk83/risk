@@ -51,68 +51,39 @@ public class Attack {
     return attackerDiceRolls;
   }
 
-  public void setAttackerDiceRolls(List<Integer> attackerDiceRolls) {
-    this.attackerDiceRolls = attackerDiceRolls;
-  }
-
   public List<Integer> getDefenderDiceRolls() {
     return defenderDiceRolls;
-  }
-
-  public void setDefenderDiceRolls(List<Integer> defenderDiceRolls) {
-    this.defenderDiceRolls = defenderDiceRolls;
   }
 
   public int getDeltaAttack() {
     return deltaAttack;
   }
 
-  public void setDeltaAttack(int deltaAttack) {
-    this.deltaAttack = deltaAttack;
-  }
-
   public int getDeltaDefend() {
     return deltaDefend;
   }
 
-  public void setDeltaDefend(int deltaDefend) {
-    this.deltaDefend = deltaDefend;
-  }
-  
   public int getAttackUnits() {
     return attackUnits;
   }
-  public void setAttackUnits(int attackUnits) {
-    this.attackUnits = attackUnits;
-  }
+
   public int getDefendUnits() {
     return defendUnits;
   }
-  public void setDefendUnits(int defendUnits) {
-    this.defendUnits = defendUnits;
-  }
+
   public String getAttackerPlayerId() {
     return attackerPlayerId;
   }
-  public void setAttackerPlayerId(String attackerPlayerId) {
-    this.attackerPlayerId = attackerPlayerId;
-  }
+
   public String getDefenderPlayerId() {
     return defenderPlayerId;
   }
-  public void setDefenderPlayerId(String defenderPlayerId) {
-    this.defenderPlayerId = defenderPlayerId;
-  }
+  
   public int getAttackerTerritoryId() {
     return attackerTerritoryId;
   }
-  public void setAttackerTerritoryId(int attackerTerritoryId) {
-    this.attackerTerritoryId = attackerTerritoryId;
-  }
+  
   public int getDefenderTerritoryId() {
     return defenderTerritoryId;
-  }
-  public void setDefenderTerritoryId(int defenderTerritoryId) {
-    this.defenderTerritoryId = defenderTerritoryId;
   }
 }

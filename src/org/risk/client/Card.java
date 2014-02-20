@@ -6,13 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class Card {
-  private String cardValue;
   private enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
   private Type cardType;
   private String cardId;
 
   public Card(String cardValue, String cardId) {
-    this.cardValue = cardValue;
     this.cardId = cardId;
     switch(cardValue.charAt(0)){
     case 'I':{
@@ -35,23 +33,8 @@ public class Card {
     }
   }
   
-  public String getCardValue() {
-    return cardValue;
-  }
-  public void setCardValue(String cardValue) {
-    this.cardValue = cardValue;
-  }
-  public Type getCardType() {
+ public Type getCardType() {
     return cardType;
-  }
-  public void setCardType(Type cardType) {
-    this.cardType = cardType;
-  }
-  public String getCardId() {
-    return cardId;
-  }
-  public void setCardId(String cardId) {
-    this.cardId = cardId;
   }
 
   public static int getUnits(List<Card> cards, int tradeNumber) {

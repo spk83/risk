@@ -2,7 +2,6 @@ package org.risk.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +18,6 @@ public class GameResources {
       4, 30,
       5, 25,
       6, 20);
-
-  public static int getInitialNumberOfUnits(int numberOfPlayers) {
-    return PLAYERS_UNIT_MAP.get(numberOfPlayers);
-  }
   
   public static final int MIN_ALLOCATED_UNITS = 3;
   public static final int TOTAL_TERRITORIES = 42; // Number of territories
@@ -131,45 +126,6 @@ public class GameResources {
     return keys;
   }
   
-  /* 
-   * This is a helper method to get list of territories for a playerID.
-   */
-  public Map<String, Integer> getTerritories(String playerID) {
-    Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-    switch(playerID) {
-    case "P1":
-      for (int i = 0; i < 14; i++) {
-        territoryMap.put(i + "", 1);
-      }
-      break;
-    case "P2": 
-      for (int i = 14; i < 28; i++) {
-        territoryMap.put(i + "", 1);
-      }
-      break;
-    case "P3": 
-      for (int i = 28; i < 42; i++) {
-        territoryMap.put(i + "", 1);
-      }
-      break;
-    default:
-    }
-    return territoryMap;
-  }
-  
-  /*
-   * Helper method to get Map of territories with specified change.
-   */
-  public Map<String, Integer> performDeltaOnTerritory(
-      Map<String, Integer> currentMap, String territory, int delta) {
-    int oldValue = currentMap.get(territory);
-    int newValue = oldValue + delta;
-    Map<String, Integer> newMap = new HashMap<String, Integer>();
-    newMap.putAll(currentMap);
-    newMap.put(territory, newValue);
-    return newMap;
-  }
-  
   /*
    * Helper method to get list of territory from given range.
    */
@@ -179,26 +135,6 @@ public class GameResources {
       listOfTerritories.add(i);
     }
     return listOfTerritories;
-  }
-    
-  /*
-   * Compare two maps
-   */
-  public boolean equalMaps(Map<String, Integer>m1, Map<String, Integer>m2) {
-    if (m1.size() != m2.size()) {
-       return false;
-    }
-    for (String key: m1.keySet()) {
-       if (!m1.get(key).equals(m2.get(key))) {
-          return false;
-       }
-    }
-    return true;
-  }
-  
-  public int getNewReinforcementUnits(int totalTerritories) {
-    int units = totalTerritories/3;
-    return units < 3 ? 3 : units;
   }
   
   public static int getMaxDiceRollsForAttacker(int units) {
