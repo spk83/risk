@@ -776,7 +776,7 @@ public class RiskLogic {
     Integer tradeNumber = lastState.getTradeNumber();
     check(playerCards.size() >= 3,
         lastState.getPlayersMap().get(playerIdToString));
-    for (Integer cardId : playerCards) {
+    for (Integer cardId : newState.getCardsTraded()) {
       Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
       if (card != null) {
         tradedCards.add(card);
