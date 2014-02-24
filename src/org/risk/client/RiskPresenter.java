@@ -28,6 +28,7 @@ public class RiskPresenter {
     void tradeCardsInAttackPhase(List<Integer> cards);
     void reinforceInAttackPhase(Map<String, Integer> territoryDelta);
     void fortify();
+    void endGame();
     
     //Functions with same input parameters can be clubbed !
   }
@@ -95,6 +96,8 @@ public class RiskPresenter {
         view.moveUnitsAfterAttack();
       } else if (phase.equals(GameResources.FORTIFY)) {
         view.fortify();
+      } else if (phase.equals(GameResources.END_GAME)) {
+        view.endGame();
       }
     }
   }
@@ -208,4 +211,25 @@ public class RiskPresenter {
     container.sendMakeMove(riskLogic.performFortify(
         riskState, null, myPlayerKey));
   }
+  
+  void endGame() {
+    container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
+  }
+  
+  RiskState getRiskState() {
+    return riskState;
+  }
+
+  void setRiskState(RiskState riskState) {
+    this.riskState = riskState;
+  }
+
+  String getMyPlayerKey() {
+    return myPlayerKey;
+  }
+
+  void setMyPlayerKey(String myPlayerKey) {
+    this.myPlayerKey = myPlayerKey;
+  }
+  
 }

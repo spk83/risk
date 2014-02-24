@@ -329,7 +329,7 @@ public class RiskLogic {
     return attackOperations;
   }
 
-  private List<Operation> performEndGame(RiskState lastState,
+  List<Operation> performEndGame(RiskState lastState,
       String playerIdToString) {
     List<Operation> endGameOperations = Lists.newArrayList();
     check(lastState.getTurnOrder().size() == 1);
