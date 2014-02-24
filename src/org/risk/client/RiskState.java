@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 public class RiskState {
   
-  private String turn;
+  private int turn;
   private String phase;
   private List<String> deck;
   private List<Integer> unclaimedTerritory;
@@ -19,7 +20,7 @@ public class RiskState {
   private List<String> cardsVisibleToAll;
   private Map<String, Card> cardMap;
   private int tradeNumber;
-  private List<Integer> cardsTraded;
+  private Optional<List<Integer>> cardsTraded;
   private Attack attack;
   private Integer lastAttackingTerritory;
   private String territoryWinner;
@@ -49,10 +50,10 @@ public class RiskState {
   public void setAttack(Attack attack) {
     this.attack = attack;
   }
-  public String getTurn() {
+  public int getTurn() {
     return turn;
   }
-  public void setTurn(String turn) {
+  public void setTurn(int turn) {
     this.turn = turn;
   }
   public String getPhase() {
@@ -109,10 +110,10 @@ public class RiskState {
   public void setTradeNumber(int tradeNumber) {
     this.tradeNumber = tradeNumber;
   }
-  public List<Integer> getCardsTraded() {
+  public Optional<List<Integer>> getCardsTraded() {
     return cardsTraded;
   }
-  public void setCardsTraded(List<Integer> cardsTraded) {
+  public void setCardsTraded(Optional<List<Integer>> cardsTraded) {
     this.cardsTraded = cardsTraded;
   }
   
@@ -121,7 +122,7 @@ public class RiskState {
       int lastMovePlayerId, List<Integer> playerIds) {
    
     RiskState riskState = new RiskState();
-    riskState.setTurn(GameResources.playerIdToString(lastMovePlayerId));
+    riskState.setTurn(lastMovePlayerId);
     riskState.setPhase(lastApiState.get(GameResources.PHASE).toString());
     
     Map<String, Player> playersMap = new HashMap<String, Player>();
@@ -172,7 +173,8 @@ public class RiskState {
       riskState.setTurnOrder(new ArrayList<Integer>((List<Integer>) lastApiState.get(
           GameResources.TURN_ORDER)));
     }
-    riskState.setCardsTraded((List<Integer>) lastApiState.get(GameResources.CARDS_BEING_TRADED));
+    riskState.setCardsTraded(
+        Optional.fromNullable((List<Integer>) lastApiState.get(GameResources.CARDS_BEING_TRADED)));
     Map<String, Object> attacker = (Map<String, Object>) lastApiState.get(GameResources.ATTACKER);
     Map<String, Object> defender = (Map<String, Object>) lastApiState.get(GameResources.DEFENDER);
     if (attacker != null && defender != null) {
