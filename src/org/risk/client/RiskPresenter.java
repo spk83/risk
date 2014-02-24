@@ -24,10 +24,10 @@ public class RiskPresenter {
     void chooseCardsForTrading();
     void reinforceTerritories();
     void attack();
-    void moveUnitsAfterAttack(int unitsFromAttackingTerritory);
+    void moveUnitsAfterAttack();
     void tradeCardsInAttackPhase(List<Integer> cards);
     void reinforceInAttackPhase(Map<String, Integer> territoryDelta);
-    void fortify(Map<String, Integer> territoryDelta);               //Size of map = 1
+    void fortify();
     
     //Functions with same input parameters can be clubbed !
   }
@@ -89,6 +89,12 @@ public class RiskPresenter {
         view.attack();
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
         attackResultMove();
+      } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
+        view.reinforceTerritories();
+      } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
+        view.moveUnitsAfterAttack();
+      } else if (phase.equals(GameResources.FORTIFY)) {
+        view.fortify();
       }
     }
   }
@@ -186,5 +192,20 @@ public class RiskPresenter {
       container.sendMakeMove(riskLogic.performEndAttackWithNoCard(
           GameResources.playerIdToInt(myPlayerKey)));
     }
+  }
+  
+  void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
+    container.sendMakeMove(riskLogic.performAttackOccupy(
+        riskState, newUnitsAtUnclaimed, myPlayerKey));
+  }
+  
+  void fortifyMove(Map<String, Integer> territoryDelta) {
+    if (territoryDelta != null && !territoryDelta.isEmpty()) {
+      container.sendMakeMove(riskLogic.performFortify(
+          riskState, territoryDelta, myPlayerKey));
+    }
+    //pass null to end fortify
+    container.sendMakeMove(riskLogic.performFortify(
+        riskState, null, myPlayerKey));
   }
 }

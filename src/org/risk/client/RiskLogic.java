@@ -177,8 +177,13 @@ public class RiskLogic {
 
       //Operations performed when the attacker successfuly captures a territory and has to make 
       //a mandatory move of sending some units to the occupied territory
-      return performAttackOccupy(lastState, (Map<String, Object>) ((Set) lastMove.get(1))
-          .getValue(), GameResources.playerIdToString(lastMovePlayerId));
+      Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+      Map<String, Integer> territoryMap = 
+          (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
+      int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
+      int newUnitsAtUnclaimed = territoryMap.get(unclaimedTerritory + "");
+      return performAttackOccupy(lastState, newUnitsAtUnclaimed, 
+          GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.FORTIFY)) {
 
       //An optional FORTIFY phase where a player moves some units to a territory which it owns and
@@ -338,7 +343,7 @@ public class RiskLogic {
     return endGameOperations;
   }
 
-  private List<Operation> performFortify(RiskState lastState,
+  List<Operation> performFortify(RiskState lastState,
       Map<String, Integer> differenceMap, String playerIdToString) {
     List<Operation> attackOperations = Lists.newArrayList();
     List<Integer> turnOrder = lastState.getTurnOrder();
@@ -431,26 +436,22 @@ public class RiskLogic {
     return endAttackOperations;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Operation> performAttackOccupy(RiskState lastState,
-      Map<String, Object> playerMap, String playerIdToString) {
+  List<Operation> performAttackOccupy(RiskState lastState,
+      int newUnitsAtUnclaimed, String playerIdToString) {
     int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
     int attackingTerritory = lastState.getLastAttackingTerritory();
-    Map<String, Integer> territoryMap = 
-        (Map<String, Integer>) playerMap.get(GameResources.TERRITORY);
     Player player = lastState.getPlayersMap().get(playerIdToString);
     Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
+    int newUnitsAtAttacking = oldTerritoryMap.get(attackingTerritory + "") - newUnitsAtUnclaimed;
     int minMovingUnits = GameResources.getMinUnitsToNewTerritory(
         oldTerritoryMap.get(attackingTerritory + ""));
     check(minMovingUnits != 0, oldTerritoryMap);
-    int newUnitsAtUnclaimed = territoryMap.get(unclaimedTerritory + "");
-    int newUnitsAtAttacking = territoryMap.get(attackingTerritory + "");
     int oldUnitsAtUnclaimed = 0;
     int oldUnitsAtAttacking = oldTerritoryMap.get(attackingTerritory + "");
-    check(newUnitsAtAttacking >= 1, territoryMap, lastState);
-    check(newUnitsAtUnclaimed >= minMovingUnits, territoryMap, lastState);
+    check(newUnitsAtAttacking >= 1, lastState);
+    check(newUnitsAtUnclaimed >= minMovingUnits, lastState);
     check(newUnitsAtAttacking + newUnitsAtUnclaimed 
-        == oldUnitsAtAttacking + oldUnitsAtUnclaimed, territoryMap, oldTerritoryMap);
+        == oldUnitsAtAttacking + oldUnitsAtUnclaimed, oldTerritoryMap);
     oldTerritoryMap.put(attackingTerritory + "", newUnitsAtAttacking);
     oldTerritoryMap.put(unclaimedTerritory + "", newUnitsAtUnclaimed);
     java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
