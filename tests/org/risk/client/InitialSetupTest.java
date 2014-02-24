@@ -2,7 +2,6 @@ package org.risk.client;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,78 +10,25 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
-import org.risk.client.GameApi.Shuffle;
+import org.risk.client.GameApi.SetTurn;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 
-/**
- * This class test the operations performed for initial setup of the game.
- * @author vishal
- *
- */
 @RunWith(JUnit4.class)
 public class InitialSetupTest extends AbstractTest {
   
-  /*
-   * This helper method returns list operations that are required to perform when game starts
-   */
-  private List<Operation> getInitialOperations() {
-    List<Operation> operations = Lists.newArrayList();
-
-    // Shuffle playerIds, assign that list as turnOrder
-    List<String> turnOrder = new Shuffle(getPlayerIds()).getKeys();
-    operations.add(new Set(TURN_ORDER, new Shuffle(getPlayerIds()).getKeys()));
-    
-    // set TURN to first from that shuffled list
-    operations.add(new Set(TURN, turnOrder.get(0)));
-    
-    // Assign initial army units to all the players
-    operations.add(new Set(UNITS, assignInitialUnits()));
-
-    // sets all 44 cards: set(RC0,A0),set(RC1,I1),set(RC2,C2),..,set(RC43,W43)
-    for (int i = 0; i < 44; i++) {
-        operations.add(new Set(RISK_CARD + i, cardIdToString(i)));
-    }
-    
-    // Shuffle all the RISK cards in the deck
-    operations.add(new Set(CARDS, new Shuffle(getCardsInRange(0, 43)).getKeys()));
-    
-    // Set next phase of the game
-    operations.add(new Set(PHASE, CLAIM_TERRITORY));
-    return operations;
-  }
-  
-  /*
-   * Helper method to get number of initial army units based on number of players 
-   */
-  private Map<String, Integer> assignInitialUnits() {
-    int initialNumberOfUnits = GameConstants.getInitialNumberOfUnits(getPlayerIds().size());
-    Map<String, Integer> assignUnits = new HashMap<String, Integer>();
-    
-    for (String playerId : getPlayerIds()) {
-      assignUnits.put(playerId, initialNumberOfUnits);
-    }
-    return assignUnits;
-  }
-  
-  /*
-   * Test the helper method assignInitialUnits
-   */
-  @Test
-  public void testassignInitialUnits() {
-    assertEquals(ImmutableMap.<String, Integer>of(
-        PLAYER_A, 35,
-        PLAYER_B, 35,
-        PLAYER_C, 35), assignInitialUnits());
-  }
-  
+  private final RiskLogic riskLogic = new RiskLogic();
+ 
   /*
    * Test the helper method getInitialOperations
    */
   @Test
   public void testgetInitialOperations() {
-    assertEquals(1 + 1 + 1 + 44 + 1 + 1, getInitialOperations().size());
+    assertEquals(1 + 1 + 3 + 44 + 1 + 1 + 1 + 9, riskLogic.getInitialOperations(
+        getPlayerIds()).size());
   }
   
   /*
@@ -92,18 +38,55 @@ public class InitialSetupTest extends AbstractTest {
    */
   @Test
   public void testInitialSetup() {
-    List<Operation> initialOperations = getInitialOperations();
-    
+    List<Operation> initialOperations = riskLogic.getInitialOperations(getPlayerIds());
+
     // Check valid move
-    assertMoveOk(move(AID, EMPTYSTATE, initialOperations));
+    assertMoveOk(move(AID, GameResources.EMPTYSTATE, initialOperations));
     
     // Check invalid moves - turn by wrong player, from invalid state, with additional operation
-    assertHacker(move(BID, EMPTYSTATE, initialOperations));
-    assertHacker(move(AID, NONEMPTYSTATE, initialOperations));
-    assertHacker(move(CID, NONEMPTYSTATE, initialOperations));
+    assertHacker(move(BID, GameResources.EMPTYSTATE, initialOperations));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, initialOperations));
+    assertHacker(move(CID, GameResources.NONEMPTYSTATE, initialOperations));
+     
+    Builder<String, Object> stateBuilder = ImmutableMap.<String, Object>builder()
+        .put(GameResources.PHASE, GameResources.SET_TURN_ORDER)
+        .put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.UNCLAIMED_UNITS, 35,
+            GameResources.TERRITORY, GameResources.EMPTYMAP,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.UNCLAIMED_UNITS, 35,
+            GameResources.TERRITORY, GameResources.EMPTYMAP,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.UNCLAIMED_UNITS, 35,
+            GameResources.TERRITORY, GameResources.EMPTYMAP,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(GameResources.DECK, getCardsInRange(0, 43))
+        .put(GameResources.UNCLAIMED_TERRITORY, getTerritoriesInRange(0, 41));
     
-    initialOperations.add(new Set(TERRITORY, new Set(PLAYER_ID, 2))); // Fake operation
-    assertHacker(move(AID, EMPTYSTATE, initialOperations));
-    assertHacker(move(BID, EMPTYSTATE, initialOperations));
+    List<Integer> diceValues = Lists.newArrayList(2, 3, 1, 4, 2, 4, 5, 2, 4);
+    int i = 0;
+    for (String diceRoll : GameResources.getDiceRollKeys(getPlayerIds())) {
+      stateBuilder.put(diceRoll, diceValues.get(i++));
+    }
+    
+    Map<String, Object> state = stateBuilder.build();
+    
+    List<Operation> setupTurnOrder = ImmutableList.<Operation>of(
+        new SetTurn(CID),
+        new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY),
+        new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)));
+    
+    // Check valid move
+    assertMoveOk(move(AID, state, setupTurnOrder));
+    
+    // Check invalid moves - turn by wrong player, from invalid state, with additional operation
+    assertHacker(move(BID, state, setupTurnOrder));
+    assertHacker(move(AID, GameResources.EMPTYSTATE, setupTurnOrder));
+    assertHacker(move(AID, GameResources.NONEMPTYSTATE, setupTurnOrder));
   }
 }

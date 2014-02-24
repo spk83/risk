@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -18,49 +19,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-/**
- * This class provides helper methods and define variables that are used by all the test classes.
- * @author vishal
- *
- */
 @RunWith(JUnit4.class)
 public class AbstractTest {
-  protected static final int TOTAL_TERRITORIES = 42; // Number of territories
   protected static final String PLAYER_ID = "playerId";
-  protected static final String TURN_ORDER = "turnOrder";
-  protected static final String TURN = "turn";
-  protected static final String PHASE = "phase"; // reinforce, attack, fortify
-  protected static final String RISK_CARD = "RC";
-  protected static final String TERRITORY = "territory";
-  protected static final String UNCLAIMED_TERRITORY = "unclaimedTerritory";
-  protected static final String CONTINENT = "continent";
-  protected static final String UNITS = "units";
-  protected static final String ATTACK_TO_TERRITORY = "attackToTerritory";
-  protected static final String ATTACK_FROM_TERRITORY = "attackFromTerritory";
-  protected static final String DICE_ROLL = "diceRoll";
-  protected static final String WINNING_TERRITORY = "winningTerritory";
-  protected static final String MOVEMENT_FROM_TERRITORY = "movementFromTerritory";
-  protected static final String MOVEMENT_TO_TERRITORY = "movementFromTerritory";
-  protected static final String UNITS_FROM_TERRITORY = "unitsFromTerritory";
-  protected static final String UNITS_TO_TERRITORY = "unitsFromTerritory";
-  protected static final String UNCLAIMED_UNITS = "unclaimedUnits";
-  protected static final int TOTAL_PLAYERS = 3; // Number of players playing
-  protected static final String CARDS = "cards";
-  protected static final String CARDS_TRADED = "cards_traded";
-  protected static final String DEPLOYMENT = "deployment";
-  protected static final String CLAIM_TERRITORY = "claimTerritory";
-  protected static final String CARD_TRADE = "cardTrade";
-  protected static final String ATTACK_PHASE = "attackPhase";
-  protected static final String FORTIFY = "fortify";
-  protected static final String END_GAME = "endGame";
-  
+  protected static final int TOTAL_PLAYERS = 3; // Number of players playing  
   protected static final int AID = 1; // Player A
   protected static final int BID = 2; // Player B
   protected static final int CID = 3; // Player C
   protected static final String PLAYER_A = playerIdToString(AID);
   protected static final String PLAYER_B = playerIdToString(BID);
   protected static final String PLAYER_C = playerIdToString(CID);
-  
   protected static final Map<String, Object> AINFO = ImmutableMap.<String, Object>of(
       PLAYER_ID, AID);
   protected static final Map<String, Object> BINFO = ImmutableMap.<String, Object>of(
@@ -70,27 +38,22 @@ public class AbstractTest {
   protected static final List<Map<String, Object>> PLAYERSINFO = ImmutableList.of(
       AINFO, BINFO, CINFO);
   
-  protected static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
-  protected static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
-      "k", "v");
-  protected static final Map<String, Object> EMPTYMAP = ImmutableMap.<String, Object>of();
-  protected static final List<String> EMPTYLISTSTRING = ImmutableList.<String>of();
-  protected static final List<Integer> EMPTYLISTINT = ImmutableList.<Integer>of();
-  
+  /** The object under test. */
+  RiskLogic riskLogic = new RiskLogic();
+
   /*
    * This method is used to check if verifyMove outcome is valid. 
    */
   protected void assertMoveOk(VerifyMove verifyMove) {
-    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-    assertEquals(new VerifyMoveDone(), verifyDone);
+    riskLogic.checkMoveIsLegal(verifyMove);
   }
 
   /*
    * This method is used to check if verifyMove outcome is invalid. 
    */
   protected void assertHacker(VerifyMove verifyMove) {
-    VerifyMoveDone verifyDone = new RiskLogic().verify(verifyMove);
-    assertEquals(new VerifyMoveDone(verifyMove.getLastMovePlayerId(), "Hacker found"), verifyDone);
+    VerifyMoveDone verifyDone = riskLogic.verify(verifyMove);
+    assertEquals(verifyMove.getLastMovePlayerId(), verifyDone.getHackerPlayerId());
   }
 
   /*
@@ -99,7 +62,7 @@ public class AbstractTest {
   protected VerifyMove move(
       int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
-        AID, PLAYERSINFO, EMPTYSTATE, lastState, lastMove, lastMovePlayerId);
+        PLAYERSINFO, GameResources.EMPTYSTATE, lastState, lastMove, lastMovePlayerId, null);
   }
 
   /*
@@ -162,12 +125,28 @@ public class AbstractTest {
   }
 
   /*
+   * This is a helper method to convert player's ID from String to int.
+   */
+  protected static int playerIdStringToInt(String playerId) {
+    return Integer.parseInt(playerId.substring(1));
+  }
+  
+  /* 
+   * Test for playerIdToString.
+   */
+  @Test
+  public void testplayerIdStringToInt() {
+    assertEquals(1, playerIdStringToInt(PLAYER_A));
+    assertEquals(2, playerIdStringToInt(PLAYER_B));
+    assertEquals(3, playerIdStringToInt(PLAYER_C));
+  }
+  /*
    * This is a helper method which returns a list of RISK cards of given range.
    */
   protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {
     List<String> keys = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
-      keys.add(RISK_CARD + i);
+      keys.add(GameResources.RISK_CARD + i);
     }
     return keys;
   }
@@ -231,13 +210,62 @@ public class AbstractTest {
     
     assertEquals(equalMaps(playerATerritoryMap, getTerritories("P2")), true);
   }
+  public Map<String, Integer> getTerritoriesInRange(
+      int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+          throws Exception {
+    if (isTerritoryInRange(highestTerritoryIdInclusive) 
+        && isTerritoryInRange(lowestTerritoryIdInclusive)
+            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
+      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+      for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+        territoryMap.put(i + "", baseUnits);
+      }
+      return territoryMap;
+    } else {
+      throw new Exception("Invalid Territory ID");
+    }
+  }
   
+  public boolean isTerritoryInRange(int territoryId) {
+    if (territoryId >= 0 && territoryId < 42) {
+      return true;
+    }
+    return false;
+  }
+  
+  @Test
+  public void testGetTerritoriesInRange() throws Exception {
+    Map<String, Integer> territoryMap = getTerritoriesInRange(0, 4, 2);
+    Assert.assertEquals(territoryMap.size(), 5);
+    for (int i = 0; i <= 4; ++i) {
+      Assert.assertEquals(2, territoryMap.get(i + "").intValue());
+    }
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRangeWithInvalidHighRange() throws Exception {
+    getTerritoriesInRange(0, 50, 2);
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRangeWithInvalidLowRange() throws Exception {
+    getTerritoriesInRange(-1, 41, 2);
+  }
+  
+  @Test(expected = Exception.class)
+  public void testGetTerritoriesInRangeWithLowGreaterThanHigh() throws Exception {
+    getTerritoriesInRange(23, 1, 2);
+  }
+
   /*
    * Helper method to get Map of territories with specified change.
    */
   protected Map<String, Integer> performDeltaOnTerritory(
       Map<String, Integer> currentMap, String territory, int delta) {
-    int oldValue = currentMap.get(territory);
+    Integer oldValue = currentMap.get(territory);
+    if (oldValue == null) {
+      oldValue = 0;
+    }
     int newValue = oldValue + delta;
     Map<String, Integer> newMap = new HashMap<String, Integer>();
     newMap.putAll(currentMap);
@@ -297,4 +325,23 @@ public class AbstractTest {
     }
     return true;
  }
+  
+  @Test
+  public void testIsFortifyPossible() {
+    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList("1", "2")));
+    assertEquals(false, Territory.isFortifyPossible(0, 39, Lists.newArrayList("0", "1", "2")));
+    assertEquals(false, Territory.isFortifyPossible(
+        0, 39, Lists.newArrayList("0", "1", "2", "39"))); 
+    assertEquals(true, Territory.isFortifyPossible(0, 19, 
+        Lists.newArrayList("0", "1", "5", "13", "15", "16", "17", "19", "26", "33", 
+        "34", "37", "2", "39"))); 
+    assertEquals(true, Territory.isFortifyPossible(0, 19, 
+        Lists.newArrayList("0", "1", "5", "13", "15", "16", "17", "19", "26", "33", 
+        "34", "37", "39"))); 
+    assertEquals(true, Territory.isFortifyPossible(0, 19, 
+        Lists.newArrayList("0", "1", "5", "13", "16", "17", "19", "26", "33", "34",
+            "37", "2", "39"))); 
+    assertEquals(false, Territory.isFortifyPossible(0, 19, 
+        Lists.newArrayList("0", "1", "5", "16", "17", "19", "26", "33", "34", "37", "2", "39"))); 
+  }
 }
