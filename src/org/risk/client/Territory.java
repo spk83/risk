@@ -6,10 +6,30 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public final class Territory {
+public class Territory {
   
-  private Territory() {
-    
+  private String territoryId;
+  private String playerKey;
+  
+  public String getTerritoryId() {
+    return territoryId;
+  }
+
+  public void setTerritoryId(String territoryId) {
+    this.territoryId = territoryId;
+  }
+
+  public String getPlayerKey() {
+    return playerKey;
+  }
+
+  public void setPlayerKey(String playerKey) {
+    this.playerKey = playerKey;
+  }
+
+  public Territory(String territoryId, String playerKey) {
+    this.territoryId = territoryId;
+    this.playerKey = playerKey;
   }
   
   public static final Map<Integer, String> TERRITORY_NAME = ImmutableMap.<Integer, String>builder()

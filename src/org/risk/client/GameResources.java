@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -74,6 +75,7 @@ public class GameResources {
   public static final String ATTACK_REINFORCE = "attackReinforce";
   public static final String CONTINUOUS_TRADE = "continuousTrade";
   public static final Integer MIN_CARDS_IN_ATTACK_TRADE = 4;
+  public static final Integer MAX_CARDS_IN_ATTACK_TRADE = 6;
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
@@ -186,6 +188,34 @@ public class GameResources {
       }
     }
     return differenceMap;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public static Map<String, Integer> differenceTerritoryMap
+      (Map<String, Object> currentPlayerState, RiskState lastPlayerState, int lastMovePlayerId) {
+    Map<String, Integer> territoryUnitMap = 
+        (Map<String, Integer>) currentPlayerState.get(GameResources.TERRITORY);
+    Map<String, Integer> oldTerritoryMap = lastPlayerState.getPlayersMap().get(
+        GameResources.playerIdToString(lastMovePlayerId)).getTerritoryUnitMap();
+    Map<String, Integer> differenceTerritoryMap = 
+        GameResources.differenceTerritoryMap(oldTerritoryMap, territoryUnitMap);
+    return differenceTerritoryMap;
+  }
+  
+  //Finds the new territory in newTerritories otherwise returns null
+  public static String findNewTerritory
+      (Set<String> oldTerritories, Set<String> newTerritories) {
+    String newTerritory = null;
+    for (String territory : newTerritories) {
+      if (!oldTerritories.contains(territory)) {
+        if (newTerritory == null) {
+          newTerritory = territory;
+        } else {
+          return null;
+        }
+      }
+    }
+    return newTerritory;
   }
   
   public static List<Integer> getDiceRolls(Map<String, Object> lastApiState, String type) {

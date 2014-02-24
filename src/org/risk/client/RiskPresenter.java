@@ -8,6 +8,7 @@ import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.UpdateUI;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 public class RiskPresenter {
@@ -86,6 +87,8 @@ public class RiskPresenter {
         view.reinforceTerritories();
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
         view.attack();
+      } else if (phase.equals(GameResources.ATTACK_RESULT)) {
+        attackResultMove();
       }
     }
   }
@@ -108,18 +111,14 @@ public class RiskPresenter {
   }
   
   void newTerritorySelected(String territory) {
-    Player myPlayer = riskState.getPlayersMap().get(myPlayerKey);
-    Map<String, Integer> territoryUnitMap = myPlayer.getTerritoryUnitMap();
-    territoryUnitMap.put(territory, 1);
     container.sendMakeMove(riskLogic.performClaimTerritory(
-        riskState, territoryUnitMap, myPlayerKey));
+        riskState, territory, myPlayerKey));
   }
   
   void territoryForDeployment(String territory) {
-    Player myPlayer = riskState.getPlayersMap().get(myPlayerKey);
-    Map<String, Integer> territoryUnitMap = myPlayer.getTerritoryUnitMap();
+    Map<String, Integer> territoryUnitMap = Maps.newHashMap();
     territoryUnitMap.put(territory, 1);
-    container.sendMakeMove(riskLogic.performClaimTerritory(
+    container.sendMakeMove(riskLogic.performDeployment(
         riskState, territoryUnitMap, myPlayerKey));
   }
   
@@ -159,11 +158,33 @@ public class RiskPresenter {
         (riskState, cards, myPlayerKey, null));
   }
   
-  void performAttack(String attacker, String defender) {
-    
+  void attackResultMove() {
+    container.sendMakeMove(riskLogic.attackResultOperations(
+        riskState, GameResources.playerIdToInt(myPlayerKey)));
+  }
+  
+  void performAttack(String attackingTerritory, String defendingTerritory) {
+    Map<String, Object> attackerMap = ImmutableMap.<String, Object>of(
+        GameResources.PLAYER, myPlayerKey,
+        GameResources.TERRITORY, Integer.parseInt(attackingTerritory),
+        GameResources.UNITS, riskState.getPlayersMap().get(myPlayerKey)
+            .getTerritoryUnitMap().get(attackingTerritory));
+    String defendingPlayer = riskState.getTerritoryMap().get(defendingTerritory).getPlayerKey();
+    Map<String, Object> defenderMap = ImmutableMap.<String, Object>of(
+        GameResources.PLAYER, defendingPlayer,
+        GameResources.TERRITORY, Integer.parseInt(defendingTerritory),
+        GameResources.UNITS, riskState.getPlayersMap().get(defendingPlayer)
+            .getTerritoryUnitMap().get(attackingTerritory));
+    container.sendMakeMove(riskLogic.performAttack
+        (riskState, attackerMap, defenderMap, myPlayerKey));
   }
   
   void endAttack() {
-    
+    if (riskState.getTerritoryWinner() != null) {
+      container.sendMakeMove(riskLogic.performEndAttack(riskState, myPlayerKey));
+    } else {
+      container.sendMakeMove(riskLogic.performEndAttackWithNoCard(
+          GameResources.playerIdToInt(myPlayerKey)));
+    }
   }
 }

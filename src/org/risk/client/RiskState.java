@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class RiskState {
   
@@ -15,6 +16,7 @@ public class RiskState {
   private List<String> deck;
   private List<Integer> unclaimedTerritory;
   private Map<String, Player> playersMap;
+  private Map<String, Territory> territoryMap;
   private List<Integer> turnOrder;
   private Map<String, List<Integer>> diceResult;
   private List<String> cardsVisibleToAll;
@@ -117,6 +119,13 @@ public class RiskState {
     this.cardsTraded = cardsTraded;
   }
   
+  public Map<String, Territory> getTerritoryMap() {
+    return territoryMap;
+  }
+  public void setTerritoryMap(Map<String, Territory> territoryMap) {
+    this.territoryMap = territoryMap;
+  }
+
   @SuppressWarnings("unchecked")
   public static RiskState gameApiStateToRiskState(Map<String, Object> lastApiState,
       int lastMovePlayerId, List<Integer> playerIds) {
@@ -124,12 +133,22 @@ public class RiskState {
     RiskState riskState = new RiskState();
     riskState.setTurn(lastMovePlayerId);
     riskState.setPhase(lastApiState.get(GameResources.PHASE).toString());
-    
+    Map<String, Territory> territoryMap = Maps.newHashMap();
+    riskState.setTerritoryMap(territoryMap);
     Map<String, Player> playersMap = new HashMap<String, Player>();
     for (String playerId : GameResources.getPlayerKeys(playerIds)) {
        Map<String, Object> tempPlayersMap = (Map<String, Object>) lastApiState.get(playerId);
        if (tempPlayersMap != null) {
-         playersMap.put(playerId, new Player(playerId, tempPlayersMap));         
+         Player newPlayer = new Player(playerId, tempPlayersMap);
+         playersMap.put(playerId, newPlayer);
+         for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
+           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId());
+           if (territoryMap.containsKey(entry.getKey())) {
+             throw new IllegalStateException("Territory ID "+entry.getKey()+" occupied by multiple"
+                 + "players.");
+           }
+           territoryMap.put(entry.getKey(), territory);
+         }
        }
     }
     riskState.setPlayersMap(playersMap);
@@ -182,7 +201,12 @@ public class RiskState {
           GameResources.getDiceRolls(lastApiState, GameResources.ATTACKER);
       List<Integer> defenderDiceRolls = 
           GameResources.getDiceRolls(lastApiState, GameResources.DEFENDER);
-      riskState.setAttack(new Attack(attacker, defender, attackerDiceRolls, defenderDiceRolls));
+      Player attackingPlayer = riskState.getPlayersMap().get(attacker.get(GameResources.PLAYER));
+      Player defendingPlayer = riskState.getPlayersMap().get(defender.get(GameResources.PLAYER));
+      Map<String, Integer> defenderTerritoryMap = defendingPlayer.getTerritoryUnitMap();
+      riskState.setAttack(new Attack(attacker, defender, attackerDiceRolls, defenderDiceRolls, 
+          defenderTerritoryMap.size(), riskState.getTurnOrder().size(),
+          attackingPlayer.getCards().size(), defendingPlayer.getCards().size()));
     }
     Integer lastAttackingTerritory = (Integer) lastApiState.get(
         GameResources.LAST_ATTACKING_TERRITORY);
