@@ -3,12 +3,12 @@ package org.risk.client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.risk.client.Attack.AttackResult;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
 import org.risk.client.GameApi.SetRandomInteger;
@@ -21,11 +21,13 @@ import org.risk.client.GameApi.Delete;
 import org.risk.client.GameApi.EndGame;
 
 import com.google.common.base.Functions;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
 public class RiskLogic {
@@ -45,7 +47,7 @@ public class RiskLogic {
     // Checking the operations are as expected.
     List<Operation> expectedOperations = getExpectedOperations(
         lastState, lastMove, verifyMove.getPlayerIds(), verifyMove.getLastMovePlayerId(),
-        verifyMove.state);
+        verifyMove.getState());
     check(expectedOperations.equals(lastMove), expectedOperations, lastMove);
     // We use SetTurn, so we don't need to check that the correct player did the move.
     // However, we do need to check the first move is done by the white player (and then in the
@@ -67,7 +69,7 @@ public class RiskLogic {
     }
     //Converting the lastState from the API to RiskState
     RiskState lastState = 
-        RiskState.gameApiStateToRiskState(lastApiState, lastMovePlayerId, playerIds);
+        gameApiStateToRiskState(lastApiState, lastMovePlayerId, playerIds);
     
     if (lastState.getPhase().equals(GameResources.SET_TURN_ORDER)) {
       
@@ -79,16 +81,21 @@ public class RiskLogic {
       Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
       Map<String, Integer> territoryUnitMap = 
           (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
+      Map<String, Integer> oldTerritoryMap = lastState.getPlayersMap().get(
+          GameResources.playerIdToString(lastMovePlayerId)).getTerritoryUnitMap();
+      String newTerritory = GameResources.findNewTerritory(
+          oldTerritoryMap.keySet(), territoryUnitMap.keySet());
       return performClaimTerritory(
-          lastState, territoryUnitMap, GameResources.playerIdToString(lastMovePlayerId));
+          lastState, newTerritory, GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.DEPLOYMENT)) {
       
       //Operations when DEPLOYMENT phase starts
       Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
-      Map<String, Integer> territoryUnitMap = 
-          (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
+      Map<String, Integer> differenceTerritoryMap = 
+          GameResources.differenceTerritoryMap(playerValue, lastState, lastMovePlayerId);
+      check(differenceTerritoryMap.size() == 1, playerValue, lastState);
       return performDeployment(
-          lastState, territoryUnitMap, GameResources.playerIdToString(lastMovePlayerId));
+          lastState, differenceTerritoryMap, GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.CARD_TRADE)) {
       
       //Operations when a player might do a cards trade or might skip it
@@ -96,11 +103,10 @@ public class RiskLogic {
         boolean isCardTrade = ((Set) lastMove.get(lastMove.size() - 3)).getKey().equals(
             GameResources.CARDS_BEING_TRADED);
         if (isCardTrade) {
-          Map<String, Object> playerValue = (Map<String, Object>) 
-              ((Set) lastMove.get(1)).getValue();
+          List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
           return performTrade(
-              lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId),
-              RiskState.gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
+              lastState, cardsBeingTraded, GameResources.playerIdToString(lastMovePlayerId),
+              gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
         }
       } else {
         return skipCardTrade(GameResources.playerIdToString(lastMovePlayerId));
@@ -110,24 +116,26 @@ public class RiskLogic {
       //Operations carried out for giving extra units to players based on the number of territories
       //and continents.
       boolean isCardTraded = false;
-      if (lastState.getCardsTraded() != null) {
-        isCardTraded = lastState.getCardsTraded().size() > 0; 
+      if (lastState.getCardsTraded().isPresent()) {
+        isCardTraded = lastState.getCardsTraded().get().size() > 0; 
       }
       if (isCardTraded) { 
-        Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
         return performAddUnitsWithTrade(
-            lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
+            lastState, GameResources.playerIdToString(lastMovePlayerId));
       } else {
-        Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
         return performAddUnitsWithOutTrade(
-            lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
+            lastState, GameResources.playerIdToString(lastMovePlayerId));
       }
     } else if (lastState.getPhase().equals(GameResources.REINFORCE)) {
       //Operations when players use the units received from CARD_TRADE and ADD_UNITS phase on their
       //respective territories
       Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
-      return performReinforce(
-          lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
+      int currentUnclaimedUnits = Integer.parseInt(
+          playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
+      Map<String, Integer> differenceTerritoryMap = 
+          GameResources.differenceTerritoryMap(playerValue, lastState, lastMovePlayerId);
+      return performReinforce(lastState, currentUnclaimedUnits, 
+          differenceTerritoryMap, GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.ATTACK_PHASE)) {
       //Beginning of attack phase
       
@@ -136,8 +144,12 @@ public class RiskLogic {
       if (nextPhase.equals(GameResources.ATTACK_RESULT)) {
         Map<String, Object> attacker = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
         Map<String, Object> defender = (Map<String, Object>) ((Set) lastMove.get(2)).getValue();
-        return performAttack(
-            lastState, attacker, defender, GameResources.playerIdToString(lastMovePlayerId));
+        int attackingTerritory = Integer.parseInt(attacker.get(GameResources.TERRITORY).toString());
+        int defendingTerritory = Integer.parseInt(defender.get(GameResources.TERRITORY).toString());
+        String attackingPlayerId = attacker.get(GameResources.PLAYER).toString();
+        check(attackingPlayerId.equals(GameResources.playerIdToString(lastMovePlayerId)));
+        return performAttack(lastState, attackingTerritory, defendingTerritory, 
+            GameResources.playerIdToString(lastMovePlayerId));
       } else if (nextPhase.equals(GameResources.FORTIFY)) {
         if (lastState.getTerritoryWinner() != null) {
             return performEndAttack(lastState, GameResources.playerIdToString(lastMovePlayerId));
@@ -147,69 +159,49 @@ public class RiskLogic {
       }
     } else if (lastState.getPhase().equals(GameResources.ATTACK_RESULT)) {
       
-      //Operations to get the result of attack where player attacks enemy's territory
-      String nextPhase = ((Set) lastMove.get(lastMove.size() - 1)).getValue().toString();
-      
-      //Operations where player wins the attack and has to occupy the territory
-      if (nextPhase.equals(GameResources.ATTACK_OCCUPY)) {
-        if (lastMove.get(2) instanceof Delete) {
-          //Case when defender is eliminated and it's state required deletion
-          return performAttackResultOnPlayerElimination(lastState, 
-              GameResources.playerIdToString(lastMovePlayerId));
-        }
-        return performAttackResultOnTerritoryWin(lastState,
-            GameResources.playerIdToString(lastMovePlayerId));
-      }
-      
-      //Operations where the player is eliminated and the attacked gets >=6 cards which require
-      //a mandatory trade.
-      if (nextPhase.equals(GameResources.ATTACK_TRADE)) {
-        return performAttackResultOnPlayerElimination(lastState, 
-            GameResources.playerIdToString(lastMovePlayerId));
-      }
-      
-      //Operations when the player loses and therefore goes back to ATTACK_PHASE
-      if (nextPhase.equals(GameResources.ATTACK_PHASE)) {
-        return performAttackResultOnLoss(lastState, 
-            GameResources.playerIdToString(lastMovePlayerId));
-      }
-      
-      //Operations performed when player wins the last territory and eliminates the last standing
-      //player. Therefore, winning the game.
-      if (nextPhase.equals(GameResources.END_GAME)) {
-        return performAttackResultOnEndGame(lastState,
-            GameResources.playerIdToString(lastMovePlayerId));
-      }
+      //Operations based on attack result
+      return attackResultOperations(lastState, lastMovePlayerId);
     } else if (lastState.getPhase().equals(GameResources.ATTACK_TRADE)) {
 
       //Operations performed when player has done the mandatory trade after getting >=6 cards
-      Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+      List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
       return performAttackTrade(
-          lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId),
-          RiskState.gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
+          lastState, cardsBeingTraded, GameResources.playerIdToString(lastMovePlayerId),
+          gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
     } else if (lastState.getPhase().equals(GameResources.ATTACK_REINFORCE)) {
       //Operations performed if the player has got extra units after the trading which require
       //immediate reinforcement
-      
       Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
-      return performReinforce(
-          lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId));
+      Map<String, Integer> differenceTerritoryMap = 
+          GameResources.differenceTerritoryMap(playerValue, lastState, lastMovePlayerId);
+      int currentUnclaimedUnits = Integer.parseInt(
+          playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
+      return performReinforce(lastState, currentUnclaimedUnits, 
+          differenceTerritoryMap, GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.ATTACK_OCCUPY)) {
 
       //Operations performed when the attacker successfuly captures a territory and has to make 
       //a mandatory move of sending some units to the occupied territory
-      return performAttackOccupy(lastState, (Map<String, Object>) ((Set) lastMove.get(1))
-          .getValue(), GameResources.playerIdToString(lastMovePlayerId));
+      Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+      Map<String, Integer> territoryMap = 
+          (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
+      int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
+      int newUnitsAtUnclaimed = territoryMap.get(unclaimedTerritory + "");
+      return performAttackOccupy(lastState, newUnitsAtUnclaimed, 
+          GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.FORTIFY)) {
 
       //An optional FORTIFY phase where a player moves some units to a territory which it owns and
       //is connected
       String playerIdString = GameResources.playerIdToString(lastMovePlayerId);
       if (((Set) lastMove.get(1)).getKey().equals(playerIdString)) {
-        return performFortify(lastState, (Map<String, Object>) ((Set) lastMove.get(1)).getValue(),
+        Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+        Map<String, Integer> differenceTerritoryMap = 
+            GameResources.differenceTerritoryMap(playerValue, lastState, lastMovePlayerId);
+        return performFortify(lastState, differenceTerritoryMap, 
             GameResources.playerIdToString(lastMovePlayerId));
       } else {
-        
+
         //skip fortify
         return performFortify(lastState, null, GameResources.playerIdToString(lastMovePlayerId));
       }
@@ -219,17 +211,20 @@ public class RiskLogic {
     return null;
   }
 
-  private List<Operation> performAttackTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString, RiskState newState) {
-    
+  List<Operation> performAttackTrade(RiskState lastState,
+      List<Integer> cardsToBeTraded, String playerIdToString, RiskState newState) {
     List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
+    if (newState == null) {
+      //case when the function is called without the new state from the player who plays the move.
+      newState = lastState;
+    }
     Map<String, Card> visibleCards = newState.getCardMap();
     List<Card> tradedCards = Lists.newArrayList();
     List<Integer> tradedCardsInt = Lists.newArrayList();
     List<String> tradedCardsString = Lists.newArrayList();
     Integer tradeNumber = lastState.getTradeNumber();
     check(playerCards.size() >= 6, lastState.getPlayersMap().get(playerIdToString));
-    for (Integer cardId : playerCards) {
+    for (Integer cardId : cardsToBeTraded) {
       Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
       if (card != null) {
         tradedCards.add(card);
@@ -255,15 +250,15 @@ public class RiskLogic {
         GameResources.TERRITORY, player.getTerritoryUnitMap(),
         GameResources.CONTINENT, player.getContinent())));
     if (continuousTradeNumber >= 1) {
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(0));
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(1));
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(2));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2));
       Collections.sort(deck);
-      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(0),
+      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0),
           GameResources.EMPTYLISTINT));
-      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(1),
+      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1),
           GameResources.EMPTYLISTINT));
-      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(2),
+      move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2),
           GameResources.EMPTYLISTINT));    
     }
     for (String tradedCardString : tradedCardsString) {
@@ -291,6 +286,7 @@ public class RiskLogic {
   private List<Operation> performAttackResultOnPlayerElimination(
       RiskState lastState, String playerIdToString) {
     Attack attack = lastState.getAttack();
+    AttackResult attackResult = attack.getAttackResult();
     Player attacker = lastState.getPlayersMap().get(playerIdToString);
     Player defender = lastState.getPlayersMap().get(attack.getDefenderPlayerId());
     Map<String, Integer> attackerTerritoryMap = attacker.getTerritoryUnitMap();
@@ -298,10 +294,11 @@ public class RiskLogic {
     int attackerUnits = attackerTerritoryMap.get(attack.getAttackerTerritoryId() + "");
     int defenderUnits = defenderTerritoryMap.get(attack.getDefenderTerritoryId() + "");
     attackerTerritoryMap.put(
-        attack.getAttackerTerritoryId() + "", attackerUnits + attack.getDeltaAttack());
+        attack.getAttackerTerritoryId() + "", attackerUnits + attackResult.getDeltaAttack());
     defenderTerritoryMap.put(
-        attack.getDefenderTerritoryId() + "", defenderUnits + attack.getDeltaDefend());
-    check(defenderUnits + attack.getDeltaDefend() == 0, attacker, defender, attack);
+        attack.getDefenderTerritoryId() + "", defenderUnits + attackResult.getDeltaDefend());
+    check(defenderUnits + attackResult.getDeltaDefend() == 0, 
+        attacker, defender, attack);
     defenderTerritoryMap.remove(attack.getDefenderTerritoryId() + "");
     check(defenderTerritoryMap.isEmpty(), attacker, defender, attack);
     lastState.getTurnOrder().remove(lastState.getTurnOrder().indexOf(
@@ -340,7 +337,7 @@ public class RiskLogic {
     return attackOperations;
   }
 
-  private List<Operation> performEndGame(RiskState lastState,
+  List<Operation> performEndGame(RiskState lastState,
       String playerIdToString) {
     List<Operation> endGameOperations = Lists.newArrayList();
     check(lastState.getTurnOrder().size() == 1);
@@ -354,22 +351,17 @@ public class RiskLogic {
     return endGameOperations;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Operation> performFortify(RiskState lastState,
-      Map<String, Object> value, String playerIdToString) {
+  List<Operation> performFortify(RiskState lastState,
+      Map<String, Integer> differenceMap, String playerIdToString) {
     List<Operation> attackOperations = Lists.newArrayList();
     List<Integer> turnOrder = lastState.getTurnOrder();
     int nextPlayerId = turnOrder.get((turnOrder.indexOf(
         GameResources.playerIdToInt(playerIdToString)) + 1) % turnOrder.size());
     attackOperations.add(new SetTurn(nextPlayerId));
-    if (value != null) {
+    if (differenceMap != null) {
       Player player = lastState.getPlayersMap().get(playerIdToString);
       Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
-      Map<String, Integer> territoryMap = (Map<String, Integer>) value.get(GameResources.TERRITORY);
-      check(oldTerritoryMap.size() == territoryMap.size(), oldTerritoryMap, territoryMap);
-      Map<String, Integer> differenceMap = 
-          GameResources.differenceTerritoryMap(oldTerritoryMap, territoryMap);
-      check(differenceMap.size() == 2, oldTerritoryMap, territoryMap, differenceMap);
+      check(differenceMap.size() == 2, oldTerritoryMap, differenceMap);
       Iterator<Entry<String, Integer>> iterator = differenceMap.entrySet().iterator();
       Entry<String, Integer> territoryEntry1 = iterator.next();
       Entry<String, Integer> territoryEntry2 = iterator.next();
@@ -377,7 +369,7 @@ public class RiskLogic {
       int territoryDelta1 = territoryEntry1.getValue();
       String territory2 = territoryEntry2.getKey();
       int territoryDelta2 = territoryEntry2.getValue();
-      check((territoryDelta1 + territoryDelta2) == 0, oldTerritoryMap, territoryMap, differenceMap);
+      check((territoryDelta1 + territoryDelta2) == 0, oldTerritoryMap, differenceMap);
       check(Territory.isFortifyPossible(Integer.parseInt(territory1), Integer.parseInt(territory2), 
           new ArrayList<String>(oldTerritoryMap.keySet())));
       oldTerritoryMap.put(territory1, territoryDelta1 + oldTerritoryMap.get(territory1));
@@ -402,8 +394,8 @@ public class RiskLogic {
     Map<String, Integer> defenderTerritoryMap = defender.getTerritoryUnitMap();
     int attackerUnits = attack.getAttackUnits();
     int defenderUnits = attack.getDefendUnits();
-    int deltaAttack = attack.getDeltaAttack();
-    int deltaDefend = attack.getDeltaDefend();
+    int deltaAttack = attack.getAttackResult().getDeltaAttack();
+    int deltaDefend = attack.getAttackResult().getDeltaDefend();
     int resultAttack = attackerUnits + deltaAttack;
     int resultDefend = defenderUnits + deltaDefend;
     check(resultAttack >= 1, attack.getAttackUnits(), deltaAttack);
@@ -445,33 +437,29 @@ public class RiskLogic {
     return attackOperations;
   }
 
-  private List<Operation> performEndAttackWithNoCard(int playerId) {
+  List<Operation> performEndAttackWithNoCard(int playerId) {
     List<Operation> endAttackOperations = Lists.newArrayList();
     endAttackOperations.add(new SetTurn(playerId));
     endAttackOperations.add(new Set(GameResources.PHASE, GameResources.FORTIFY));
     return endAttackOperations;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Operation> performAttackOccupy(RiskState lastState,
-      Map<String, Object> playerMap, String playerIdToString) {
+  List<Operation> performAttackOccupy(RiskState lastState,
+      int newUnitsAtUnclaimed, String playerIdToString) {
     int unclaimedTerritory = lastState.getUnclaimedTerritory().get(0);
     int attackingTerritory = lastState.getLastAttackingTerritory();
-    Map<String, Integer> territoryMap = 
-        (Map<String, Integer>) playerMap.get(GameResources.TERRITORY);
     Player player = lastState.getPlayersMap().get(playerIdToString);
     Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
+    int newUnitsAtAttacking = oldTerritoryMap.get(attackingTerritory + "") - newUnitsAtUnclaimed;
     int minMovingUnits = GameResources.getMinUnitsToNewTerritory(
         oldTerritoryMap.get(attackingTerritory + ""));
     check(minMovingUnits != 0, oldTerritoryMap);
-    int newUnitsAtUnclaimed = territoryMap.get(unclaimedTerritory + "");
-    int newUnitsAtAttacking = territoryMap.get(attackingTerritory + "");
     int oldUnitsAtUnclaimed = 0;
     int oldUnitsAtAttacking = oldTerritoryMap.get(attackingTerritory + "");
-    check(newUnitsAtAttacking >= 1, territoryMap, lastState);
-    check(newUnitsAtUnclaimed >= minMovingUnits, territoryMap, lastState);
+    check(newUnitsAtAttacking >= 1, lastState);
+    check(newUnitsAtUnclaimed >= minMovingUnits, lastState);
     check(newUnitsAtAttacking + newUnitsAtUnclaimed 
-        == oldUnitsAtAttacking + oldUnitsAtUnclaimed, territoryMap, oldTerritoryMap);
+        == oldUnitsAtAttacking + oldUnitsAtUnclaimed, oldTerritoryMap);
     oldTerritoryMap.put(attackingTerritory + "", newUnitsAtAttacking);
     oldTerritoryMap.put(unclaimedTerritory + "", newUnitsAtUnclaimed);
     java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
@@ -491,16 +479,19 @@ public class RiskLogic {
         GameResources.UNCLAIMED_UNITS, player.getUnclaimedUnits(),
         GameResources.CONTINENT, player.getContinent())));
     if (lastState.getContinuousTrade() > 0) {
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(0));
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(1));
-      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(2));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1));
+      deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2));
       Collections.sort(deck);
       attackOperations.add(new SetVisibility(
-          GameResources.RISK_CARD + lastState.getCardsTraded().get(0), GameResources.EMPTYLISTINT));
+          GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0), 
+              GameResources.EMPTYLISTINT));
       attackOperations.add(new SetVisibility(
-          GameResources.RISK_CARD + lastState.getCardsTraded().get(1), GameResources.EMPTYLISTINT));
+          GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1), 
+              GameResources.EMPTYLISTINT));
       attackOperations.add(new SetVisibility(
-          GameResources.RISK_CARD + lastState.getCardsTraded().get(2), GameResources.EMPTYLISTINT));
+          GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2), 
+              GameResources.EMPTYLISTINT));
     }
     attackOperations.add(new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT));
     attackOperations.add(new Delete(GameResources.LAST_ATTACKING_TERRITORY));
@@ -521,14 +512,15 @@ public class RiskLogic {
     Attack attack = lastState.getAttack();
     Player attacker = lastState.getPlayersMap().get(playerIdToString);
     Player defender = lastState.getPlayersMap().get(attack.getDefenderPlayerId());
+    AttackResult attackResult = attack.getAttackResult();
     Map<String, Integer> attackerTerritoryMap = attacker.getTerritoryUnitMap();
     Map<String, Integer> defenderTerritoryMap = defender.getTerritoryUnitMap();
     int attackerUnits = attackerTerritoryMap.get(attack.getAttackerTerritoryId() + "");
     int defenderUnits = defenderTerritoryMap.get(attack.getDefenderTerritoryId() + "");
     attackerTerritoryMap.put(
-        attack.getAttackerTerritoryId() + "", attackerUnits + attack.getDeltaAttack());
+        attack.getAttackerTerritoryId() + "", attackerUnits + attackResult.getDeltaAttack());
     defenderTerritoryMap.put(
-        attack.getDefenderTerritoryId() + "", defenderUnits + attack.getDeltaDefend());
+        attack.getDefenderTerritoryId() + "", defenderUnits + attackResult.getDeltaDefend());
     List<Operation> attackOperations = Lists.newArrayList();
     attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     attackOperations.add(new Set(attack.getAttackerPlayerId(), ImmutableMap.<String, Object>of(
@@ -560,15 +552,16 @@ public class RiskLogic {
     Attack attack = lastState.getAttack();
     Player attacker = lastState.getPlayersMap().get(playerIdToString);
     Player defender = lastState.getPlayersMap().get(attack.getDefenderPlayerId());
+    AttackResult attackResult = attack.getAttackResult();
     Map<String, Integer> attackerTerritoryMap = attacker.getTerritoryUnitMap();
     Map<String, Integer> defenderTerritoryMap = defender.getTerritoryUnitMap();
     int attackerUnits = attackerTerritoryMap.get(attack.getAttackerTerritoryId() + "");
     int defenderUnits = defenderTerritoryMap.get(attack.getDefenderTerritoryId() + "");
     attackerTerritoryMap.put(
-        attack.getAttackerTerritoryId() + "", attackerUnits + attack.getDeltaAttack());
+        attack.getAttackerTerritoryId() + "", attackerUnits + attackResult.getDeltaAttack());
     defenderTerritoryMap.put(
-        attack.getDefenderTerritoryId() + "", defenderUnits + attack.getDeltaDefend());
-    check(defenderUnits + attack.getDeltaDefend() == 0, attacker, defender, attack);
+        attack.getDefenderTerritoryId() + "", defenderUnits + attackResult.getDeltaDefend());
+    check(defenderUnits + attackResult.getDeltaDefend() == 0, attacker, defender, attack);
     defenderTerritoryMap.remove(attack.getDefenderTerritoryId() + "");
     java.util.Set<String> defenderTerritorySet = defenderTerritoryMap.keySet();
     List<String> defenderContinentList = Lists.newArrayList(defender.getContinent());
@@ -609,7 +602,7 @@ public class RiskLogic {
     return attackOperations;
   }
 
-  private List<Operation> performEndAttack(RiskState lastState,
+  List<Operation> performEndAttack(RiskState lastState,
       String playerIdToString) {
     List<Operation> endAttackOperations = Lists.newArrayList();
     int playerId = GameResources.playerIdToInt(playerIdToString);
@@ -635,34 +628,33 @@ public class RiskLogic {
     return endAttackOperations;
   }
 
-  private List<Operation> performAttack(RiskState lastState,
-      Map<String, Object> attacker, Map<String, Object> defender,
-      String playerIdToString) {
-    String playerIdOfAttacker = attacker.get(GameResources.PLAYER).toString();
-    Integer attackTerritory = (Integer) attacker.get(GameResources.TERRITORY);
-    Integer attackUnits = (Integer) attacker.get(GameResources.UNITS);
+  List<Operation> performAttack(RiskState lastState, int attackTerritory, int defendTerritory, 
+      String playerIdOfAttacker) {
+    String playerIdOfDefender = lastState.getTerritoryMap().get(defendTerritory + "")
+        .getPlayerKey();
+    Integer attackUnits = lastState.getPlayersMap().get(playerIdOfAttacker)
+        .getTerritoryUnitMap().get(attackTerritory + "");
     check(attackUnits >= 2, attackUnits);
-    String playerIdOfDefender = defender.get(GameResources.PLAYER).toString();
-    Integer defendTerritory = (Integer) defender.get(GameResources.TERRITORY);
-    Integer defendUnits = (Integer) defender.get(GameResources.UNITS);
-    check(Territory.isAttackPossible(attackTerritory, defendTerritory), attacker, defender);
-    check(playerIdOfAttacker.equals(playerIdToString));
+    Integer defendUnits = lastState.getPlayersMap().get(playerIdOfDefender)
+        .getTerritoryUnitMap().get(defendTerritory + "");
+    check(Territory.isAttackPossible(attackTerritory, defendTerritory), 
+        attackTerritory, defendTerritory);
     Player attackerPlayer = lastState.getPlayersMap().get(playerIdOfAttacker);
     Player defenderPlayer = lastState.getPlayersMap().get(playerIdOfDefender);
     check(playerIdOfAttacker.equals(attackerPlayer.getPlayerId()));
     Integer lastStateAttackUnits = attackerPlayer.getTerritoryUnitMap().get(attackTerritory + "");
     Integer lastStateDefendUnits = defenderPlayer.getTerritoryUnitMap().get(defendTerritory + "");
-    check(lastStateAttackUnits == attackUnits, attackerPlayer, attacker);
-    check(lastStateDefendUnits == defendUnits, defenderPlayer, defender);
+    check(lastStateAttackUnits == attackUnits, attackerPlayer, attackUnits);
+    check(lastStateDefendUnits == defendUnits, defenderPlayer, defendUnits);
     check((lastStateAttackUnits != null)
-        && (lastStateAttackUnits == attackUnits), attackerPlayer, attacker);
+        && (lastStateAttackUnits == attackUnits), attackerPlayer, attackUnits);
     check((lastStateDefendUnits != null) 
-        && (lastStateDefendUnits == defendUnits), defenderPlayer, defender);
+        && (lastStateDefendUnits == defendUnits), defenderPlayer, defendUnits);
     int totalDiceAttacker = GameResources.getMaxDiceRollsForAttacker(attackUnits);
     int totalDiceDefender = GameResources.getMaxDiceRollsForDefender(defendUnits);
    
     List<Operation> attackOperations = Lists.newArrayList();
-    attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
+    attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdOfAttacker)));
     
     attackOperations.add(new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, playerIdOfAttacker,
@@ -684,28 +676,15 @@ public class RiskLogic {
     return attackOperations;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Operation> performReinforce(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString) {
+  List<Operation> performReinforce(RiskState lastState, int currentUnclaimedUnits,
+      Map<String, Integer> differenceTerritoryMap, String playerIdToString) {
     List<Operation> move = Lists.newArrayList();
     Player player = lastState.getPlayersMap().get(playerIdToString);
     int oldUnclaimedUnits = player.getUnclaimedUnits();
     check(oldUnclaimedUnits >= GameResources.MIN_ALLOCATED_UNITS, oldUnclaimedUnits);
-    int differenceUnclaimedUnits = oldUnclaimedUnits 
-        - Integer.parseInt(playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
-    int currentUnclaimedUnits = Integer.parseInt(
-        playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
-    check(currentUnclaimedUnits == 0, playerValue);
-    Map<String, Integer> territoryUnitMap = 
-        (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
-    java.util.Set<String> newTerritorySet = new HashSet<String>(territoryUnitMap.keySet());
+    int differenceUnclaimedUnits = oldUnclaimedUnits - currentUnclaimedUnits;
+    check(currentUnclaimedUnits == 0, currentUnclaimedUnits);
     Map<String, Integer> oldTerritoryMap = player.getTerritoryUnitMap();
-    java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
-    check(newTerritorySet.size() == oldTerritorySet.size(), newTerritorySet, oldTerritorySet);
-    newTerritorySet.removeAll(oldTerritorySet);
-    check(newTerritorySet.size() == 0, newTerritorySet, oldTerritorySet);
-    Map<String, Integer> differenceTerritoryMap = 
-        GameResources.differenceTerritoryMap(oldTerritoryMap, territoryUnitMap);
     int reinforcedUnits = 0;
     for (Entry<String, Integer> entry : differenceTerritoryMap.entrySet()) {
       check(entry.getValue() > 0, entry);
@@ -724,18 +703,13 @@ public class RiskLogic {
     return move;
   }
 
-  private List<Operation> performAddUnitsWithOutTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString) {
+  List<Operation> performAddUnitsWithOutTrade(RiskState lastState, String playerIdToString) {
     List<Operation> move = Lists.newArrayList();
-    int unclaimedTerritoryNew = Integer.parseInt(
-        playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
     Player player = lastState.getPlayersMap().get(playerIdToString);
     int unclaimedTerritoryOld = player.getUnclaimedUnits();
     int addUnits = GameResources.getNewUnits(
         player.getTerritoryUnitMap().size(), player.getContinent());
-    check(unclaimedTerritoryNew == (unclaimedTerritoryOld + addUnits), unclaimedTerritoryNew,
-        unclaimedTerritoryOld, addUnits);
-    player.setUnclaimedUnits(unclaimedTerritoryNew); 
+    player.setUnclaimedUnits(unclaimedTerritoryOld + addUnits); 
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
         GameResources.CARDS, player.getCards(),
@@ -746,22 +720,17 @@ public class RiskLogic {
     return move;
   }
 
-  private List<Operation> performAddUnitsWithTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString) {
+  List<Operation> performAddUnitsWithTrade(RiskState lastState, String playerIdToString) {
     List<Operation> move = Lists.newArrayList();
-    int unclaimedTerritoryNew = Integer.parseInt(
-        playerValue.get(GameResources.UNCLAIMED_UNITS).toString());
     Player player = lastState.getPlayersMap().get(playerIdToString);
     int unclaimedTerritoryOld = player.getUnclaimedUnits();
     int addUnits = GameResources.getNewUnits(
         player.getTerritoryUnitMap().size(), player.getContinent());
-    check(unclaimedTerritoryNew == (unclaimedTerritoryOld + addUnits), unclaimedTerritoryNew,
-        unclaimedTerritoryOld, addUnits);
-    player.setUnclaimedUnits(unclaimedTerritoryNew);
+    player.setUnclaimedUnits(unclaimedTerritoryOld + addUnits);
     List<String> deck = lastState.getDeck();
-    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(0));
-    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(1));
-    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get(2));
+    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0));
+    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1));
+    deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2));
     Collections.sort(deck);
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
@@ -770,11 +739,11 @@ public class RiskLogic {
         GameResources.UNCLAIMED_UNITS, player.getUnclaimedUnits(),
         GameResources.CONTINENT, player.getContinent())));
     move.add(new Delete(GameResources.CARDS_BEING_TRADED));
-    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(0),
+    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0),
         GameResources.EMPTYLISTINT));
-    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(1),
+    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1),
         GameResources.EMPTYLISTINT));
-    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get(2),
+    move.add(new SetVisibility(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2),
         GameResources.EMPTYLISTINT));    
     move.add(new Shuffle(deck));
     move.add(new Set(GameResources.DECK, deck));
@@ -782,17 +751,20 @@ public class RiskLogic {
     return move;
   }
 
-  private List<Operation> skipCardTrade(String playerIdToString) {
+  List<Operation> skipCardTrade(String playerIdToString) {
     List<Operation> move = Lists.newArrayList();
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(GameResources.PHASE, GameResources.ADD_UNITS));
     return move;
   }
 
-  private List<Operation> performTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString,
-      RiskState newState) {
+  List<Operation> performTrade(RiskState lastState,
+      List<Integer> cardsBeingTraded, String playerIdToString, RiskState newState) {
     List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
+    if (newState == null) {
+      //case when the function is called without the new state from the player who plays the move.
+      newState = lastState;
+    }
     Map<String, Card> visibleCards = newState.getCardMap();
     List<Card> tradedCards = Lists.newArrayList();
     List<Integer> tradedCardsInt = Lists.newArrayList();
@@ -800,7 +772,7 @@ public class RiskLogic {
     Integer tradeNumber = lastState.getTradeNumber();
     check(playerCards.size() >= 3,
         lastState.getPlayersMap().get(playerIdToString));
-    for (Integer cardId : newState.getCardsTraded()) {
+    for (Integer cardId : cardsBeingTraded) {
       Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
       if (card != null) {
         tradedCards.add(card);
@@ -832,22 +804,16 @@ public class RiskLogic {
     return move;
   }
 
-  private List<Operation> performClaimTerritory(RiskState lastState,
-      Map<String, Integer> territoryUnitMap, String playerKey) {
-    java.util.Set<String> newTerritorySet = new HashSet<String>(territoryUnitMap.keySet());
+  List<Operation> performClaimTerritory(RiskState lastState,
+      String newTerritory, String playerKey) {
     Player playerMap = lastState.getPlayersMap().get(playerKey);
     Map<String, Integer> oldTerritoryMap = playerMap.getTerritoryUnitMap();
-    java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
-    newTerritorySet.removeAll(oldTerritorySet);
-    check(newTerritorySet.size() == 1, newTerritorySet, oldTerritorySet);
-    String newTerritory = newTerritorySet.iterator().next();
     List<Integer> unclaimedTerritory = Lists.newArrayList(lastState.getUnclaimedTerritory());
     check(unclaimedTerritory.contains(
         Integer.parseInt(newTerritory)), unclaimedTerritory, newTerritory);
     unclaimedTerritory.remove(unclaimedTerritory.indexOf(Integer.parseInt(newTerritory)));
-    check(territoryUnitMap.get(newTerritory) == 1, territoryUnitMap, newTerritory);
     oldTerritoryMap.put(newTerritory, 1);
-    oldTerritorySet = oldTerritoryMap.keySet();
+    java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
     for (int i = 0; i < GameResources.TOTAL_CONTINENTS; i++) {
       if (oldTerritorySet.containsAll(Continent.TERRITORY_SET.get(i + ""))) {
         if (!playerMap.getContinent().contains(i + "")) {
@@ -880,19 +846,12 @@ public class RiskLogic {
     return move;
   }
   
-  private List<Operation> performDeployment(RiskState lastState,
-      Map<String, Integer> territoryUnitMap, String playerKey) {
-    java.util.Set<String> newTerritorySet = new HashSet<String>(territoryUnitMap.keySet());
+  List<Operation> performDeployment(RiskState lastState,
+      Map<String, Integer> differenceTerritoryMap, String playerKey) {
     Player playerMap = lastState.getPlayersMap().get(playerKey);
     Map<String, Integer> oldTerritoryMap = playerMap.getTerritoryUnitMap();
-    java.util.Set<String> oldTerritorySet = oldTerritoryMap.keySet();
-    check(newTerritorySet.size() == oldTerritorySet.size(), newTerritorySet, oldTerritorySet);
-    newTerritorySet.removeAll(oldTerritorySet);
-    check(newTerritorySet.size() == 0, newTerritorySet, oldTerritorySet);
     playerMap.setTerritoryUnitMap(oldTerritoryMap);
     playerMap.setUnclaimedUnits(playerMap.getUnclaimedUnits() - 1);
-    Map<String, Integer> differenceTerritoryMap = 
-        GameResources.differenceTerritoryMap(oldTerritoryMap, territoryUnitMap);
     check(differenceTerritoryMap.size() == 1, differenceTerritoryMap);
     check(differenceTerritoryMap.entrySet().iterator().next().getValue() == 1, 
         differenceTerritoryMap);
@@ -923,7 +882,7 @@ public class RiskLogic {
     return move;
   }
 
-  private List<Operation> setTurnOrderMove(RiskState lastState) {
+  List<Operation> setTurnOrderMove(RiskState lastState) {
     List<Operation> turnOrderMove = Lists.newArrayList();
     int nextTurn;
     ImmutableSortedSet<Integer> turnOrder;
@@ -949,6 +908,41 @@ public class RiskLogic {
     return turnOrderMove;
   }
 
+  List<Operation> attackResultOperations(RiskState lastState, int lastMovePlayerId) {
+    AttackResult attackResult = lastState.getAttack().getAttackResult();
+    
+    //Operations performed when player wins the last territory and eliminates the last standing
+    //player. Therefore, winning the game.
+    if (attackResult.isAttackerAWinnerOfGame()) {
+      return performAttackResultOnEndGame(lastState,
+          GameResources.playerIdToString(lastMovePlayerId));
+    }
+    
+    //Operations when the player loses and therefore goes back to ATTACK_PHASE
+    if (!attackResult.isAttackerATerritoryWinner()) {
+      return performAttackResultOnLoss(lastState, 
+          GameResources.playerIdToString(lastMovePlayerId));
+    }
+    
+    //Operations where the player is eliminated and the attacked gets >=6 cards which require
+    //a mandatory trade.
+    if (attackResult.isTradeRequired()) {
+      return performAttackResultOnPlayerElimination(lastState, 
+          GameResources.playerIdToString(lastMovePlayerId));
+    }
+    
+    //Operations where player wins the attack and has to occupy the territory
+    if (attackResult.isAttackerATerritoryWinner()) {
+      if (attackResult.isDefenderOutOfGame()) {
+        //Case when defender is eliminated and it's state required deletion
+        return performAttackResultOnPlayerElimination(lastState, 
+            GameResources.playerIdToString(lastMovePlayerId));
+      }
+      return performAttackResultOnTerritoryWin(lastState,
+          GameResources.playerIdToString(lastMovePlayerId));
+    }
+    return null;
+  }
   public List<Operation> getInitialOperations(List<String> playerIds) {
     List<Operation> operations = Lists.newArrayList();
 
@@ -1002,6 +996,102 @@ public class RiskLogic {
         GameResources.CONTINENT, GameResources.EMPTYLISTSTRING);
     return playerState;
   }  
+
+  @SuppressWarnings("unchecked")
+  public RiskState gameApiStateToRiskState(Map<String, Object> lastApiState,
+      int lastMovePlayerId, List<Integer> playerIds) {
+   
+    RiskState riskState = new RiskState();
+    riskState.setTurn(lastMovePlayerId);
+    riskState.setPhase(lastApiState.get(GameResources.PHASE).toString());
+    Map<String, Territory> territoryMap = Maps.newHashMap();
+    riskState.setTerritoryMap(territoryMap);
+    Map<String, Player> playersMap = new HashMap<String, Player>();
+    for (String playerId : GameResources.getPlayerKeys(playerIds)) {
+       Map<String, Object> tempPlayersMap = (Map<String, Object>) lastApiState.get(playerId);
+       if (tempPlayersMap != null) {
+         Player newPlayer = new Player(playerId, tempPlayersMap);
+         playersMap.put(playerId, newPlayer);
+         for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
+           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId());
+           if (territoryMap.containsKey(entry.getKey())) {
+             throw new IllegalStateException(
+                 "Territory ID " + entry.getKey() + " occupied by multiple" + "players.");
+           }
+           territoryMap.put(entry.getKey(), territory);
+         }
+       }
+    }
+    riskState.setPlayersMap(playersMap);
+    Map<String, Card> cardsMap = new HashMap<String, Card>();
+    for (int i = 0; i <= 43; i++) { 
+      Object cardValue = lastApiState.get(GameResources.RISK_CARD + i);
+      if (cardValue != null) {
+        cardsMap.put(
+            GameResources.RISK_CARD + i, 
+            new Card(cardValue.toString(), 
+            GameResources.RISK_CARD + i));
+      }
+    }
+    Integer tradeNumber = (Integer) lastApiState.get(GameResources.TRADE_NUMBER);
+    if (tradeNumber == null) {
+      tradeNumber = 0;
+    }
+    riskState.setTradeNumber(tradeNumber.intValue() + 1);
+    riskState.setCardMap(cardsMap);
+    riskState.setDeck((List<String>) lastApiState.get(GameResources.DECK));
+    riskState.setUnclaimedTerritory((List<Integer>) lastApiState.get(
+        GameResources.UNCLAIMED_TERRITORY));
+    
+    List<String> diceRolls = GameResources.getDiceRollKeys(GameResources.getPlayerKeys(playerIds));
+    Map<String, List<Integer>> diceResultMap = new HashMap<String, List<Integer>>();
+    int j = 0;
+    for (String playerId : GameResources.getPlayerKeys(playerIds)) {
+      List<Integer> results = Lists.newArrayList();
+      for (int i = 0; i < GameResources.TOTAL_INITIAL_DICE_ROLL; i++) {
+        Object tempDiceRoll = lastApiState.get(diceRolls.get(j));
+        if (tempDiceRoll != null) {
+          results.add(Integer.parseInt(tempDiceRoll.toString()));
+          j++;
+        }
+      }
+      diceResultMap.put(playerId, results);
+    }
+    riskState.setDiceResult(diceResultMap);
+    
+    if (lastApiState.get(GameResources.TURN_ORDER) != null) {
+      riskState.setTurnOrder(new ArrayList<Integer>((List<Integer>) lastApiState.get(
+          GameResources.TURN_ORDER)));
+    }
+    riskState.setCardsTraded(
+        Optional.fromNullable((List<Integer>) lastApiState.get(GameResources.CARDS_BEING_TRADED)));
+    Map<String, Object> attacker = (Map<String, Object>) lastApiState.get(GameResources.ATTACKER);
+    Map<String, Object> defender = (Map<String, Object>) lastApiState.get(GameResources.DEFENDER);
+    if (attacker != null && defender != null) {
+      List<Integer> attackerDiceRolls = 
+          GameResources.getDiceRolls(lastApiState, GameResources.ATTACKER);
+      List<Integer> defenderDiceRolls = 
+          GameResources.getDiceRolls(lastApiState, GameResources.DEFENDER);
+      Player attackingPlayer = riskState.getPlayersMap().get(attacker.get(GameResources.PLAYER));
+      Player defendingPlayer = riskState.getPlayersMap().get(defender.get(GameResources.PLAYER));
+      Map<String, Integer> defenderTerritoryMap = defendingPlayer.getTerritoryUnitMap();
+      riskState.setAttack(new Attack(attacker, defender, attackerDiceRolls, defenderDiceRolls, 
+          defenderTerritoryMap.size(), riskState.getTurnOrder().size(),
+          attackingPlayer.getCards().size(), defendingPlayer.getCards().size()));
+    }
+    Integer lastAttackingTerritory = (Integer) lastApiState.get(
+        GameResources.LAST_ATTACKING_TERRITORY);
+    riskState.setLastAttackingTerritory(lastAttackingTerritory);
+    
+    String territoryWinner = (String) lastApiState.get(GameResources.TERRITORY_WINNER);    
+    riskState.setTerritoryWinner(territoryWinner);
+    
+    Integer continuousTrade = (Integer) lastApiState.get(GameResources.CONTINUOUS_TRADE);
+    if (continuousTrade != null) {
+      riskState.setContinuousTrade(continuousTrade);
+    }
+    return riskState;
+  }
 
   private void check(boolean val, Object... debugArguments) {
     if (!val) {
