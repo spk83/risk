@@ -33,16 +33,18 @@ public class RiskPresenter {
     //Functions with same input parameters can be clubbed !
   }
   
-  private final RiskLogic riskLogic = new RiskLogic();
+  private final RiskLogic riskLogic;// = new RiskLogic();
   private final View view;
   private final Container container;
   private RiskState riskState;
   private String myPlayerKey;
   
-  public RiskPresenter(View view, Container container) {
+  public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
     this.container = container;
+    this.riskLogic = riskLogic;
     view.setPresenter(this);
+    
   }
   
   public void updateUI(UpdateUI updateUI) {
@@ -59,8 +61,7 @@ public class RiskPresenter {
       }
       return;  
     }
-    riskState = RiskState.gameApiStateToRiskState(
-        updateUI.getState(), turnPlayerId, playerIds);
+    riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playerIds);
 
     if (updateUI.isViewer()) {
       view.setViewerState(riskState);
@@ -120,6 +121,7 @@ public class RiskPresenter {
   }
   
   void newTerritorySelected(String territory) {
+    System.out.println("checked");
     container.sendMakeMove(riskLogic.performClaimTerritory(
         riskState, territory, myPlayerKey));
   }
@@ -134,6 +136,7 @@ public class RiskPresenter {
   void addUnits() {
     if (riskState.getCardsTraded().isPresent()) {
       container.sendMakeMove(riskLogic.performAddUnitsWithTrade(riskState, myPlayerKey));
+      return;
     }
     container.sendMakeMove(riskLogic.performAddUnitsWithOutTrade(riskState, myPlayerKey));
   }
@@ -223,7 +226,7 @@ public class RiskPresenter {
   void setRiskState(RiskState riskState) {
     this.riskState = riskState;
   }
-
+  
   String getMyPlayerKey() {
     return myPlayerKey;
   }

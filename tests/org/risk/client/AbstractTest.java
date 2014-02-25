@@ -68,7 +68,7 @@ public class AbstractTest {
   /*
    * This is a helper method to get list of player IDs.
    */
-  protected List<String> getPlayerIds() {
+  protected static List<String> getPlayerIds() {
     List<String> playerIds = Lists.newArrayList();
     playerIds.add("P" + AID);
     playerIds.add("P" + BID);
@@ -143,7 +143,7 @@ public class AbstractTest {
   /*
    * This is a helper method which returns a list of RISK cards of given range.
    */
-  protected List<String> getCardsInRange(int fromInclusive, int toInclusive) {
+  protected static List<String> getCardsInRange(int fromInclusive, int toInclusive) {
     List<String> keys = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
       keys.add(GameResources.RISK_CARD + i);
@@ -163,7 +163,7 @@ public class AbstractTest {
   /* 
    * This is a helper method to get list of territories for a playerID.
    */
-  protected Map<String, Integer> getTerritories(String playerID) {
+  protected static Map<String, Integer> getTerritories(String playerID) {
     Map<String, Integer> territoryMap = new HashMap<String, Integer>();
     switch(playerID) {
     case "P1":
@@ -296,7 +296,7 @@ public class AbstractTest {
   /*
    * Helper method to get list of territory from given range.
    */
-  protected List<Integer> getTerritoriesInRange(int fromInclusive, int toInclusive) {
+  protected static List<Integer> getTerritoriesInRange(int fromInclusive, int toInclusive) {
     List<Integer> listOfTerritories = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
       listOfTerritories.add(i);
