@@ -71,7 +71,7 @@ public class RiskPresenter {
     }
     view.setPlayerState(riskState);
     if (turnPlayerId == myPlayerId) {
-      String phase = (String)state.get(GameResources.PHASE);
+      String phase = (String) state.get(GameResources.PHASE);
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
         setTurnOrderMove();
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
@@ -105,7 +105,7 @@ public class RiskPresenter {
   private int getTurnPlayer(List<Operation> operations) {
     for (Operation operation : operations) {
       if (operation instanceof SetTurn) {
-        return ((SetTurn)operation).getPlayerId();
+        return ((SetTurn) operation).getPlayerId();
       }
     }
     throw new IllegalArgumentException("Invalid operations: Should contain SetTurn");
@@ -145,8 +145,7 @@ public class RiskPresenter {
       //for skipping the reinforcement phase
       territoryDelta = Maps.<String, Integer>newHashMap();
     }
-    container.sendMakeMove(riskLogic.performReinforce
-        (riskState, 0, territoryDelta, myPlayerKey));
+    container.sendMakeMove(riskLogic.performReinforce(riskState, 0, territoryDelta, myPlayerKey));
   }
   
   void cardsTraded(List<Integer> cards) {
@@ -169,7 +168,7 @@ public class RiskPresenter {
   
   void performAttack(String attackingTerritory, String defendingTerritory) {
     container.sendMakeMove(riskLogic.performAttack(riskState, Integer.parseInt(attackingTerritory),
-        Integer.parseInt(defendingTerritory),myPlayerKey));
+        Integer.parseInt(defendingTerritory), myPlayerKey));
   }
   
   void endAttack() {
@@ -203,18 +202,5 @@ public class RiskPresenter {
   
   RiskState getRiskState() {
     return riskState;
-  }
-
-  void setRiskState(RiskState riskState) {
-    this.riskState = riskState;
-  }
-  
-  String getMyPlayerKey() {
-    return myPlayerKey;
-  }
-
-  void setMyPlayerKey(String myPlayerKey) {
-    this.myPlayerKey = myPlayerKey;
-  }
-  
+  }  
 }

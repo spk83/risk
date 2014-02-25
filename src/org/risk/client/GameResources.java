@@ -15,7 +15,10 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class GameResources {
+public final class GameResources {
+  
+  private GameResources() {
+  }
   
   public static final Map<Integer, Integer> PLAYERS_UNIT_MAP = ImmutableMap.<Integer, Integer>of(
       2, 40,
@@ -145,14 +148,14 @@ public class GameResources {
   }
   
   public static int getMaxDiceRollsForAttacker(int units) {
-    if(units  < 2) {
+    if (units  < 2) {
       return 0;
     }
     return (units - 1) >= 3 ? 3 : (units - 1);
   }
   
   public static int getMaxDiceRollsForDefender(int units) {
-    if(units  < 1) {
+    if (units  < 1) {
       return 0;
     }
     return units >= 2 ? 2 : 1;
@@ -180,8 +183,8 @@ public class GameResources {
   }
   
   //Assumes both map have equal size
-  public static Map<String, Integer> differenceTerritoryMap
-      (Map<String, Integer> oldTerritories, Map<String, Integer> newTerritories) {
+  public static Map<String, Integer> differenceTerritoryMap(
+      Map<String, Integer> oldTerritories, Map<String, Integer> newTerritories) {
     Map<String, Integer> differenceMap = new HashMap<String, Integer>();
     for (Map.Entry<String, Integer> oldEntry : oldTerritories.entrySet()) {
       int difference = newTerritories.get(oldEntry.getKey()) - oldEntry.getValue();
@@ -193,8 +196,8 @@ public class GameResources {
   }
   
   @SuppressWarnings("unchecked")
-  public static Map<String, Integer> differenceTerritoryMap
-      (Map<String, Object> currentPlayerState, RiskState lastPlayerState, int lastMovePlayerId) {
+  public static Map<String, Integer> differenceTerritoryMap(
+      Map<String, Object> currentPlayerState, RiskState lastPlayerState, int lastMovePlayerId) {
     Map<String, Integer> territoryUnitMap = 
         (Map<String, Integer>) currentPlayerState.get(GameResources.TERRITORY);
     Map<String, Integer> oldTerritoryMap = lastPlayerState.getPlayersMap().get(
@@ -205,8 +208,8 @@ public class GameResources {
   }
   
   //Finds the new territory in newTerritories otherwise returns null
-  public static String findNewTerritory
-      (Set<String> oldTerritories, Set<String> newTerritories) {
+  public static String findNewTerritory(
+      Set<String> oldTerritories, Set<String> newTerritories) {
     String newTerritory = null;
     for (String territory : newTerritories) {
       if (!oldTerritories.contains(territory)) {
@@ -224,23 +227,22 @@ public class GameResources {
     List<Integer> diceRolls = new ArrayList<Integer>();
     boolean rolls = true;
     int count = 0;
-    while(rolls) {
-      Integer diceRoll = (Integer)lastApiState.get(
+    while (rolls) {
+      Integer diceRoll = (Integer) lastApiState.get(
           type + GameResources.DICE_ROLL + (++count));
       if (diceRoll != null) {
         diceRolls.add(diceRoll);
-      }
-      else {
+      } else {
         rolls = false;
       }
     }
     return diceRolls;
   }
   
-  public static List<String> getDiceRollKeys(List<String> playerIds){
+  public static List<String> getDiceRollKeys(List<String> playerIds) {
     List<String> diceRollList = new ArrayList<String>();
     for (String playerId : playerIds) {
-      for (int i = 0; i< GameResources.TOTAL_INITIAL_DICE_ROLL; i++) {
+      for (int i = 0; i < GameResources.TOTAL_INITIAL_DICE_ROLL; i++) {
         diceRollList.add(GameResources.DICE_ROLL + "_" + playerId + "_" + i);
       }
     }
@@ -251,7 +253,7 @@ public class GameResources {
   public static List<Integer> getTradedCards(List<Operation> operations) {
     for (Operation operation : operations) {
       if (operation instanceof org.risk.client.GameApi.Set) {
-        if(((org.risk.client.GameApi.Set) operation).getKey()
+        if (((org.risk.client.GameApi.Set) operation).getKey()
             .equals(GameResources.CARDS_BEING_TRADED)) {
               return (List<Integer>) ((org.risk.client.GameApi.Set) operation).getValue();
         }

@@ -1,6 +1,9 @@
 package org.risk.client;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +41,9 @@ import com.google.common.collect.ImmutableMap.Builder;
  * 7) attack phase
  * 8) attack result
  * 9) attack occupy
- * 10) player looses 
- * 11) fortify
+ * 10) trade cards in attack phase
+ * 11) reinforce in attack phase 
+ * 11) fortify or skip fortify
  * 12) end game 
  * There are several interesting yourPlayerId:
  * 1) playerA
@@ -50,10 +54,17 @@ import com.google.common.collect.ImmutableMap.Builder;
  * I will test what methods the presenters calls on the view and container.
  * In addition I will also test the interactions between the presenter and view, i.e.,
  * the view can call one of these methods:
- * 1) cardSelected
- * 2) finishedSelectingCards
- * 3) rankSelected
- * 4) declaredCheater
+ * 1) newTerritorySelected
+ * 2) territoryForDeployment
+ * 3) addUnits
+ * 4) territoriesReinforced
+ * 5) cardsTraded
+ * 6) attackResultMove
+ * 7) performAttack
+ * 8) endAttack
+ * 9) moveUnitsAfterAttack
+ * 10) fortifyMove
+ * 11) endGame
  */
 @RunWith(JUnit4.class)
 public class RiskPresenterTest {
@@ -85,7 +96,6 @@ public class RiskPresenterTest {
 
   @After
   public void runAfter() {
-    // This will ensure I didn't forget to declare any extra interaction the mocks have.
     verifyNoMoreInteractions(mockContainer);
     verifyNoMoreInteractions(mockView);
   }
@@ -93,7 +103,8 @@ public class RiskPresenterTest {
   @Test
   public void testEmptyStateForA() {
     riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, 0, emptyState));
-    verify(mockContainer).sendMakeMove(mockRiskLogic.getInitialOperations(AbstractTest.getPlayerIds()));
+    verify(mockContainer).sendMakeMove(mockRiskLogic.getInitialOperations(
+        AbstractTest.getPlayerIds()));
   }
 
   @Test
@@ -116,7 +127,8 @@ public class RiskPresenterTest {
     riskPresenter.updateUI(createUpdateUI(
         AbstractTest.AID, AbstractTest.AID, getSetTurnOrderState()));
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
-    verify(mockContainer).sendMakeMove(mockRiskLogic.setTurnOrderMove(riskPresenter.getRiskState()));
+    verify(mockContainer).sendMakeMove(mockRiskLogic.setTurnOrderMove(
+        riskPresenter.getRiskState()));
   }
 
   @Test
@@ -241,13 +253,15 @@ public class RiskPresenterTest {
   
   @Test
   public void testCardTradeByAForB() { 
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, getCardTradeState()));    
+    riskPresenter.updateUI(createUpdateUI(
+        AbstractTest.BID, AbstractTest.AID, getCardTradeState()));    
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
   }
   
   @Test
   public void testCardTradeByAForC() { 
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, getCardTradeState()));    
+    riskPresenter.updateUI(createUpdateUI(
+        AbstractTest.CID, AbstractTest.AID, getCardTradeState()));    
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
   }
   
@@ -277,13 +291,15 @@ public class RiskPresenterTest {
   
   @Test
   public void testNoCardTradeByAForB() { 
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, getCardTradeState()));    
+    riskPresenter.updateUI(createUpdateUI(
+        AbstractTest.BID, AbstractTest.AID, getCardTradeState()));    
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
   }
   
   @Test
   public void testNoCardTradeByAForC() { 
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, getCardTradeState()));    
+    riskPresenter.updateUI(createUpdateUI(
+        AbstractTest.CID, AbstractTest.AID, getCardTradeState()));    
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
   }
   
@@ -297,7 +313,7 @@ public class RiskPresenterTest {
   public void testAddUnitsWithCardTradeByCForC() {
     Map<String, Object> state = getAddUnitsWithCardTradeState(); 
     Optional<List<Integer>> cardsBeingTraded = Optional.fromNullable(
-        (List<Integer>)ImmutableList.of(1, 2, 3));
+        (List<Integer>) ImmutableList.of(1, 2, 3));
     
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
         .thenReturn(mockRiskState);
@@ -377,9 +393,9 @@ public class RiskPresenterTest {
   public void testReinforceTerritoriesByCForC() {
     Map<String, Object> state = getReinforceState(); 
     Map<String, Integer> territoryDelta = ImmutableMap.<String, Integer>of(
-        "29",3,
-        "38",3,
-        "41",2);
+        "29", 3,
+        "38", 3,
+        "41", 2);
     
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
         .thenReturn(mockRiskState);
@@ -490,6 +506,85 @@ public class RiskPresenterTest {
   }
   
   @Test
+  public void testEndAttackByAForA() throws Exception {
+    Map<String, Object> state = getEndAttackStateByA(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performEndAttack(mockRiskState, AbstractTest.PLAYER_A))
+        .thenReturn(operations);
+    when(mockRiskState.getTerritoryWinner()).thenReturn(AbstractTest.PLAYER_A);
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
+    riskPresenter.endAttack();
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).attack();
+    verify(mockRiskLogic).performEndAttack(mockRiskState, AbstractTest.PLAYER_A);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testEndAttackByAForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, 
+        getEndAttackStateByA()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testEndAttackByAForC() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, 
+        getEndAttackStateByA()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+
+  @Test
+  public void testEndAttackByAForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.AID, 
+        getEndAttackStateByA()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+
+  @Test
+  public void testEndAttackWithNoCardByAForA() throws Exception {
+    Map<String, Object> state = getEndAttackWithNoCardStateByA(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performEndAttackWithNoCard(AbstractTest.AID))
+        .thenReturn(operations);
+    when(mockRiskState.getTerritoryWinner()).thenReturn(null);
+    
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
+    riskPresenter.endAttack();
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).attack();
+    verify(mockRiskLogic).performEndAttackWithNoCard(AbstractTest.AID);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testEndAttackWithNoCardByAForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, 
+        getEndAttackWithNoCardStateByA()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+   }
+  
+  @Test
+  public void testEndAttackWithNoCardByAForC() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, 
+        getEndAttackWithNoCardStateByA()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+   }
+  
+  @Test
+  public void testEndAttackWithNoCardByAForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.AID, 
+        getEndAttackWithNoCardStateByA()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+   }
+  
+  @Test
   public void testAttackResultByAForA() throws Exception {
     Map<String, Object> state = getAttackResultStateByA(); 
     
@@ -562,6 +657,204 @@ public class RiskPresenterTest {
   public void testAttackOccupyByAForViewer() throws Exception {
     riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.AID, 
         getAttackOccupyStateByA()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackTradeCardsByAForA() throws Exception {
+    Map<String, Object> state = getAttackTradeCardsByAState();
+    List<Integer> cards = ImmutableList.<Integer>of(0, 1, 2);
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performAttackTrade(mockRiskState, cards, AbstractTest.PLAYER_A, null))
+        .thenReturn(operations);
+
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
+    riskPresenter.attackTradeMove(cards);
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).tradeCardsInAttackPhase();
+    verify(mockRiskLogic).performAttackTrade(mockRiskState, cards, AbstractTest.PLAYER_A, null);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testAttackTradeCardsByAForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, 
+        getAttackTradeCardsByAState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackTradeCardsByAForC() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, 
+        getAttackTradeCardsByAState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackTradeCardsByAForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.AID, 
+        getAttackTradeCardsByAState()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackReinforceTerritoriesByAForA() throws Exception {
+    Map<String, Object> state = getAttackReinforceState(); 
+    Map<String, Integer> territoryDelta = ImmutableMap.<String, Integer>of(
+        "0", 6,
+        "1", 4);
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performReinforce(mockRiskState, 0, territoryDelta, AbstractTest.PLAYER_A))
+        .thenReturn(operations);
+
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
+    riskPresenter.territoriesReinforced(territoryDelta);
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).reinforceTerritories();
+    verify(mockRiskLogic).performReinforce(mockRiskState, 0, territoryDelta, AbstractTest.PLAYER_A);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testAttackReinforceTerritoriesByAForB() throws Exception { 
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, 
+        getAttackReinforceState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackReinforceTerritoriesByAForC() throws Exception { 
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, 
+        getAttackReinforceState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testAttackReinforceTerritoriesByAForViewer() throws Exception { 
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.AID, 
+        getAttackReinforceState()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testFortifyByCForC() throws Exception {
+    Map<String, Object> state = getFortifyStateByC(); 
+    Map<String, Integer> territoryDelta = ImmutableMap.<String, Integer>of(
+        "30", -2,
+        "38", 2);
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performFortify(mockRiskState, territoryDelta, AbstractTest.PLAYER_C))
+        .thenReturn(operations);
+
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.CID, state));
+    riskPresenter.fortifyMove(territoryDelta);
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).fortify();
+    verify(mockRiskLogic).performFortify(mockRiskState, territoryDelta, AbstractTest.PLAYER_C);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testFortifyByCForA() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+
+  @Test
+  public void testFortifyByCForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testFortifyByCForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testSkipFortifyByCForC() throws Exception {
+    Map<String, Object> state = getFortifyStateByC(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performFortify(mockRiskState, null, AbstractTest.PLAYER_C))
+        .thenReturn(operations);
+
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.CID, state));
+    riskPresenter.fortifyMove(null);
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).fortify();
+    verify(mockRiskLogic).performFortify(mockRiskState, null, AbstractTest.PLAYER_C);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testSkipFortifyByCForA() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+
+  @Test
+  public void testSkipFortifyByCForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testSkipFortifyByCForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.CID, 
+        getFortifyStateByC()));
+    verify(mockView).setViewerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testEndGameByCForC() throws Exception {
+    Map<String, Object> state = getEndState(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.performEndGame(mockRiskState, AbstractTest.PLAYER_C))
+        .thenReturn(operations);
+
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.CID, state));
+    riskPresenter.endGame();
+    
+    verify(mockView).setPlayerState(mockRiskState);
+    verify(mockView).endGame();
+    verify(mockRiskLogic).performEndGame(mockRiskState, AbstractTest.PLAYER_C);
+    verify(mockContainer).sendMakeMove(operations);
+  }
+  
+  @Test
+  public void testEndGameByCForA() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.CID, getEndState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+
+  @Test
+  public void testEndGameByCForB() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.CID, getEndState()));
+    verify(mockView).setPlayerState(riskPresenter.getRiskState());
+  }
+  
+  @Test
+  public void testEndGameByCForViewer() throws Exception {
+    riskPresenter.updateUI(createUpdateUI(viewerId, AbstractTest.CID, getEndState()));
     verify(mockView).setViewerState(riskPresenter.getRiskState());
   }
   
@@ -668,7 +961,8 @@ public class RiskPresenterTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
-        .put(GameResources.DECK, AbstractTest.getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            3, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
     return state;
@@ -694,7 +988,8 @@ public class RiskPresenterTest {
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
-        .put(GameResources.DECK, AbstractTest.getCardsInRange(5, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            5, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .build();
@@ -721,7 +1016,8 @@ public class RiskPresenterTest {
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
-        .put(GameResources.DECK, AbstractTest.getCardsInRange(5, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            5, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .put(GameResources.TRADE_NUMBER, 1)
         .build();
@@ -748,7 +1044,8 @@ public class RiskPresenterTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
-        .put(GameResources.DECK, AbstractTest.getCardsInRange(2, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            2, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .put(GameResources.TRADE_NUMBER, 1)
         .build();
@@ -775,10 +1072,72 @@ public class RiskPresenterTest {
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
         .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
-        .put(GameResources.DECK, AbstractTest.getCardsInRange(0, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            0, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .put(GameResources.TRADE_NUMBER, 1)
         .build();
+    return state;
+  }
+  
+  private Map<String, Object> getEndAttackStateByA() throws Exception {
+    Map<String, Integer> territoryMapB = AbstractTest.getTerritoriesInRange(11, 29, 1);
+    territoryMapB = AbstractTest.performDeltaOnTerritory(territoryMapB, "13", -1);
+    territoryMapB.remove("13");
+    
+    Map<String, Integer> territoryMapA = AbstractTest.getTerritoriesInRange(0, 10, 6);
+    territoryMapA.put("13", 0);
+    territoryMapA = AbstractTest.performDeltaOnTerritory(territoryMapA, "5", -3);
+    territoryMapA = AbstractTest.performDeltaOnTerritory(territoryMapA, "13", +3);
+    
+    //creating state after the attack of A
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_PHASE).
+        put(AbstractTest.PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryMapA,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(AbstractTest.PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryMapB,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+            AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
+        put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
+        put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_A).
+        build();
+    return state;
+  }
+  
+  private Map<String, Object> getEndAttackWithNoCardStateByA() throws Exception {
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_PHASE).
+        put(AbstractTest.PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(0, 10, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(AbstractTest.PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(11, 29, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+            AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
+        put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
+        build();
     return state;
   }
   
@@ -847,6 +1206,99 @@ public class RiskPresenterTest {
         put(GameResources.LAST_ATTACKING_TERRITORY, 5).
         put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_A).
         build();
+    return state;
+  }
+  
+  private Map<String, Object> getAttackTradeCardsByAState() throws Exception {
+    Map<String, Object> state = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_TRADE).
+        put(AbstractTest.PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4, 5),
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(0, 12, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+            AbstractTest.CID, AbstractTest.AID)).
+        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
+        put(GameResources.LAST_ATTACKING_TERRITORY, 5).
+        put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_A).
+        put(GameResources.DECK, AbstractTest.getCardsInRange(6, 43)).
+        build();
+    return state;
+  }
+  
+  private Map<String, Object> getAttackReinforceState() throws Exception {
+    Map<String, Object> state = ImmutableMap.<String, Object>builder()
+        .put(GameResources.PHASE, GameResources.ATTACK_REINFORCE)
+        .put(AbstractTest.PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(3, 4, 5),
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(0, 13, 6),
+            GameResources.UNCLAIMED_UNITS, 10,
+            GameResources.CONTINENT, ImmutableList.<String>of("0", "1")))
+        .put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+            AbstractTest.CID, AbstractTest.AID))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(
+            6, GameResources.TOTAL_RISK_CARDS - 1))
+        .put(GameResources.TRADE_NUMBER, 2)
+        .put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_A)
+        .build();
+    return state;
+  }
+  
+  private Map<String, Object> getFortifyStateByC() {
+    Map<String, Integer> territoryC = AbstractTest.performDeltaOnTerritory(
+        AbstractTest.getTerritories(AbstractTest.PLAYER_C), "30", 30);
+    Map<String, Integer> territoryB = AbstractTest.performDeltaOnTerritory(
+        AbstractTest.getTerritories(AbstractTest.PLAYER_B), "15", 1);
+    
+    Map<String, Object> state = ImmutableMap.<String, Object>builder()
+        .put(GameResources.PHASE, GameResources.FORTIFY)
+        .put(AbstractTest.PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0),
+            GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_A),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(AbstractTest.PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(1),
+            GameResources.TERRITORY, territoryB,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, territoryC,
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+            AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(2, 43))
+        .build();
+    return state;
+  }
+  
+  private Map<String, Object> getEndState() throws Exception {
+    Map<String, Object> state = ImmutableMap.<String, Object>builder()
+        .put(GameResources.PHASE, GameResources.END_GAME)
+        .put(AbstractTest.PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(0, 40, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4")))
+        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(AbstractTest.CID))
+        .put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43))
+        .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41))
+        .put(GameResources.LAST_ATTACKING_TERRITORY, 40)
+        .put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_C)
+        .build();
     return state;
   }
   private UpdateUI createUpdateUI(

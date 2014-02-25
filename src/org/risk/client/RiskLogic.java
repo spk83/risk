@@ -83,8 +83,8 @@ public class RiskLogic {
           (Map<String, Integer>) playerValue.get(GameResources.TERRITORY);
       Map<String, Integer> oldTerritoryMap = lastState.getPlayersMap().get(
           GameResources.playerIdToString(lastMovePlayerId)).getTerritoryUnitMap();
-      String newTerritory = GameResources.findNewTerritory
-          (oldTerritoryMap.keySet(), territoryUnitMap.keySet());
+      String newTerritory = GameResources.findNewTerritory(
+          oldTerritoryMap.keySet(), territoryUnitMap.keySet());
       return performClaimTerritory(
           lastState, newTerritory, GameResources.playerIdToString(lastMovePlayerId));
     } else if (lastState.getPhase().equals(GameResources.DEPLOYMENT)) {
@@ -1015,8 +1015,8 @@ public class RiskLogic {
          for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
            Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId());
            if (territoryMap.containsKey(entry.getKey())) {
-             throw new IllegalStateException("Territory ID "+entry.getKey()+" occupied by multiple"
-                 + "players.");
+             throw new IllegalStateException(
+                 "Territory ID " + entry.getKey() + " occupied by multiple" + "players.");
            }
            territoryMap.put(entry.getKey(), territory);
          }

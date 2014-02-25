@@ -40,7 +40,7 @@ public class Attack {
         totalPlayers, totalAttackerCards, totalDefenderCards);
   }
   
-  public class AttackResult {
+  public final class AttackResult {
     private int deltaAttack;
     private int deltaDefend;
     private boolean isAttackerATerritoryWinner;
