@@ -24,8 +24,7 @@ public class RiskPresenter {
     void reinforceTerritories();
     void attack();
     void moveUnitsAfterAttack();
-    void tradeCardsInAttackPhase(List<Integer> cards);
-    void reinforceInAttackPhase(Map<String, Integer> territoryDelta);
+    void tradeCardsInAttackPhase();
     void fortify();
     void endGame();
     
@@ -89,6 +88,8 @@ public class RiskPresenter {
         view.attack();
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
         attackResultMove();
+      } else if (phase.equals(GameResources.ATTACK_TRADE)) {
+        view.tradeCardsInAttackPhase();
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
         view.reinforceTerritories();
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
@@ -119,7 +120,6 @@ public class RiskPresenter {
   }
   
   void newTerritorySelected(String territory) {
-    System.out.println("checked");
     container.sendMakeMove(riskLogic.performClaimTerritory(
         riskState, territory, myPlayerKey));
   }
@@ -160,6 +160,11 @@ public class RiskPresenter {
   void attackResultMove() {
     container.sendMakeMove(riskLogic.attackResultOperations(
         riskState, GameResources.playerIdToInt(myPlayerKey)));
+  }
+  
+  void attackTradeMove(List<Integer> cardsToBeTraded) {
+    container.sendMakeMove(riskLogic.performAttackTrade(
+        riskState, cardsToBeTraded, myPlayerKey, null));
   }
   
   void performAttack(String attackingTerritory, String defendingTerritory) {

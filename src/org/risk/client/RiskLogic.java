@@ -103,8 +103,7 @@ public class RiskLogic {
         boolean isCardTrade = ((Set) lastMove.get(lastMove.size() - 3)).getKey().equals(
             GameResources.CARDS_BEING_TRADED);
         if (isCardTrade) {
-          List<Integer> cardsBeingTraded = (List<Integer>) ((Set) lastMove.get(
-              lastMove.size() - 3)).getValue();
+          List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
           return performTrade(
               lastState, cardsBeingTraded, GameResources.playerIdToString(lastMovePlayerId),
               gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
@@ -165,9 +164,9 @@ public class RiskLogic {
     } else if (lastState.getPhase().equals(GameResources.ATTACK_TRADE)) {
 
       //Operations performed when player has done the mandatory trade after getting >=6 cards
-      Map<String, Object> playerValue = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
+      List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
       return performAttackTrade(
-          lastState, playerValue, GameResources.playerIdToString(lastMovePlayerId),
+          lastState, cardsBeingTraded, GameResources.playerIdToString(lastMovePlayerId),
           gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
     } else if (lastState.getPhase().equals(GameResources.ATTACK_REINFORCE)) {
       //Operations performed if the player has got extra units after the trading which require
@@ -202,7 +201,7 @@ public class RiskLogic {
         return performFortify(lastState, differenceTerritoryMap, 
             GameResources.playerIdToString(lastMovePlayerId));
       } else {
-        
+
         //skip fortify
         return performFortify(lastState, null, GameResources.playerIdToString(lastMovePlayerId));
       }
@@ -212,17 +211,20 @@ public class RiskLogic {
     return null;
   }
 
-  private List<Operation> performAttackTrade(RiskState lastState,
-      Map<String, Object> playerValue, String playerIdToString, RiskState newState) {
-    
+  List<Operation> performAttackTrade(RiskState lastState,
+      List<Integer> cardsToBeTraded, String playerIdToString, RiskState newState) {
     List<Integer> playerCards = lastState.getPlayersMap().get(playerIdToString).getCards();
+    if (newState == null) {
+      //case when the function is called without the new state from the player who plays the move.
+      newState = lastState;
+    }
     Map<String, Card> visibleCards = newState.getCardMap();
     List<Card> tradedCards = Lists.newArrayList();
     List<Integer> tradedCardsInt = Lists.newArrayList();
     List<String> tradedCardsString = Lists.newArrayList();
     Integer tradeNumber = lastState.getTradeNumber();
     check(playerCards.size() >= 6, lastState.getPlayersMap().get(playerIdToString));
-    for (Integer cardId : playerCards) {
+    for (Integer cardId : cardsToBeTraded) {
       Card card = visibleCards.get(GameResources.RISK_CARD + cardId);
       if (card != null) {
         tradedCards.add(card);
