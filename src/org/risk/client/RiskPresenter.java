@@ -137,8 +137,9 @@ public class RiskPresenter {
     if (riskState.getCardsTraded().isPresent()) {
       container.sendMakeMove(riskLogic.performAddUnitsWithTrade(riskState, myPlayerKey));
       return;
+    } else {
+      container.sendMakeMove(riskLogic.performAddUnitsWithOutTrade(riskState, myPlayerKey));
     }
-    container.sendMakeMove(riskLogic.performAddUnitsWithOutTrade(riskState, myPlayerKey));
   }
   
   void territoriesReinforced(Map<String, Integer> territoryDelta) {
@@ -146,28 +147,16 @@ public class RiskPresenter {
       //for skipping the reinforcement phase
       territoryDelta = Maps.<String, Integer>newHashMap();
     }
-    Player myPlayer = riskState.getPlayersMap().get(myPlayerKey);
-    Map<String, Integer> territoryUnitMap = myPlayer.getTerritoryUnitMap();
-    for (Map.Entry<String, Integer> deltaEntry : territoryDelta.entrySet()) {
-      String territory = deltaEntry.getKey();
-      Integer delta = deltaEntry.getValue();
-      Integer units = territoryUnitMap.get(territory);
-      if (units == null) {
-        throw new IllegalArgumentException(
-            "Territory "+territory+" does not belong to player "+myPlayerKey);
-      }
-      territoryUnitMap.put(territory, delta + units);
-    }
     container.sendMakeMove(riskLogic.performReinforce
-        (riskState, 0, territoryUnitMap, myPlayerKey));
+        (riskState, 0, territoryDelta, myPlayerKey));
   }
   
   void cardsTraded(List<Integer> cards) {
-    if (cards == null) {
+    if (cards == null || cards.isEmpty()) {
       container.sendMakeMove(riskLogic.skipCardTrade(myPlayerKey));
+    } else {
+      container.sendMakeMove(riskLogic.performTrade(riskState, cards, myPlayerKey, null));
     }
-    container.sendMakeMove(riskLogic.performTrade
-        (riskState, cards, myPlayerKey, null));
   }
   
   void attackResultMove() {
@@ -209,10 +198,11 @@ public class RiskPresenter {
     if (territoryDelta != null && !territoryDelta.isEmpty()) {
       container.sendMakeMove(riskLogic.performFortify(
           riskState, territoryDelta, myPlayerKey));
+    } else {
+      //pass null to end fortify
+      container.sendMakeMove(riskLogic.performFortify(
+          riskState, null, myPlayerKey));
     }
-    //pass null to end fortify
-    container.sendMakeMove(riskLogic.performFortify(
-        riskState, null, myPlayerKey));
   }
   
   void endGame() {
