@@ -8,7 +8,6 @@ import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.UpdateUI;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 public class RiskPresenter {
@@ -33,7 +32,7 @@ public class RiskPresenter {
     //Functions with same input parameters can be clubbed !
   }
   
-  private final RiskLogic riskLogic;// = new RiskLogic();
+  private final RiskLogic riskLogic;
   private final View view;
   private final Container container;
   private RiskState riskState;
@@ -44,7 +43,6 @@ public class RiskPresenter {
     this.container = container;
     this.riskLogic = riskLogic;
     view.setPresenter(this);
-    
   }
   
   public void updateUI(UpdateUI updateUI) {
@@ -59,7 +57,7 @@ public class RiskPresenter {
       if (myPlayerId == GameResources.START_PLAYER_ID) {
         sendInitialMove(playerIds);
       }
-      return;  
+      return;
     }
     riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playerIds);
 
@@ -165,19 +163,8 @@ public class RiskPresenter {
   }
   
   void performAttack(String attackingTerritory, String defendingTerritory) {
-    Map<String, Object> attackerMap = ImmutableMap.<String, Object>of(
-        GameResources.PLAYER, myPlayerKey,
-        GameResources.TERRITORY, Integer.parseInt(attackingTerritory),
-        GameResources.UNITS, riskState.getPlayersMap().get(myPlayerKey)
-            .getTerritoryUnitMap().get(attackingTerritory));
-    String defendingPlayer = riskState.getTerritoryMap().get(defendingTerritory).getPlayerKey();
-    Map<String, Object> defenderMap = ImmutableMap.<String, Object>of(
-        GameResources.PLAYER, defendingPlayer,
-        GameResources.TERRITORY, Integer.parseInt(defendingTerritory),
-        GameResources.UNITS, riskState.getPlayersMap().get(defendingPlayer)
-            .getTerritoryUnitMap().get(attackingTerritory));
-    container.sendMakeMove(riskLogic.performAttack
-        (riskState, attackerMap, defenderMap, myPlayerKey));
+    container.sendMakeMove(riskLogic.performAttack(riskState, Integer.parseInt(attackingTerritory),
+        Integer.parseInt(defendingTerritory),myPlayerKey));
   }
   
   void endAttack() {

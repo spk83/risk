@@ -145,8 +145,12 @@ public class RiskLogic {
       if (nextPhase.equals(GameResources.ATTACK_RESULT)) {
         Map<String, Object> attacker = (Map<String, Object>) ((Set) lastMove.get(1)).getValue();
         Map<String, Object> defender = (Map<String, Object>) ((Set) lastMove.get(2)).getValue();
-        return performAttack(
-            lastState, attacker, defender, GameResources.playerIdToString(lastMovePlayerId));
+        int attackingTerritory = Integer.parseInt(attacker.get(GameResources.TERRITORY).toString());
+        int defendingTerritory = Integer.parseInt(defender.get(GameResources.TERRITORY).toString());
+        String attackingPlayerId = attacker.get(GameResources.PLAYER).toString();
+        check(attackingPlayerId.equals(GameResources.playerIdToString(lastMovePlayerId)));
+        return performAttack(lastState, attackingTerritory, defendingTerritory, 
+            GameResources.playerIdToString(lastMovePlayerId));
       } else if (nextPhase.equals(GameResources.FORTIFY)) {
         if (lastState.getTerritoryWinner() != null) {
             return performEndAttack(lastState, GameResources.playerIdToString(lastMovePlayerId));
@@ -622,34 +626,33 @@ public class RiskLogic {
     return endAttackOperations;
   }
 
-  List<Operation> performAttack(RiskState lastState,
-      Map<String, Object> attacker, Map<String, Object> defender,
-      String playerIdToString) {
-    String playerIdOfAttacker = attacker.get(GameResources.PLAYER).toString();
-    Integer attackTerritory = (Integer) attacker.get(GameResources.TERRITORY);
-    Integer attackUnits = (Integer) attacker.get(GameResources.UNITS);
+  List<Operation> performAttack(RiskState lastState, int attackTerritory, int defendTerritory, 
+      String playerIdOfAttacker) {
+    String playerIdOfDefender = lastState.getTerritoryMap().get(defendTerritory + "")
+        .getPlayerKey();
+    Integer attackUnits = lastState.getPlayersMap().get(playerIdOfAttacker)
+        .getTerritoryUnitMap().get(attackTerritory + "");
     check(attackUnits >= 2, attackUnits);
-    String playerIdOfDefender = defender.get(GameResources.PLAYER).toString();
-    Integer defendTerritory = (Integer) defender.get(GameResources.TERRITORY);
-    Integer defendUnits = (Integer) defender.get(GameResources.UNITS);
-    check(Territory.isAttackPossible(attackTerritory, defendTerritory), attacker, defender);
-    check(playerIdOfAttacker.equals(playerIdToString));
+    Integer defendUnits = lastState.getPlayersMap().get(playerIdOfDefender)
+        .getTerritoryUnitMap().get(defendTerritory + "");
+    check(Territory.isAttackPossible(attackTerritory, defendTerritory), 
+        attackTerritory, defendTerritory);
     Player attackerPlayer = lastState.getPlayersMap().get(playerIdOfAttacker);
     Player defenderPlayer = lastState.getPlayersMap().get(playerIdOfDefender);
     check(playerIdOfAttacker.equals(attackerPlayer.getPlayerId()));
     Integer lastStateAttackUnits = attackerPlayer.getTerritoryUnitMap().get(attackTerritory + "");
     Integer lastStateDefendUnits = defenderPlayer.getTerritoryUnitMap().get(defendTerritory + "");
-    check(lastStateAttackUnits == attackUnits, attackerPlayer, attacker);
-    check(lastStateDefendUnits == defendUnits, defenderPlayer, defender);
+    check(lastStateAttackUnits == attackUnits, attackerPlayer, attackUnits);
+    check(lastStateDefendUnits == defendUnits, defenderPlayer, defendUnits);
     check((lastStateAttackUnits != null)
-        && (lastStateAttackUnits == attackUnits), attackerPlayer, attacker);
+        && (lastStateAttackUnits == attackUnits), attackerPlayer, attackUnits);
     check((lastStateDefendUnits != null) 
-        && (lastStateDefendUnits == defendUnits), defenderPlayer, defender);
+        && (lastStateDefendUnits == defendUnits), defenderPlayer, defendUnits);
     int totalDiceAttacker = GameResources.getMaxDiceRollsForAttacker(attackUnits);
     int totalDiceDefender = GameResources.getMaxDiceRollsForDefender(defendUnits);
    
     List<Operation> attackOperations = Lists.newArrayList();
-    attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
+    attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdOfAttacker)));
     
     attackOperations.add(new Set(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
             GameResources.PLAYER, playerIdOfAttacker,

@@ -210,7 +210,7 @@ public class AbstractTest {
     
     assertEquals(equalMaps(playerATerritoryMap, getTerritories("P2")), true);
   }
-  public Map<String, Integer> getTerritoriesInRange(
+  public static Map<String, Integer> getTerritoriesInRange(
       int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
           throws Exception {
     if (isTerritoryInRange(highestTerritoryIdInclusive) 
@@ -226,7 +226,7 @@ public class AbstractTest {
     }
   }
   
-  public boolean isTerritoryInRange(int territoryId) {
+  public static boolean isTerritoryInRange(int territoryId) {
     if (territoryId >= 0 && territoryId < 42) {
       return true;
     }
@@ -260,7 +260,7 @@ public class AbstractTest {
   /*
    * Helper method to get Map of territories with specified change.
    */
-  protected Map<String, Integer> performDeltaOnTerritory(
+  protected static Map<String, Integer> performDeltaOnTerritory(
       Map<String, Integer> currentMap, String territory, int delta) {
     Integer oldValue = currentMap.get(territory);
     if (oldValue == null) {
