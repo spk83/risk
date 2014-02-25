@@ -60,11 +60,12 @@ import com.google.common.collect.ImmutableMap.Builder;
  * 4) territoriesReinforced
  * 5) cardsTraded
  * 6) attackResultMove
- * 7) performAttack
- * 8) endAttack
- * 9) moveUnitsAfterAttack
- * 10) fortifyMove
- * 11) endGame
+ * 7) attackTradeMove
+ * 8) performAttack
+ * 9) endAttack
+ * 10) moveUnitsAfterAttack
+ * 11) fortifyMove
+ * 12) endGame
  */
 @RunWith(JUnit4.class)
 public class RiskPresenterTest {
@@ -77,10 +78,9 @@ public class RiskPresenterTest {
   private View mockView;
   private Container mockContainer;
   private RiskState mockRiskState;
+  
   private List<Operation> operations = ImmutableList.<Operation>of();
   private final int viewerId = GameApi.VIEWER_ID;
-  
-  /* The interesting states that I'll test. */
   private final ImmutableMap<String, Object> emptyState = ImmutableMap.<String, Object>of();
   private final ImmutableList<Integer> playerIds = ImmutableList.<Integer>of(1, 2, 3);
   
