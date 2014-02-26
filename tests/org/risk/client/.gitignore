@@ -5,5 +5,3 @@
 *.war
 *.ear
 /bin
-/gwt-unitCache
-/.gwt
