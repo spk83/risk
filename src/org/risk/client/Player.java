@@ -19,7 +19,7 @@ public class Player {
   public Player(String playerId, Map<String, Object> playerMap) {
     this.playerId = playerId;
     this.cards = new ArrayList<Integer>((List<Integer>) playerMap.get(GameResources.CARDS));
-    this.unclaimedUnits = (int) playerMap.get(GameResources.UNCLAIMED_UNITS);
+    this.unclaimedUnits = (Integer) playerMap.get(GameResources.UNCLAIMED_UNITS);
     Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(
         GameResources.TERRITORY);
     this.territoryUnitMap = new HashMap<String, Integer>(territoryMap);

@@ -19,7 +19,7 @@ import com.google.common.collect.Maps;
  */
 public class RiskPresenter {
   
-  interface View {
+  public interface View {
     /**
      * Sets the presenter. The viewer will call certain methods on the presenter, e.g.,
      * when a territory is selected ({@link #newTerritorySelected}),
@@ -111,17 +111,17 @@ public class RiskPresenter {
   public void updateUI(UpdateUI updateUI) {
     List<Integer> playerIds = updateUI.getPlayerIds();
     int myPlayerId = updateUI.getYourPlayerId();
-    List<Operation> operations = updateUI.getLastMove();
-    int turnPlayerId = getTurnPlayer(operations);
-    Map<String, Object> state = updateUI.getState();
     myPlayerKey = GameResources.playerIdToString(myPlayerId);
-    
+    Map<String, Object> state = updateUI.getState();
     if (state.isEmpty()) {
       if (myPlayerId == GameResources.START_PLAYER_ID) {
         sendInitialMove(playerIds);
       }
       return;
     }
+    List<Operation> operations = updateUI.getLastMove();
+    int turnPlayerId = getTurnPlayer(operations);
+    
     riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playerIds);
 
     if (updateUI.isViewer()) {

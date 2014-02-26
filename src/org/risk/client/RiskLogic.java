@@ -900,11 +900,13 @@ public class RiskLogic {
         Functions.forMap(result)).compound(Ordering.natural());
     ImmutableSortedMap<Integer, Integer> resultMap = ImmutableSortedMap.copyOf(
         result, valueComparator);
-    turnOrder = resultMap.descendingKeySet();
-    nextTurn = turnOrder.first();
+    turnOrder = resultMap.keySet();
+    List<Integer> turnOrderList = Lists.newArrayList(turnOrder.asList());
+    Collections.reverse(turnOrderList);
+    nextTurn = turnOrderList.get(0);
     turnOrderMove.add(new SetTurn(nextTurn));
     turnOrderMove.add(new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY));
-    turnOrderMove.add(new Set(GameResources.TURN_ORDER, turnOrder.asList()));
+    turnOrderMove.add(new Set(GameResources.TURN_ORDER, turnOrderList));
     return turnOrderMove;
   }
 
