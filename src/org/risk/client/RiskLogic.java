@@ -74,7 +74,7 @@ public class RiskLogic {
     if (lastState.getPhase().equals(GameResources.SET_TURN_ORDER)) {
       
       //Getting operations for setting the turn order of all the players
-      return setTurnOrderMove(lastState); 
+      return setTurnOrderMove(lastState, GameResources.getPlayerKeys(playerIds)); 
     } else if (lastState.getPhase().equals(GameResources.CLAIM_TERRITORY)) {
       
       //Getting operations when a player claims a territory at inital setup of the game
@@ -882,7 +882,7 @@ public class RiskLogic {
     return move;
   }
 
-  List<Operation> setTurnOrderMove(RiskState lastState) {
+  List<Operation> setTurnOrderMove(RiskState lastState, List<String> playerIds) {
     List<Operation> turnOrderMove = Lists.newArrayList();
     int nextTurn;
     ImmutableSortedSet<Integer> turnOrder;
@@ -905,6 +905,10 @@ public class RiskLogic {
     Collections.reverse(turnOrderList);
     nextTurn = turnOrderList.get(0);
     turnOrderMove.add(new SetTurn(nextTurn));
+    List<String> deleteKeys = GameResources.getDiceRollKeys(playerIds);
+    for (String deleteKey : deleteKeys) {
+      turnOrderMove.add(new Delete(deleteKey));
+    }
     turnOrderMove.add(new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY));
     turnOrderMove.add(new Set(GameResources.TURN_ORDER, turnOrderList));
     return turnOrderMove;
@@ -1057,7 +1061,9 @@ public class RiskLogic {
           j++;
         }
       }
-      diceResultMap.put(playerId, results);
+      if (!results.isEmpty()) {
+        diceResultMap.put(playerId, results);
+      }
     }
     riskState.setDiceResult(diceResultMap);
     

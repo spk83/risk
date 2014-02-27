@@ -124,11 +124,11 @@ public class RiskPresenterTest {
 
   @Test
   public void testSetTurnOrderStateForA() {
-    riskPresenter.updateUI(createUpdateUI(
-        AbstractTest.AID, AbstractTest.AID, getSetTurnOrderState()));
+    UpdateUI updateUI = createUpdateUI(
+        AbstractTest.AID, AbstractTest.AID, getSetTurnOrderState());
+    riskPresenter.updateUI(updateUI);
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
-    verify(mockContainer).sendMakeMove(mockRiskLogic.setTurnOrderMove(
-        riskPresenter.getRiskState()));
+    verify(mockView).turnOrderMove();
   }
 
   @Test

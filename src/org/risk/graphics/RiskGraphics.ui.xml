@@ -1,0 +1,10 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <g:VerticalPanel>
+    <g:HorizontalPanel height="400px">
+      <g:HorizontalPanel ui:field="playerArea"/>
+    </g:HorizontalPanel>
+    <g:VerticalPanel height="200px" ui:field="diceArea"/>
+  </g:VerticalPanel>
+</ui:UiBinder> 

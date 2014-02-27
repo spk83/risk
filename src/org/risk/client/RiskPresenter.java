@@ -20,6 +20,9 @@ import com.google.common.collect.Maps;
 public class RiskPresenter {
   
   public interface View {
+    
+    void turnOrderMove();
+    
     /**
      * Sets the presenter. The viewer will call certain methods on the presenter, e.g.,
      * when a territory is selected ({@link #newTerritorySelected}),
@@ -99,6 +102,7 @@ public class RiskPresenter {
   private final Container container;
   private RiskState riskState;
   private String myPlayerKey;
+  private List<Integer> playerIds;
   
   public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
@@ -109,7 +113,7 @@ public class RiskPresenter {
   
   /** Updates the presenter and the view with the state in updateUI. */
   public void updateUI(UpdateUI updateUI) {
-    List<Integer> playerIds = updateUI.getPlayerIds();
+    playerIds = updateUI.getPlayerIds();
     int myPlayerId = updateUI.getYourPlayerId();
     myPlayerKey = GameResources.playerIdToString(myPlayerId);
     Map<String, Object> state = updateUI.getState();
@@ -117,6 +121,8 @@ public class RiskPresenter {
       if (myPlayerId == GameResources.START_PLAYER_ID) {
         sendInitialMove(playerIds);
       }
+      
+      //show a basic UI
       return;
     }
     List<Operation> operations = updateUI.getLastMove();
@@ -139,7 +145,7 @@ public class RiskPresenter {
     if (turnPlayerId == myPlayerId) {
       String phase = (String) state.get(GameResources.PHASE);
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        setTurnOrderMove();
+        view.turnOrderMove();
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
         view.chooseNewTerritory();
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
@@ -197,8 +203,9 @@ public class RiskPresenter {
   /**
    * Set the turn order of the game based on current dice rolled in initial moves.
    */
-  private void setTurnOrderMove() {
-    container.sendMakeMove(riskLogic.setTurnOrderMove(riskState));
+  public void setTurnOrderMove() {
+    container.sendMakeMove(riskLogic.setTurnOrderMove(
+        riskState, GameResources.getPlayerKeys(playerIds)));
   }
   
   /**
