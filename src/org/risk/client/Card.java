@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class Card {
-  private enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
+  public enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
   private Type cardType;
   @SuppressWarnings("unused")
   private String cardId;
