@@ -276,7 +276,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           if (currentRiskState.getTurn() == playerId) {
             Territory territorySelected = currentRiskState.getTerritoryMap()
                 .get(Territory.SVG_ID_MAP.get(territoryId) + "");
-            if (territorySelected.getPlayerKey() == playerKey) {
+            if (territorySelected.getPlayerKey().equals(playerKey)) {
               int units = Integer.parseInt(
                   territoryUnits.getFirstChild().getFirstChild().getNodeValue()); //phase
               territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
@@ -306,8 +306,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @Override
   public void chooseCardsForTrading() {
-    // TODO Auto-generated method stub
-    
+    removeHandlers(deploymentHandlers);
   }
 
   @Override

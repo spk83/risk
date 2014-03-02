@@ -9,7 +9,7 @@ public interface MapSVG extends ClientBundle {
   /*@Source("images/map/Riskgameboard.svg")
   TextResource riskMap();*/
   
-  @Source("images/map/Risk_board2.svg")
+  @Source("images/map/Risk_board.svg")
   TextResource riskMap();
   
   /*@Source("images/map/riskboard.jpg")

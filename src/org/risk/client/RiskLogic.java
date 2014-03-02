@@ -855,8 +855,8 @@ public class RiskLogic {
     check(differenceTerritoryMap.size() == 1, differenceTerritoryMap);
     check(differenceTerritoryMap.entrySet().iterator().next().getValue() == 1, 
         differenceTerritoryMap);
-    oldTerritoryMap.put(differenceTerritoryMap.entrySet().iterator().next().getKey(), 
-        oldTerritoryMap.entrySet().iterator().next().getValue() + 1);
+    String key = differenceTerritoryMap.entrySet().iterator().next().getKey();
+    oldTerritoryMap.put(key, oldTerritoryMap.get(key) + 1);
     boolean isDeploymentDone = true;
     for (Entry<String, Player> playerStateMap : lastState.getPlayersMap().entrySet()) {
       isDeploymentDone = isDeploymentDone && playerStateMap.getValue().getUnclaimedUnits() == 0;
