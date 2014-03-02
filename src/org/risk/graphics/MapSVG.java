@@ -6,7 +6,10 @@ import com.google.gwt.resources.client.TextResource;
 
 public interface MapSVG extends ClientBundle {
 
-  @Source("images/map/Riskgameboard.svg")
+  /*@Source("images/map/Riskgameboard.svg")
+  TextResource riskMap();*/
+  
+  @Source("images/map/Risk_board2.svg")
   TextResource riskMap();
   
   /*@Source("images/map/riskboard.jpg")

@@ -1,11 +1,15 @@
 package org.risk.graphics;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.risk.client.Card;
+import org.risk.client.GameResources;
+import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
+import org.risk.client.Territory;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
@@ -14,6 +18,7 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dev.util.arg.OptionMaxPermsPerPrecompile;
 import com.google.gwt.dom.client.AreaElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -28,6 +33,7 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -77,6 +83,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   /*@UiField
   SVGImage riskMap;*/
+  
+  private Integer currentPlayerId;
+  private String currentPhase;
+  private RiskState currentRiskState;
+  private List<HandlerRegistration> newTerritoryHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> deploymentHandlers = new ArrayList<HandlerRegistration>();
   
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
@@ -144,17 +156,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });*/
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
-    OMElement india = boardElt.getElementById("india");
-    System.out.println(india);
-    System.out.println(india.getAttribute("d"));
-    MouseDownHandler handler = new MouseDownHandler() {
-      
-      @Override
-      public void onMouseDown(MouseDownEvent event) {
-        Window.alert("ok");
-      }
-    };
-    ((OMNode) india).addDomHandler(handler, MouseDownEvent.getType());
+    /*for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+      addDomHandlerToTerritory(territoryId);
+    }*/
   }
   
   @Override
@@ -164,11 +168,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setViewerState(RiskState riskState) {
-    // TODO Auto-generated method stub
+    // TODO Auto-generated method stubbbluelue
   }
 
   @Override
   public void setPlayerState(RiskState riskState) {
+    this.currentRiskState = riskState;
     diceArea.clear();
     if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
       for (Map.Entry<String, List<Integer>> entry : riskState.getDiceResult().entrySet()) {
@@ -182,16 +187,123 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void chooseNewTerritory() {
-    // TODO Auto-generated method stub
-    
+    //removeHandlers(newTerritoryHandlers);
+    if (newTerritoryHandlers.isEmpty()) {
+      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+        newTerritoryHandlers.addAll(addNewTerritoryHandler(territoryId));
+      }
+    }
+  }
+  
+  private void removeHandlers(List<HandlerRegistration> handlerRegistrations) {
+    if (handlerRegistrations != null) {
+      for (HandlerRegistration registration : handlerRegistrations) {
+        registration.removeHandler();
+      }
+      handlerRegistrations.clear();
+    }
   }
 
+  private List<HandlerRegistration> addNewTerritoryHandler(final String territoryId) {
+    try {
+      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
+      final OMElement territory = boardElt.getElementById(territoryId);
+      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
+      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
+      MouseDownHandler handler = new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          int playerId = riskPresenter.getMyPlayerId();
+          String playerKey = GameResources.playerIdToString(playerId);
+          if (currentRiskState.getTurn() == playerId) {
+            Territory territorySelected = currentRiskState.getTerritoryMap()
+                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
+            if (territorySelected == null) {
+              String style = territory.getAttribute("style");
+              style = style.replaceFirst("fill:#ffffff", "fill:"
+                + Player.PLAYER_COLOR.get(playerId));
+              territory.setAttribute("style", style);
+              territoryUnits.getFirstChild().getFirstChild().setNodeValue("1"); //phase
+              riskPresenter.newTerritorySelected(Territory.SVG_ID_MAP.get(territoryId) + "");
+            } else {
+              if (territorySelected.getPlayerKey().equals(playerKey)) {
+                Window.alert("You already own this territory");
+              } else {
+                Window.alert("Select an empty territory");
+              }
+            }
+          } else {
+            Window.alert("Please wait for your turn");
+          }
+        }
+      };
+      handlerRegistrations.add(((OMNode) territory)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryText)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryUnits)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      return handlerRegistrations;
+    } catch (Exception e) {
+      System.out.println(territoryId);
+      e.printStackTrace();
+      //throw new IllegalStateException("Exception in selecting territory");
+    }
+    return new ArrayList<HandlerRegistration>();
+  }
+  
   @Override
   public void chooseTerritoryForDeployment() {
-    // TODO Auto-generated method stub
-    
+    removeHandlers(newTerritoryHandlers);
+    if (deploymentHandlers.isEmpty()) {
+      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+        deploymentHandlers.addAll(addDeploymentHandlers(territoryId));
+      }
+    }
   }
 
+  private List<HandlerRegistration> addDeploymentHandlers(final String territoryId) {
+    try {
+      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
+      final OMElement territory = boardElt.getElementById(territoryId);
+      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
+      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
+      MouseDownHandler handler = new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          int playerId = riskPresenter.getMyPlayerId();
+          String playerKey = GameResources.playerIdToString(playerId);
+          if (currentRiskState.getTurn() == playerId) {
+            Territory territorySelected = currentRiskState.getTerritoryMap()
+                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
+            if (territorySelected.getPlayerKey() == playerKey) {
+              int units = Integer.parseInt(
+                  territoryUnits.getFirstChild().getFirstChild().getNodeValue()); //phase
+              territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
+              riskPresenter.territoryForDeployment(Territory.SVG_ID_MAP.get(territoryId) + "");
+            } else {
+              Window.alert("Please select your territory");
+            }
+          } else {
+            Window.alert("Please wait for your turn");
+          }
+        }
+      };
+      handlerRegistrations.add(((OMNode) territory)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryText)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryUnits)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      return handlerRegistrations;
+    } catch (Exception e) {
+      System.out.println(territoryId);
+      e.printStackTrace();
+      //throw new IllegalStateException("Exception in selecting territory");
+    }
+    return new ArrayList<HandlerRegistration>();
+  }
+  
   @Override
   public void chooseCardsForTrading() {
     // TODO Auto-generated method stub

@@ -103,6 +103,7 @@ public class RiskPresenter {
   private RiskState riskState;
   private String myPlayerKey;
   private List<Integer> playerIds;
+  private int myPlayerId;
   
   public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
@@ -114,7 +115,7 @@ public class RiskPresenter {
   /** Updates the presenter and the view with the state in updateUI. */
   public void updateUI(UpdateUI updateUI) {
     playerIds = updateUI.getPlayerIds();
-    int myPlayerId = updateUI.getYourPlayerId();
+    myPlayerId = updateUI.getYourPlayerId();
     myPlayerKey = GameResources.playerIdToString(myPlayerId);
     Map<String, Object> state = updateUI.getState();
     if (state.isEmpty()) {
@@ -213,7 +214,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#chooseNewTerritory()}.
    * @param territory
    */
-  void newTerritorySelected(String territory) {
+  public void newTerritorySelected(String territory) {
     container.sendMakeMove(riskLogic.performClaimTerritory(
         riskState, territory, myPlayerKey));
   }
@@ -224,7 +225,7 @@ public class RiskPresenter {
    * {@link View#chooseTerritoryForDeployment()}.
    * @param territory
    */
-  void territoryForDeployment(String territory) {
+  public void territoryForDeployment(String territory) {
     Map<String, Integer> territoryUnitMap = Maps.newHashMap();
     territoryUnitMap.put(territory, 1);
     container.sendMakeMove(riskLogic.performDeployment(
@@ -346,5 +347,9 @@ public class RiskPresenter {
    */
   void endGame() {
     container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
+  }
+  
+  public int getMyPlayerId() {
+    return myPlayerId;
   }
 }

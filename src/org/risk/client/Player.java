@@ -5,10 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 public class Player {
 
+  public static final Map<Integer, String> PLAYER_COLOR = ImmutableMap.<Integer, String>builder()
+    .put(1, "lightskyblue")
+    .put(2, "lightgreen")
+    .put(3, "orange")
+    .put(4, "lightcoral")
+    .put(5, "lightsalmon")
+    .put(6, "khaki")
+    .build();
+      
   private String playerId;
   private List<Integer> cards;
   private int unclaimedUnits;
