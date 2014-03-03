@@ -8,8 +8,6 @@ import org.risk.client.GameApi.Game;
 import org.risk.client.GameApi.IteratingPlayerContainer;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiField;
@@ -56,24 +54,12 @@ public class RiskEntryPoint implements EntryPoint {
         };
         container = new IteratingPlayerContainer(game, selectedIndex + 3);
         RiskGraphics riskGraphics = new RiskGraphics();
-        riskGraphics.setPresenter(riskPresenter);
         riskPresenter = new RiskPresenter(riskGraphics, container, new RiskLogic());
+        //riskGraphics.setPresenter(riskPresenter);
         container.sendGameReady();
         container.updateUi(1);
-        final ListBox playerSelect = new ListBox();
-        for (int i = 1; i <= selectedIndex + 3; ++i) {
-          playerSelect.addItem(i + "");
-        }
-        Label playerSelectLabel = new Label("Select player: ");
-        RootPanel.get("mainDiv").add(playerSelectLabel);
-        RootPanel.get("mainDiv").add(playerSelect);
+        riskGraphics.addPlayerSelection(container, selectedIndex);
         RootPanel.get("mainDiv").add(riskGraphics);
-        playerSelect.addChangeHandler(new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent event) {
-            container.updateUi(playerSelect.getSelectedIndex() + 1);
-          }
-        });
       }
     });
     RootPanel.get("mainDiv").add(label);

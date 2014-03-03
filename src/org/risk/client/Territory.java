@@ -10,7 +10,16 @@ public class Territory {
   
   private String territoryId;
   private String playerKey;
+  private int currentUnits;
   
+  public int getCurrentUnits() {
+    return currentUnits;
+  }
+
+  public void setCurrentUnits(int currentUnits) {
+    this.currentUnits = currentUnits;
+  }
+
   public String getTerritoryId() {
     return territoryId;
   }
@@ -27,9 +36,10 @@ public class Territory {
     this.playerKey = playerKey;
   }
 
-  public Territory(String territoryId, String playerKey) {
+  public Territory(String territoryId, String playerKey, int currentUnits) {
     this.territoryId = territoryId;
     this.playerKey = playerKey;
+    this.currentUnits = currentUnits;
   }
   
   public static final Map<Integer, String> TERRITORY_NAME = ImmutableMap.<Integer, String>builder()

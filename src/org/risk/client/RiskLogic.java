@@ -1019,7 +1019,8 @@ public class RiskLogic {
          Player newPlayer = new Player(playerId, tempPlayersMap);
          playersMap.put(playerId, newPlayer);
          for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
-           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId());
+           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId(), 
+               entry.getValue());
            if (territoryMap.containsKey(entry.getKey())) {
              throw new IllegalStateException(
                  "Territory ID " + entry.getKey() + " occupied by multiple" + "players.");

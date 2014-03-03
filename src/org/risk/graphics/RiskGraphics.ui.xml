@@ -10,7 +10,9 @@
           <g:map ui:field="riskMap">
               <g:area ui:field="indiaArea"/>
           </g:map> -->
+           <g:VerticalPanel ui:field="gameStatus" height="400px" width="180px" />
            <g:HTML ui:field="mapContainer"/> 
+           <g:TabPanel ui:field="playersStatusPanel" height="400px" width="300px" />
            <!-- <svgui:SVGImage ui:field="riskMap" resource="{resources.riskMap}" /> -->
       </g:HorizontalPanel>
     </g:HorizontalPanel>

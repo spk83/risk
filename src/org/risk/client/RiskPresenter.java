@@ -250,7 +250,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#reinforceTerritories()}.
    * @param territoryDelta
    */
-  void territoriesReinforced(Map<String, Integer> territoryDelta) {
+  public void territoriesReinforced(Map<String, Integer> territoryDelta) {
     if (territoryDelta == null) {
       //for skipping the reinforcement phase
       territoryDelta = Maps.<String, Integer>newHashMap();
@@ -264,7 +264,7 @@ public class RiskPresenter {
    * called {@link View#chooseCardsForTrading()}.
    * @param cards being traded
    */
-  void cardsTraded(List<Integer> cards) {
+  public void cardsTraded(List<Integer> cards) {
     if (cards == null || cards.isEmpty()) {
       container.sendMakeMove(riskLogic.skipCardTrade(myPlayerKey));
     } else {
@@ -278,7 +278,7 @@ public class RiskPresenter {
    * @param attackingTerritory
    * @param defendingTerritory
    */
-  void performAttack(String attackingTerritory, String defendingTerritory) {
+  public void performAttack(String attackingTerritory, String defendingTerritory) {
     container.sendMakeMove(riskLogic.performAttack(riskState, Integer.parseInt(attackingTerritory),
         Integer.parseInt(defendingTerritory), myPlayerKey));
   }
@@ -316,7 +316,7 @@ public class RiskPresenter {
    * Peform end attack operations based on result in attack phase.
    * This method is called by view only if the presenter called {@link View#attack()}.
    */
-  void endAttack() {
+  public void endAttack() {
     if (riskState.getTerritoryWinner() != null) {
       container.sendMakeMove(riskLogic.performEndAttack(riskState, myPlayerKey));
     } else {
@@ -351,5 +351,9 @@ public class RiskPresenter {
   
   public int getMyPlayerId() {
     return myPlayerId;
+  }
+  
+  public String getMyPlayerKey() {
+    return myPlayerKey;
   }
 }
