@@ -1,6 +1,7 @@
 package org.risk.graphics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,11 +85,19 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   /*@UiField
   SVGImage riskMap;*/
   
+  
   private Integer currentPlayerId;
   private String currentPhase;
   private RiskState currentRiskState;
   private List<HandlerRegistration> newTerritoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> deploymentHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> reinforceHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> attackHandlers = new ArrayList<HandlerRegistration>();
+  private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
+  private int unclaimedUnits;
+  private Button endPhase;
+  private String attackToTerritory;
+  private String attackFromTerritory;
   
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
@@ -307,20 +316,207 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @Override
   public void chooseCardsForTrading() {
     removeHandlers(deploymentHandlers);
+    Window.alert("Moving to Reinforce phase from card trade phase");
+    riskPresenter.cardsTraded(null);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void reinforceTerritories() {
-    // TODO Auto-generated method stub
+    //removeHandlers(card);
+    if (reinforceHandlers.isEmpty()) {
+      endPhase = new Button("End Reinforce", new ClickHandler() {
+        
+        @Override
+        public void onClick(ClickEvent event) {
+          sendReinforceMap();
+        }
+      });
+      playerArea.add(endPhase);
+      territoryDelta = new HashMap<String, Integer>();
+      unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
+          .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
+          .getUnclaimedUnits();
+      Window.alert("You got " + unclaimedUnits);
+      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+        reinforceHandlers.addAll(addReinforceHandlers(territoryId));
+      }
+    }
+  }
+  
+  private void addToReinforceMap(String territoryId) {
+    Integer deltaUnits = territoryDelta.get(territoryId);
+    if (deltaUnits == null) {
+      territoryDelta.put(territoryId, 1);
+    } else {
+      territoryDelta.put(territoryId, deltaUnits + 1);
+    }
+    unclaimedUnits--;
+    if (unclaimedUnits == 0) {
+      sendReinforceMap();
+    }
     
   }
+  private void sendReinforceMap() {
+    riskPresenter.territoriesReinforced(territoryDelta);
+  }
+
+  private List<HandlerRegistration> addReinforceHandlers(final String territoryId) {
+    try {
+      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
+      final OMElement territory = boardElt.getElementById(territoryId);
+      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
+      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
+      MouseDownHandler handler = new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          int playerId = riskPresenter.getMyPlayerId();
+          String playerKey = GameResources.playerIdToString(playerId);
+          if (currentRiskState.getTurn() == playerId) {
+            Territory territorySelected = currentRiskState.getTerritoryMap()
+                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
+            if (territorySelected.getPlayerKey().equals(playerKey)) {
+              int units = Integer.parseInt(
+                  territoryUnits.getFirstChild().getFirstChild().getNodeValue()); //phase
+              territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
+              addToReinforceMap(Territory.SVG_ID_MAP.get(territoryId) + "");
+            } else {
+              Window.alert("Please select your territory");
+            }
+          } else {
+            Window.alert("Please wait for your turn");
+          }
+        }
+      };
+      handlerRegistrations.add(((OMNode) territory)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryText)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryUnits)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      return handlerRegistrations;
+    } catch (Exception e) {
+      System.out.println(territoryId);
+      e.printStackTrace();
+      //throw new IllegalStateException("Exception in selecting territory");
+    }
+    return new ArrayList<HandlerRegistration>();
+  }
+  
 
   @Override
   public void attack() {
-    // TODO Auto-generated method stub
+    removeHandlers(reinforceHandlers);
+    Window.alert("Attackkkk!!");
+    if (attackHandlers.isEmpty()) {
+      endPhase.removeFromParent();
+      endPhase = new Button("End Attack", new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          riskPresenter.endAttack();
+        }
+      });
+      playerArea.add(endPhase);
+      attackToTerritory = null;
+      attackFromTerritory = null;
+      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+        attackHandlers.addAll(addAttackHandlers(territoryId));
+      }
+      Window.alert("Ready to attack");
+    }
     
   }
 
+  private List<HandlerRegistration> addAttackHandlers(final String territoryId) {
+    try {
+      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
+      final OMElement territory = boardElt.getElementById(territoryId);
+      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
+      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
+      MouseDownHandler handler = new MouseDownHandler() {
+        @Override
+        public void onMouseDown(MouseDownEvent event) {
+          int playerId = riskPresenter.getMyPlayerId();
+          String playerKey = GameResources.playerIdToString(playerId);
+          if (currentRiskState.getTurn() == playerId) {
+            Territory territorySelected = currentRiskState.getTerritoryMap()
+                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
+            if (territorySelected.getPlayerKey().equals(playerKey)) {
+              attackFromTerritorySelected(territoryId);
+            } else {
+              attackToTerritorySelected(territoryId);
+            }
+          } else {
+            Window.alert("Please wait for your turn");
+          }
+        }
+      };
+      handlerRegistrations.add(((OMNode) territory)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryText)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      handlerRegistrations.add(((OMNode) territoryUnits)
+          .addDomHandler(handler, MouseDownEvent.getType()));
+      return handlerRegistrations;
+    } catch (Exception e) {
+      System.out.println(territoryId);
+      e.printStackTrace();
+      //throw new IllegalStateException("Exception in selecting territory");
+    }
+    return new ArrayList<HandlerRegistration>();
+  }
+  
+  private void attackFromTerritorySelected(String territoryId) {
+    Window.alert("selecting attacking territory");
+    OMElement territory = boardElt.getElementById(territoryId);
+    String style = territory.getAttribute("style");
+
+    territoryId = Territory.SVG_ID_MAP.get(territoryId) + "";
+
+    if (attackFromTerritory == null) {
+      int units = ((Player) currentRiskState.getPlayersMap()
+          .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
+          .getTerritoryUnitMap().get(territoryId);
+      if (units < 2) {
+        Window.alert("not enough units to attack");
+        return;
+      }
+      attackFromTerritory = territoryId;
+      style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
+    } else if (attackFromTerritory.equals(territoryId)) {
+      attackFromTerritory = null;
+      style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
+    } else {
+      Window.alert("ignore");
+      //ignore
+    }
+    territory.setAttribute("style", style);
+  } 
+  
+  
+  private void attackToTerritorySelected(String territoryId) {
+    Window.alert("selecting defending territory");
+    OMElement territory = boardElt.getElementById(territoryId);
+    String style = territory.getAttribute("style");
+    
+    if (attackFromTerritory == null) {
+      Window.alert("ignore-return");
+      return;
+    }
+    attackToTerritory = Territory.SVG_ID_MAP.get(territoryId) + "";
+    if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
+        .contains(Integer.parseInt(attackToTerritory))) {
+      style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
+      style = style.replaceFirst("stroke:#000000", "stroke:red");
+      territory.setAttribute("style", style);
+      riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
+      Window.alert("Peform Attack");
+    } else {
+      Window.alert("not adjacent territory");
+      return;
+    }
+  } 
+  
   @Override
   public void moveUnitsAfterAttack() {
     // TODO Auto-generated method stub
