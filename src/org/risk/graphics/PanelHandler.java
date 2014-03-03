@@ -1,6 +1,7 @@
 package org.risk.graphics;
 
 import java.util.List;
+import java.util.Map;
 
 import org.risk.client.Card;
 import org.risk.client.GameResources;
@@ -21,7 +22,7 @@ public final class PanelHandler {
   }
   
   public static Panel getPlayerPanel(CardImages cardImages, RiskState state, 
-      Player player, int currentPlayerId) {
+      Player player, int currentPlayerId, Map<Image, Card> currentPlayerCardImages) {
     String myPlayerKey = player.getPlayerId();
     int myPlayerId = GameResources.playerIdToInt(myPlayerKey);
     VerticalPanel panel = new VerticalPanel();
@@ -46,6 +47,9 @@ public final class PanelHandler {
           Card card = state.getCardMap().get(GameResources.RISK_CARD + cardId);
           Image image = new Image(ImagesHandler.getCardImageResource(cardImages, card));
           image.setSize("60px", "90px");
+          image.setAltText(card.getCardType().name());
+          image.setStyleName("risk-cards");
+          currentPlayerCardImages.put(image, card);
           cardsPanel.add(image);
         }
         panel.add(cardsPanel);

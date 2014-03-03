@@ -1,5 +1,6 @@
 package org.risk.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,5 +70,27 @@ public class Card {
       }
     }
     return 0;
+  }
+  
+  public static List<Card> getCardsById(Map<String, Card> cardMap, List<Integer> cardIds) {
+    List<Card> cards = new ArrayList<Card>();
+    for (int cardId : cardIds) {
+      String cardKey = GameResources.RISK_CARD + cardId;
+      Card card = cardMap.get(cardKey);
+      if (card != null) {
+        cards.add(card);
+      }
+    }
+    return cards;
+  }
+  
+  public static List<Integer> getCardIdsFromCardObjects(List<Card> cardObjects) {
+    List<Integer> cards = new ArrayList<Integer>();
+    for (Card card : cardObjects) {
+      if (card != null) {
+        cards.add(Integer.parseInt(card.cardId.substring(2)));
+      }
+    }
+    return cards;
   }
 }

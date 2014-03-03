@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.risk.client.Card;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskLogic;
@@ -21,9 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.AreaElement;
-import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.dom.client.MapElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,6 +36,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -54,17 +53,17 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       switch(playerID) {
       case "P1":
         for (int i = 0; i < 14; i++) {
-          territoryMap.put(i + "", 1);
+          territoryMap.put(i + "", 6);
         }
         break;
       case "P2": 
         for (int i = 14; i < 28; i++) {
-          territoryMap.put(i + "", 1);
+          territoryMap.put(i + "", 6);
         }
         break;
       case "P3": 
         for (int i = 28; i < 42; i++) {
-          territoryMap.put(i + "", 1);
+          territoryMap.put(i + "", 6);
         }
         break;
       default:
@@ -129,18 +128,16 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @UiField
   TabPanel playersStatusPanel;
   
-  ImageElement imageRiskMap;
-  
-  MapElement riskMap;
-  
-  AreaElement indiaArea;
-  
   private RiskState currentRiskState;
   private List<HandlerRegistration> newTerritoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> deploymentHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> reinforceHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> attackHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
+  private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
+  private List<Card> selectedCards = new ArrayList<Card>();
+  private Button selectCardsButton = new Button("Finish Selecting");
   private int unclaimedUnits;
   private Button endPhase;
   private String attackToTerritory;
@@ -157,6 +154,37 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
     playerArea.setSpacing(5);
+    createSelectCardsButtonHandler();
+  }
+  
+  private void createSelectCardsButtonHandler() {
+    selectCardsButton.addClickHandler(new ClickHandler() {
+      
+      private void cleanup() {
+        selectedCards.clear();
+        removeHandlers(cardHandlers);
+        cardImagesOfCurrentPlayer.clear();
+        gameStatus.remove(selectCardsButton);
+      }
+      
+      @Override
+      public void onClick(ClickEvent event) {
+        if (selectedCards.size() == 0) {
+          cleanup();
+          riskPresenter.cardsTraded(null);
+        } else if (Card.getUnits(selectedCards, currentRiskState.getTradeNumber() + 1) > 0) {
+          List<Integer> selectedIntCards = Card.getCardIdsFromCardObjects(selectedCards);
+          cleanup();
+          riskPresenter.cardsTraded(selectedIntCards);
+        } else {
+          if (Window.confirm("Invalid selection: press OK to continue or Cancel to select "
+              + "again")) {
+            cleanup();
+            riskPresenter.cardsTraded(null);
+          }
+        }
+      }
+    });
   }
   
   public void addPlayerSelection(final IteratingPlayerContainer container, int selectedIndex) {
@@ -195,8 +223,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     int index = 0;
     for (Player player : playersMap.values()) {
       playersStatusPanel.add(PanelHandler.getPlayerPanel(
-          cardImages, currentRiskState, player, riskPresenter.getMyPlayerId()), 
-              player.getPlayerId());
+          cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
+          cardImagesOfCurrentPlayer), player.getPlayerId());
       if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
         index = count;
       }
@@ -211,6 +239,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         diceArea.add(PanelHandler.getNewDicePanel(diceImages, entry.getKey(), entry.getValue()));
       }
     }
+    chooseCardsForTrading();
   }
 
   @Override
@@ -332,11 +361,42 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @Override
   public void chooseCardsForTrading() {
     removeHandlers(deploymentHandlers);
-    Window.alert("Moving to Reinforce phase from card trade phase");
-    riskPresenter.cardsTraded(null);
+    //String playingPlayerKey = riskPresenter.getMyPlayerKey();
+    int playingPlayerId = riskPresenter.getMyPlayerId();
+    int turnPlayerId = currentRiskState.getTurn();
+    String turnPlayerKey = GameResources.playerIdToString(turnPlayerId);
+    if (playingPlayerId == turnPlayerId) {
+      Player currentPlayer = currentRiskState.getPlayersMap().get(turnPlayerKey);
+      List<Integer> playerCards = currentPlayer.getCards();
+      if (playerCards != null && playerCards.size() >= 3) {
+        List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
+        int units = Card.getUnits(cardObjects, currentRiskState.getTradeNumber() + 1);
+        if (units > 0) {
+          for (Map.Entry<Image, Card> imageCard : cardImagesOfCurrentPlayer.entrySet()) { 
+            cardHandlers.add(addCardHandlers(imageCard.getKey(), imageCard.getValue()));
+          }
+        }
+        gameStatus.add(selectCardsButton);
+      }
+    }
+  }
+  
+  private HandlerRegistration addCardHandlers(final Image image, final Card card) {
+    return image.addClickHandler(new ClickHandler() {
+      
+      @Override
+      public void onClick(ClickEvent event) {
+        if (image.getStyleName().equals("risk-cards")) {
+          image.setStyleName("risk-cards-selected");
+          selectedCards.add(card);
+        } else {
+          image.setStyleName("risk-cards");
+          selectedCards.remove(card);
+        }
+      }
+    });
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void reinforceTerritories() {
     //removeHandlers(card);
@@ -425,7 +485,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     removeHandlers(reinforceHandlers);
     Window.alert("Attackkkk!!");
     if (attackHandlers.isEmpty()) {
-      endPhase.removeFromParent();
+      //endPhase.removeFromParent();
       endPhase = new Button("End Attack", new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -525,7 +585,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
       style = style.replaceFirst("stroke:#000000", "stroke:red");
       territory.setAttribute("style", style);
-      riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
+      //riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       Window.alert("Peform Attack");
     } else {
       Window.alert("not adjacent territory");
