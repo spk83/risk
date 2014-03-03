@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.risk.client.Card;
+import org.risk.client.GameApi.IteratingPlayerContainer;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskLogic;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
-import org.risk.client.GameApi.IteratingPlayerContainer;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
@@ -63,7 +63,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         break;
       case "P3": 
         for (int i = 28; i < 42; i++) {
-          territoryMap.put(i + "", 6);
+          territoryMap.put(i + "", 3);
         }
         break;
       default:
@@ -80,7 +80,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     
     Map<String, Object> newStateAtA = ImmutableMap.<String, Object>builder()
-        .put(GameResources.PHASE, GameResources.ADD_UNITS)
+        .put(GameResources.PHASE, GameResources.CARD_TRADE)
         .put("P1", ImmutableMap.<String, Object>of(
             GameResources.CARDS, GameResources.EMPTYLISTINT,
             GameResources.UNCLAIMED_UNITS, 0,
@@ -102,8 +102,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         .put("RC0", "I1")
         .put("RC1", "I4")
         .put("RC2", "I7")
-        .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
-        .put(GameResources.TRADE_NUMBER, 1)
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
     
@@ -129,10 +127,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   TabPanel playersStatusPanel;
   
   private RiskState currentRiskState;
-  private List<HandlerRegistration> newTerritoryHandlers = new ArrayList<HandlerRegistration>();
-  private List<HandlerRegistration> deploymentHandlers = new ArrayList<HandlerRegistration>();
-  private List<HandlerRegistration> reinforceHandlers = new ArrayList<HandlerRegistration>();
-  private List<HandlerRegistration> attackHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
   private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
@@ -142,6 +137,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private Button endPhase;
   private String attackToTerritory;
   private String attackFromTerritory;
+  private boolean claimTerritory = false;
+  private boolean deployment = false;
+  private boolean reinforce = false;
+  private boolean attack = false;
+  boolean flag = false;
   
   public RiskGraphics() {
     currentRiskState = new RiskLogic().gameApiStateToRiskState(
@@ -155,6 +155,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     mapContainer.getElement().appendChild(boardElt.getElement());
     playerArea.setSpacing(5);
     createSelectCardsButtonHandler();
+    addMapHandlers();
+    flag = false;
   }
   
   private void createSelectCardsButtonHandler() {
@@ -185,7 +187,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         }
       }
     });
-  }
+    }
   
   public void addPlayerSelection(final IteratingPlayerContainer container, int selectedIndex) {
     final ListBox playerSelect = new ListBox();
@@ -217,6 +219,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     gameStatus.clear();
     playersStatusPanel.clear();
     riskState = currentRiskState;
+    //currentRiskState = riskState;
+    riskPresenter.setRiskState(riskState);
     changeSVGMap(riskState);
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -239,14 +243,21 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         diceArea.add(PanelHandler.getNewDicePanel(diceImages, entry.getKey(), entry.getValue()));
       }
     }
-    chooseCardsForTrading();
+    if (!flag && riskPresenter.getMyPlayerId() == 3) {
+      Window.alert("inside player s");
+      chooseCardsForTrading();
+      flag = true;
+    }
+    //reinforceTerritories();
+    //attack();
+  
   }
 
-  @Override
-  public void chooseNewTerritory() {
-    if (newTerritoryHandlers.isEmpty()) {
+  
+  private void addMapHandlers() {
+    if (territoryHandlers.isEmpty()) {
       for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
-        newTerritoryHandlers.addAll(addNewTerritoryHandler(territoryId));
+        territoryHandlers.addAll(addTerritoryHandlers(territoryId));
       }
     }
   }
@@ -260,7 +271,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
   }
 
-  private List<HandlerRegistration> addNewTerritoryHandler(final String territoryId) {
+  private List<HandlerRegistration> addTerritoryHandlers(final String territoryId) {
     try {
       List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
       final OMElement territory = boardElt.getElementById(territoryId);
@@ -270,23 +281,15 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         @Override
         public void onMouseDown(MouseDownEvent event) {
           int playerId = riskPresenter.getMyPlayerId();
-          String playerKey = GameResources.playerIdToString(playerId);
           if (currentRiskState.getTurn() == playerId) {
-            Territory territorySelected = currentRiskState.getTerritoryMap()
-                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
-            if (territorySelected == null) {
-              String style = territory.getAttribute("style");
-              style = style.replaceFirst("fill:#ffffff", "fill:"
-                + Player.PLAYER_COLOR.get(playerId));
-              territory.setAttribute("style", style);
-              territoryUnits.getFirstChild().getFirstChild().setNodeValue("1"); //phase
-              riskPresenter.newTerritorySelected(Territory.SVG_ID_MAP.get(territoryId) + "");
-            } else {
-              if (territorySelected.getPlayerKey().equals(playerKey)) {
-                Window.alert("You already own this territory");
-              } else {
-                Window.alert("Select an empty territory");
-              }
+            if (claimTerritory) {
+              claimTerritory(territoryId);
+            } else if (deployment) {
+              deployment(territoryId);
+            } else if (reinforce) {
+              reinforce(territoryId);
+            } else if (attack) {
+              attack(territoryId);
             }
           } else {
             Window.alert("Please wait for your turn");
@@ -305,62 +308,137 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       e.printStackTrace();
     }
     return new ArrayList<HandlerRegistration>();
+  }
+  
+  private void claimTerritory(String territoryName) {
+
+    String playerKey = riskPresenter.getMyPlayerKey();
+    int playerId = riskPresenter.getMyPlayerId();
+    OMElement territory = boardElt.getElementById(territoryName);
+    OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
+    String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
+    Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
+
+    if (territorySelected == null) {
+      String style = territory.getAttribute("style");
+      style = style.replaceFirst("fill:#ffffff", "fill:" + Player.PLAYER_COLOR.get(playerId));
+      territory.setAttribute("style", style);
+      territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
+      claimTerritory = false;
+      riskPresenter.newTerritorySelected(territoryId);
+    } else {
+      if (territorySelected.getPlayerKey().equals(playerKey)) {
+        Window.alert("You already own this territory");
+      } else {
+        Window.alert("Select an empty territory");
+      }
+    }
+  }
+  
+  private void deployment(String territoryName) {
+    String playerKey = riskPresenter.getMyPlayerKey();
+    OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
+    String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
+    Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
+
+    if (territorySelected.getPlayerKey().equals(playerKey)) {
+      int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
+      territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
+      deployment = false;
+      riskPresenter.territoryForDeployment(territoryId);
+    } else {
+      Window.alert("Please select your territory");
+    }
+  }
+  
+  private void reinforce(String territoryName) {
+    String playerKey = riskPresenter.getMyPlayerKey();
+    OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
+    String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
+    Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
+    
+    if (territorySelected.getPlayerKey().equals(playerKey)) {
+      int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
+      territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
+      Integer deltaUnits = territoryDelta.get(territoryId);
+      if (deltaUnits == null) {
+        territoryDelta.put(territoryId, 1);
+      } else {
+        territoryDelta.put(territoryId, deltaUnits + 1);
+      }
+      unclaimedUnits--;
+      Window.alert(unclaimedUnits + "");
+      if (unclaimedUnits == 0) {
+        reinforce = false;
+        riskPresenter.territoriesReinforced(territoryDelta);
+      }
+    } else {
+      Window.alert("Please select your territory");
+    }
+  }
+  
+  private void attack(String territoryName) {
+    String playerKey = riskPresenter.getMyPlayerKey();
+    String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
+    OMElement territory = boardElt.getElementById(territoryName);
+    Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
+    String style = territory.getAttribute("style");
+
+    if (territorySelected.getPlayerKey().equals(playerKey)) {
+      // Attacking territory selected
+      if (attackFromTerritory == null) {
+        int units = ((Player) currentRiskState.getPlayersMap()
+            .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
+            .getTerritoryUnitMap().get(territoryId);
+        if (units < 2) {
+          Window.alert("not enough units to attack");
+          return;
+        }
+        attackFromTerritory = territoryId;
+        style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
+      } else if (attackFromTerritory.equals(territoryId)) {
+        attackFromTerritory = null;
+        style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
+      } else {
+        Window.alert("ignore : own territory already selected");
+        //ignore
+      }
+      territory.setAttribute("style", style);
+      return;
+    } else {
+      // Defending territory selected
+      if (attackFromTerritory == null) {
+        Window.alert("ignore : select attacking territory first");
+        return;
+      }
+      attackToTerritory = territoryId;
+      if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
+          .contains(Integer.parseInt(attackToTerritory))) {
+        style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
+        style = style.replaceFirst("stroke:#000000", "stroke:red");
+        territory.setAttribute("style", style);
+        Window.alert("Peform Attack");
+        attack = false;
+        riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
+      } else {
+        Window.alert("not adjacent territory");
+        return;
+      }
+    }
+  } 
+  
+  @Override
+  public void chooseNewTerritory() {
+    claimTerritory = true;
   }
   
   @Override
   public void chooseTerritoryForDeployment() {
-    removeHandlers(newTerritoryHandlers);
-    if (deploymentHandlers.isEmpty()) {
-      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
-        deploymentHandlers.addAll(addDeploymentHandlers(territoryId));
-      }
-    }
-  }
-
-  private List<HandlerRegistration> addDeploymentHandlers(final String territoryId) {
-    try {
-      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
-      final OMElement territory = boardElt.getElementById(territoryId);
-      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
-      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
-      MouseDownHandler handler = new MouseDownHandler() {
-        @Override
-        public void onMouseDown(MouseDownEvent event) {
-          int playerId = riskPresenter.getMyPlayerId();
-          String playerKey = GameResources.playerIdToString(playerId);
-          if (currentRiskState.getTurn() == playerId) {
-            Territory territorySelected = currentRiskState.getTerritoryMap()
-                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
-            if (territorySelected.getPlayerKey().equals(playerKey)) {
-              int units = Integer.parseInt(
-                  territoryUnits.getFirstChild().getFirstChild().getNodeValue());
-              territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
-              riskPresenter.territoryForDeployment(Territory.SVG_ID_MAP.get(territoryId) + "");
-            } else {
-              Window.alert("Please select your territory");
-            }
-          } else {
-            Window.alert("Please wait for your turn");
-          }
-        }
-      };
-      handlerRegistrations.add(((OMNode) territory)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryText)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryUnits)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      return handlerRegistrations;
-    } catch (Exception e) {
-      System.out.println(territoryId);
-      e.printStackTrace();
-    }
-    return new ArrayList<HandlerRegistration>();
+    deployment = true;
   }
   
   @Override
   public void chooseCardsForTrading() {
-    removeHandlers(deploymentHandlers);
     //String playingPlayerKey = riskPresenter.getMyPlayerKey();
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
@@ -399,200 +477,40 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void reinforceTerritories() {
-    //removeHandlers(card);
-    if (reinforceHandlers.isEmpty()) {
-      endPhase = new Button("End Reinforce", new ClickHandler() {
-        
-        @Override
-        public void onClick(ClickEvent event) {
-          sendReinforceMap();
-        }
-      });
-      playerArea.add(endPhase);
-      territoryDelta = new HashMap<String, Integer>();
-      unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
-          .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
-          .getUnclaimedUnits();
-      Window.alert("You got " + unclaimedUnits);
-      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
-        reinforceHandlers.addAll(addReinforceHandlers(territoryId));
+    territoryDelta = new HashMap<String, Integer>();
+    unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
+        .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
+        .getUnclaimedUnits();
+    Window.alert(riskPresenter.getMyPlayerKey() + " You got " + unclaimedUnits);
+    endPhase = new Button("End Reinforce", new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        reinforce = false;
+        riskPresenter.territoriesReinforced(territoryDelta);
       }
-    }
+    });
+    playerArea.add(endPhase);
+    reinforce = true;
   }
   
-  private void addToReinforceMap(String territoryId) {
-    Integer deltaUnits = territoryDelta.get(territoryId);
-    if (deltaUnits == null) {
-      territoryDelta.put(territoryId, 1);
-    } else {
-      territoryDelta.put(territoryId, deltaUnits + 1);
-    }
-    unclaimedUnits--;
-    if (unclaimedUnits == 0) {
-      sendReinforceMap();
-    }
-    
-  }
-  private void sendReinforceMap() {
-    riskPresenter.territoriesReinforced(territoryDelta);
-  }
-
-  private List<HandlerRegistration> addReinforceHandlers(final String territoryId) {
-    try {
-      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
-      final OMElement territory = boardElt.getElementById(territoryId);
-      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
-      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
-      MouseDownHandler handler = new MouseDownHandler() {
-        @Override
-        public void onMouseDown(MouseDownEvent event) {
-          int playerId = riskPresenter.getMyPlayerId();
-          String playerKey = GameResources.playerIdToString(playerId);
-          if (currentRiskState.getTurn() == playerId) {
-            Territory territorySelected = currentRiskState.getTerritoryMap()
-                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
-            if (territorySelected.getPlayerKey().equals(playerKey)) {
-              int units = Integer.parseInt(
-                  territoryUnits.getFirstChild().getFirstChild().getNodeValue()); //phase
-              territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
-              addToReinforceMap(Territory.SVG_ID_MAP.get(territoryId) + "");
-            } else {
-              Window.alert("Please select your territory");
-            }
-          } else {
-            Window.alert("Please wait for your turn");
-          }
-        }
-      };
-      handlerRegistrations.add(((OMNode) territory)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryText)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryUnits)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      return handlerRegistrations;
-    } catch (Exception e) {
-      System.out.println(territoryId);
-      e.printStackTrace();
-      //throw new IllegalStateException("Exception in selecting territory");
-    }
-    return new ArrayList<HandlerRegistration>();
-  }
-  
-
   @Override
   public void attack() {
-    removeHandlers(reinforceHandlers);
-    Window.alert("Attackkkk!!");
-    if (attackHandlers.isEmpty()) {
-      //endPhase.removeFromParent();
-      endPhase = new Button("End Attack", new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          riskPresenter.endAttack();
-        }
-      });
-      playerArea.add(endPhase);
-      attackToTerritory = null;
-      attackFromTerritory = null;
-      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
-        attackHandlers.addAll(addAttackHandlers(territoryId));
+    attackToTerritory = null;
+    attackFromTerritory = null;
+  
+    endPhase.removeFromParent();
+    endPhase = new Button("End Attack", new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        riskPresenter.endAttack();
       }
-      Window.alert("Ready to attack");
-    }
-    
-  }
-
-  private List<HandlerRegistration> addAttackHandlers(final String territoryId) {
-    try {
-      List<HandlerRegistration> handlerRegistrations = new ArrayList<HandlerRegistration>();
-      final OMElement territory = boardElt.getElementById(territoryId);
-      final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
-      final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
-      MouseDownHandler handler = new MouseDownHandler() {
-        @Override
-        public void onMouseDown(MouseDownEvent event) {
-          int playerId = riskPresenter.getMyPlayerId();
-          String playerKey = GameResources.playerIdToString(playerId);
-          if (currentRiskState.getTurn() == playerId) {
-            Territory territorySelected = currentRiskState.getTerritoryMap()
-                .get(Territory.SVG_ID_MAP.get(territoryId) + "");
-            if (territorySelected.getPlayerKey().equals(playerKey)) {
-              attackFromTerritorySelected(territoryId);
-            } else {
-              attackToTerritorySelected(territoryId);
-            }
-          } else {
-            Window.alert("Please wait for your turn");
-          }
-        }
-      };
-      handlerRegistrations.add(((OMNode) territory)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryText)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      handlerRegistrations.add(((OMNode) territoryUnits)
-          .addDomHandler(handler, MouseDownEvent.getType()));
-      return handlerRegistrations;
-    } catch (Exception e) {
-      System.out.println(territoryId);
-      e.printStackTrace();
-      //throw new IllegalStateException("Exception in selecting territory");
-    }
-    return new ArrayList<HandlerRegistration>();
+    });
+    playerArea.add(endPhase);
+    attack = true;
+    Window.alert("Ready to attack");
   }
   
-  private void attackFromTerritorySelected(String territoryId) {
-    Window.alert("selecting attacking territory");
-    OMElement territory = boardElt.getElementById(territoryId);
-    String style = territory.getAttribute("style");
-
-    territoryId = Territory.SVG_ID_MAP.get(territoryId) + "";
-
-    if (attackFromTerritory == null) {
-      int units = ((Player) currentRiskState.getPlayersMap()
-          .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
-          .getTerritoryUnitMap().get(territoryId);
-      if (units < 2) {
-        Window.alert("not enough units to attack");
-        return;
-      }
-      attackFromTerritory = territoryId;
-      style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
-    } else if (attackFromTerritory.equals(territoryId)) {
-      attackFromTerritory = null;
-      style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
-    } else {
-      Window.alert("ignore");
-      //ignore
-    }
-    territory.setAttribute("style", style);
-  } 
-  
-  
-  private void attackToTerritorySelected(String territoryId) {
-    Window.alert("selecting defending territory");
-    OMElement territory = boardElt.getElementById(territoryId);
-    String style = territory.getAttribute("style");
-    
-    if (attackFromTerritory == null) {
-      Window.alert("ignore-return");
-      return;
-    }
-    attackToTerritory = Territory.SVG_ID_MAP.get(territoryId) + "";
-    if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
-        .contains(Integer.parseInt(attackToTerritory))) {
-      style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
-      style = style.replaceFirst("stroke:#000000", "stroke:red");
-      territory.setAttribute("style", style);
-      //riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
-      Window.alert("Peform Attack");
-    } else {
-      Window.alert("not adjacent territory");
-      return;
-    }
-  } 
-  
+   
   @Override
   public void moveUnitsAfterAttack() {
     // TODO Auto-generated method stub

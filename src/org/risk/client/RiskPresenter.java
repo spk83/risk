@@ -177,7 +177,11 @@ public class RiskPresenter {
   
   RiskState getRiskState() {
     return riskState;
-  }  
+  }
+  
+  public void setRiskState(RiskState riskState) {
+    this.riskState = riskState;
+  }
 
   /**
    * Get the playerId who has the turn.

@@ -22,7 +22,7 @@ public final class GameResources {
   
   public static final Map<Integer, Integer> PLAYERS_UNIT_MAP = ImmutableMap.<Integer, Integer>of(
       2, 40,
-      3, 35,
+      3, 16,
       4, 30,
       5, 25,
       6, 20);
