@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.risk.client.Card;
+import org.risk.client.Attack.AttackResult;
 import org.risk.client.GameApi.IteratingPlayerContainer;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
@@ -39,6 +40,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -79,6 +81,63 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       return keys;
     }
     
+    public static boolean isTerritoryInRange(int territoryId) {
+      if (territoryId >= 0 && territoryId < 42) {
+        return true;
+      }
+      return false;
+    }
+    
+    public static Map<String, Integer> getTerritoriesInRange(
+        int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+            {
+      if (isTerritoryInRange(highestTerritoryIdInclusive) 
+          && isTerritoryInRange(lowestTerritoryIdInclusive)
+              && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
+        Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+        for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+          territoryMap.put(i + "", baseUnits);
+        }
+        return territoryMap;
+      } else {
+        return null;
+        //throw new Exception("Invalid Territory ID");
+      }
+    }
+    
+    Map<String, Object> attackState = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_RESULT).
+        put("P1", ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(0, 10, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, ImmutableList.<String>of("0"))).
+        put("P2", ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(11, 29, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, ImmutableList.<String>of("2"))).
+        put("P3", ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(3, 2, 1)).
+        put(GameResources.DECK, getCardsInRange(0, 43)).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
+        put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, "P1",
+            GameResources.TERRITORY, 5, 
+            GameResources.UNITS, 6)).
+        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
+        put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, "P2",
+            GameResources.TERRITORY, 13, 
+            GameResources.UNITS, 1)).build();
+    
+    
     Map<String, Object> newStateAtA = ImmutableMap.<String, Object>builder()
         .put(GameResources.PHASE, GameResources.CARD_TRADE)
         .put("P1", ImmutableMap.<String, Object>of(
@@ -115,7 +174,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   HorizontalPanel playerArea;
   
   @UiField
-  VerticalPanel diceArea;
+  HorizontalPanel diceAttackPanel;
   
   @UiField
   HTML mapContainer;
@@ -133,6 +192,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
   private List<Card> selectedCards = new ArrayList<Card>();
   private Button selectCardsButton = new Button("Finish Selecting");
+  private Button turnOrderButton = new Button("Continue");
+  private Button continueAttackButton = new Button("Continue");
+  private VerticalPanel attackResultPanel = new VerticalPanel();
+  //private HorizontalPanel diceHorizontalPanel = new HorizontalPanel();
   private int unclaimedUnits;
   private Button endPhase;
   private String attackToTerritory;
@@ -145,7 +208,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   public RiskGraphics() {
     currentRiskState = new RiskLogic().gameApiStateToRiskState(
-        newStateAtA, 3,  ImmutableList.<Integer>of(1, 2, 3));
+        attackState, 3,  ImmutableList.<Integer>of(1, 2, 3));
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -154,7 +217,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
     playerArea.setSpacing(5);
+    diceAttackPanel.setSpacing(20);
+    //diceHorizontalPanel.setBorderWidth(1);
+    /*diceAttackPanel.setBorderWidth(1);
+    diceAttackPanel.setBorderWidth(5);*/
     createSelectCardsButtonHandler();
+    createTurnOrderButton();
+    createContinueAttackButton();
     addMapHandlers();
     flag = false;
   }
@@ -187,7 +256,30 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         }
       }
     });
-    }
+  }
+  
+  private void createTurnOrderButton() {
+    turnOrderButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        gameStatus.remove(turnOrderButton);
+        attackResultPanel.clear();
+        //diceHorizontalPanel.clear();
+        diceAttackPanel.clear();
+        riskPresenter.setTurnOrderMove();
+      }
+    });
+  }
+  
+  private void createContinueAttackButton() {
+    continueAttackButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        gameStatus.remove(continueAttackButton);
+        riskPresenter.attackResultMove();
+      }
+    });
+  }
   
   public void addPlayerSelection(final IteratingPlayerContainer container, int selectedIndex) {
     final ListBox playerSelect = new ListBox();
@@ -218,9 +310,15 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   public void setPlayerState(RiskState riskState) {
     gameStatus.clear();
     playersStatusPanel.clear();
-    riskState = currentRiskState;
+    if (!flag) {
+      //&& riskPresenter.getMyPlayerId() == 3) {
+      //riskState = currentRiskState;
+      riskPresenter.setRiskState(riskState);
+    } else {
+      currentRiskState = riskState;
+    }
     //currentRiskState = riskState;
-    riskPresenter.setRiskState(riskState);
+    
     changeSVGMap(riskState);
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -237,22 +335,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     playersStatusPanel.setSize("300px", "450px");
     playersStatusPanel.selectTab(index);
     gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
-    diceArea.clear();
+    diceAttackPanel.clear();
     if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
       for (Map.Entry<String, List<Integer>> entry : riskState.getDiceResult().entrySet()) {
-        diceArea.add(PanelHandler.getNewDicePanel(diceImages, entry.getKey(), entry.getValue()));
+        diceAttackPanel.add(PanelHandler.getNewDicePanel(
+            diceImages, entry.getKey(), entry.getValue()));
       }
     }
     if (!flag && riskPresenter.getMyPlayerId() == 3) {
       Window.alert("inside player s");
-      chooseCardsForTrading();
+      //chooseCardsForTrading();
+      attackResult();
       flag = true;
     }
     //reinforceTerritories();
     //attack();
   
   }
-
   
   private void addMapHandlers() {
     if (territoryHandlers.isEmpty()) {
@@ -477,10 +576,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void reinforceTerritories() {
-    territoryDelta = new HashMap<String, Integer>();
+    //territoryDelta = new HashMap<String, Integer>();
+    if (territoryDelta == null) {
+      territoryDelta = new HashMap<String, Integer>();
+    }
+    territoryDelta.clear();
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
         .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
-        .getUnclaimedUnits();
+            .getUnclaimedUnits();
     Window.alert(riskPresenter.getMyPlayerKey() + " You got " + unclaimedUnits);
     endPhase = new Button("End Reinforce", new ClickHandler() {
       @Override
@@ -510,6 +613,53 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     Window.alert("Ready to attack");
   }
   
+  @Override
+  public void attackResult() {
+    //diceHorizontalPanel.clear();
+    attackResultPanel.clear();
+    diceAttackPanel.clear();
+    String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
+    String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
+    /*int attackerId = GameResources.playerIdToInt(attackerKey);
+    int defenderId = GameResources.playerIdToInt(defenderKey);*/
+    String attackingTerritory = Territory.TERRITORY_NAME.get(
+        currentRiskState.getAttack().getAttackerTerritoryId());
+    String defendingTerritory = Territory.TERRITORY_NAME.get(
+        currentRiskState.getAttack().getDefenderTerritoryId());
+    String attackerText = attackerKey + " (" + attackingTerritory + ")";
+    String defenderText = defenderKey + " (" + defendingTerritory + ")";
+    
+    Panel attackerDicePanel = PanelHandler.getNewDicePanel(
+        diceImages, attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
+    Panel defenderDicePanel = PanelHandler.getNewDicePanel(
+        diceImages, defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
+ /*   diceHorizontalPanel.add(attackerDicePanel);
+    diceHorizontalPanel.add(defenderDicePanel);*/
+    diceAttackPanel.add(attackerDicePanel);
+    diceAttackPanel.add(defenderDicePanel);
+    AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
+    attackResultPanel.add(new HTML("Attacker lost <b>" + (-1 * attackResult.getDeltaAttack()) 
+        + " units</b>"));
+    attackResultPanel.add(new HTML("Defender lost <b>" + (-1 * attackResult.getDeltaDefend()) 
+        + " units</b>"));
+    
+    if (attackResult.isAttackerATerritoryWinner()) {
+      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " captures " + defendingTerritory 
+          + " </b>"));
+    }
+    if (attackResult.isDefenderOutOfGame()) {
+      attackResultPanel.add(new HTML("<b>Player " + defenderKey + " out of the game</b>"));
+    }
+    if (attackResult.isTradeRequired()) {
+      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
+    }
+    if (attackResult.isAttackerAWinnerOfGame()) {
+      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " wins the game !</b>"));
+    }
+    //diceAttackPanel.add(diceHorizontalPanel);
+    diceAttackPanel.add(attackResultPanel);
+    gameStatus.add(continueAttackButton);
+  }
    
   @Override
   public void moveUnitsAfterAttack() {
@@ -537,15 +687,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @Override
   public void turnOrderMove() {
-    Button button;
-    ClickHandler handler = new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        riskPresenter.setTurnOrderMove();
-      }
-    };
-    button = new Button("Continue", handler);
-    diceArea.add(button);
+    //gameStatus.add(turnOrderButton);
   }
   
   private void changeSVGMap(RiskState riskState) {

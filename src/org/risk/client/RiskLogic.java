@@ -931,7 +931,7 @@ public class RiskLogic {
           GameResources.playerIdToString(lastMovePlayerId));
     }
     
-    //Operations where the player is eliminated and the attacked gets >=6 cards which require
+    //Operations where the player is eliminated and the attacker gets >=6 cards which require
     //a mandatory trade.
     if (attackResult.isTradeRequired()) {
       return performAttackResultOnPlayerElimination(lastState, 

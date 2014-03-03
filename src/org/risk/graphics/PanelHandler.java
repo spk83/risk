@@ -1,5 +1,6 @@
 package org.risk.graphics;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,14 +63,17 @@ public final class PanelHandler {
     VerticalPanel panel = new VerticalPanel();
     panel.setSpacing(5);
     panel.add(new HTML("Turn: " + "<b>" + state.getTurn() + "</b>"));
-    panel.add(new HTML("Turn Order: " + "<b>" + state.getTurnOrder() + "</b>"));
+    if (state.getTurnOrder() != null) {
+      panel.add(new HTML("Turn Order: " + "<b>" + state.getTurnOrder() + "</b>"));
+    }
     panel.add(new HTML("Phase: " + "<b>" + state.getPhase() + "</b>"));
     return panel;
   }
   
-  public static Panel getNewDicePanel(DiceImages diceImages, String userId, List<Integer> rolls) {
+  public static Panel getNewDicePanel(DiceImages diceImages, String text, List<Integer> rolls) {
+    Collections.sort(rolls);
     FlowPanel imageContainer = new FlowPanel();
-    imageContainer.add(new Label(userId));
+    imageContainer.add(new Label(text + "   "));
     for (Integer dots : rolls) {
       Image diceImage = new Image(ImagesHandler.getDiceImageResource(diceImages, dots));
       imageContainer.add(diceImage);

@@ -4,18 +4,18 @@
    xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui' >
   <ui:with field='resources' type='org.risk.graphics.MapSVG' />
   <g:VerticalPanel>
-    <g:HorizontalPanel height="400px">
+    <g:HorizontalPanel height="380px">
       <g:HorizontalPanel ui:field="playerArea">
           <!-- <g:img ui:field="imageRiskMap" />
           <g:map ui:field="riskMap">
               <g:area ui:field="indiaArea"/>
           </g:map> -->
-           <g:VerticalPanel ui:field="gameStatus" height="400px" width="180px" />
+           <g:VerticalPanel ui:field="gameStatus" height="380px" width="180px" />
            <g:HTML ui:field="mapContainer"/> 
-           <g:TabPanel ui:field="playersStatusPanel" height="400px" width="300px" />
+           <g:TabPanel ui:field="playersStatusPanel" height="380px" width="300px" />
            <!-- <svgui:SVGImage ui:field="riskMap" resource="{resources.riskMap}" /> -->
       </g:HorizontalPanel>
     </g:HorizontalPanel>
-    <g:VerticalPanel height="200px" ui:field="diceArea"/>
+    <g:HorizontalPanel ui:field="diceAttackPanel"/>
   </g:VerticalPanel>
 </ui:UiBinder> 

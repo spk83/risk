@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 public class Card {
   public enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
   private Type cardType;
-  @SuppressWarnings("unused")
+  
   private String cardId;
 
   public Card(String cardValue, String cardId) {

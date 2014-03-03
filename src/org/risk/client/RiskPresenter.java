@@ -72,6 +72,8 @@ public class RiskPresenter {
      */
     void attack();
     
+    void attackResult();
+    
     /**
      * If a player wins a territory after attack, he needs to select number of units to move 
      * in the new territory. Player can call {@link #moveUnitsAfterAttack} to do so.
@@ -160,7 +162,7 @@ public class RiskPresenter {
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
         view.attack();
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
-        attackResultMove();
+        view.attackResult();
       } else if (phase.equals(GameResources.ATTACK_TRADE)) {
         view.tradeCardsInAttackPhase();
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
@@ -290,7 +292,7 @@ public class RiskPresenter {
   /**
    * Peform the attack result operations based on the output of attack phase state.
    */
-  void attackResultMove() {
+  public void attackResultMove() {
     container.sendMakeMove(riskLogic.attackResultOperations(
         riskState, GameResources.playerIdToInt(myPlayerKey)));
   }
