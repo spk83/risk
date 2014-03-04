@@ -235,7 +235,12 @@ public class RiskPresenterTest {
   public void testCardTradeByAForA() {
     Map<String, Object> state = getCardTradeState(); 
     List<Integer> cardsBeingTraded = ImmutableList.of(0, 1, 2);
+    Player mockPlayer = Mockito.mock(Player.class);
+    Map<String, Player> playerMap = Maps.newHashMap();
+    playerMap.put(AbstractTest.PLAYER_A, mockPlayer);
 
+    when(mockRiskState.getPlayersMap()).thenReturn(playerMap);
+    when(mockPlayer.getCards()).thenReturn(cardsBeingTraded);
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performTrade(mockRiskState, cardsBeingTraded, AbstractTest.PLAYER_A, null))
@@ -244,6 +249,8 @@ public class RiskPresenterTest {
     riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
     riskPresenter.cardsTraded(cardsBeingTraded);
     
+    verify(mockPlayer).getCards();
+    verify(mockRiskState).getPlayersMap();
     verify(mockView).setPlayerState(mockRiskState);
     verify(mockView).chooseCardsForTrading(false);
     verify(mockRiskLogic).performTrade(
@@ -275,7 +282,12 @@ public class RiskPresenterTest {
   public void testNoCardTradeByAForA() {
     Map<String, Object> state = getCardTradeState();
     List<Integer> cardsBeingTraded = ImmutableList.of();
-    
+    Player mockPlayer = Mockito.mock(Player.class);
+    Map<String, Player> playerMap = Maps.newHashMap();
+    playerMap.put(AbstractTest.PLAYER_A, mockPlayer);
+
+    when(mockRiskState.getPlayersMap()).thenReturn(playerMap);
+    when(mockPlayer.getCards()).thenReturn(cardsBeingTraded);
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.skipCardTrade(AbstractTest.PLAYER_A)).thenReturn(operations);
@@ -283,6 +295,8 @@ public class RiskPresenterTest {
     riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
     riskPresenter.cardsTraded(cardsBeingTraded);
     
+    verify(mockPlayer).getCards();
+    verify(mockRiskState).getPlayersMap();
     verify(mockView).setPlayerState(mockRiskState);
     verify(mockView).chooseCardsForTrading(false);
     verify(mockRiskLogic).skipCardTrade(AbstractTest.PLAYER_A);
@@ -596,8 +610,7 @@ public class RiskPresenterTest {
     riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
     
     verify(mockView).setPlayerState(mockRiskState);
-    verify(mockRiskLogic).attackResultOperations(mockRiskState, AbstractTest.AID);
-    verify(mockContainer).sendMakeMove(operations);
+    verify(mockView).attackResult();
   }
   
   @Test
