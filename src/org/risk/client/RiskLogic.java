@@ -37,8 +37,8 @@ public class RiskLogic {
       checkMoveIsLegal(verifyMove);
       return new VerifyMoveDone();
     } catch (Exception e) {
-      return new VerifyMoveDone();
-      //return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
+      //return new VerifyMoveDone();
+      return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
     }
   }
   
@@ -66,7 +66,8 @@ public class RiskLogic {
     
     // Initial Operations from empty state
     if (lastApiState.isEmpty()) {
-      return getInitialOperations(GameResources.getPlayerKeys(playerIds));
+      //return getInitialOperations(GameResources.getPlayerKeys(playerIds));
+      return getInitialOperations();
     }
     //Converting the lastState from the API to RiskState
     RiskState lastState = 
@@ -950,6 +951,86 @@ public class RiskLogic {
     }
     return null;
   }
+  
+  public List<Operation> getInitialOperations() {
+    List<Operation> operations = Lists.newArrayList();
+    operations.add(new SetTurn(1));
+    operations.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    operations.add(new Set("P1", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, ImmutableList.<Integer>of(),
+        GameResources.TERRITORY, getTerritoriesInRange(0, 13, 6),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1"))));
+    operations.add(new Set("P2", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, ImmutableList.<Integer>of(),
+        GameResources.TERRITORY, getTerritoriesInRange(14, 27, 6),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of("3"))));
+        operations.add(new Set("P3", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, GameResources.EMPTYLISTINT,
+        GameResources.TERRITORY, getTerritoriesInRange(28, 41, 6),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of("5"))));
+        for (int i = 0; i < 44; i++) {
+          operations.add(
+              new Set(GameResources.RISK_CARD + i,
+              GameResources.cardIdToString(i),
+              GameResources.EMPTYLISTINT));
+      }
+        operations.add(new Set(GameResources.DECK, GameResources.getCardsInRange(
+            0, GameResources.TOTAL_RISK_CARDS - 1)));
+        operations.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(1,2,3)));
+    return operations;
+    
+  }
+  
+  private static boolean isTerritoryInRange(int territoryId) {
+    if (territoryId >= 0 && territoryId < 42) {
+      return true;
+    }
+    return false;
+  }
+  
+  private static Map<String, Integer> getTerritoriesInRange(
+      int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+          {
+    if (isTerritoryInRange(highestTerritoryIdInclusive) 
+        && isTerritoryInRange(lowestTerritoryIdInclusive)
+            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
+      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+      for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+        territoryMap.put(i + "", baseUnits);
+      }
+      return territoryMap;
+    } else {
+      return null;
+      //throw new Exception("Invalid Territory ID");
+    }
+  }
+  
+  private static Map<String, Integer> getTerritories(String playerID) {
+    Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+    switch(playerID) {
+    case "P1":
+      for (int i = 0; i < 14; i++) {
+        territoryMap.put(i + "", 6);
+      }
+      break;
+    case "P2": 
+      for (int i = 14; i < 28; i++) {
+        territoryMap.put(i + "", 6);
+      }
+      break;
+    case "P3": 
+      for (int i = 28; i < 42; i++) {
+        territoryMap.put(i + "", 3);
+      }
+      break;
+    default:
+    }
+    return territoryMap;
+  }
+  
   public List<Operation> getInitialOperations(List<String> playerIds) {
     List<Operation> operations = Lists.newArrayList();
 

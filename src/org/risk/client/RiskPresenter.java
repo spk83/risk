@@ -56,7 +56,7 @@ public class RiskPresenter {
      * Asks the player to select 3 cards for trading.
      * Player can finish selecting cards by calling {@link #cardsTraded}.
      */
-    void chooseCardsForTrading();
+    void chooseCardsForTrading(boolean mandatoryCardSelection);
     
     /**
      * Asks the player to select territories to reinforce.
@@ -84,7 +84,7 @@ public class RiskPresenter {
      * If player defeated an opponent and gains his RISK cards, he might have to trade cards if 
      * he has more than 5 cards now. To do so, player can call {@link #attackTradeMove} to do so.
      */
-    void tradeCardsInAttackPhase();
+   /* void tradeCardsInAttackPhase();*/
     
     /**
      * Player can perform fortification by calling {@link #fortifyMove} with territories and 
@@ -106,6 +106,8 @@ public class RiskPresenter {
   private String myPlayerKey;
   private List<Integer> playerIds;
   private int myPlayerId;
+  private String currentPhase;
+  private int turnPlayerId;
   
   public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
@@ -129,8 +131,7 @@ public class RiskPresenter {
       return;
     }
     List<Operation> operations = updateUI.getLastMove();
-    int turnPlayerId = getTurnPlayer(operations);
-    
+    turnPlayerId = getTurnPlayer(operations);
     riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playerIds);
 
     if (updateUI.isViewer()) {
@@ -147,14 +148,16 @@ public class RiskPresenter {
     // If it's your turn, call appropriate method for next move based on current phase in state
     if (turnPlayerId == myPlayerId) {
       String phase = (String) state.get(GameResources.PHASE);
+      currentPhase = phase;
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
         view.turnOrderMove();
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
         view.chooseNewTerritory();
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
         view.chooseTerritoryForDeployment();
-      } else if (phase.equals(GameResources.CARD_TRADE)) {
-        view.chooseCardsForTrading();
+      } else if (phase.equals(GameResources.CARD_TRADE) 
+          || phase.equals(GameResources.ATTACK_TRADE)) {
+        view.chooseCardsForTrading(isCardSelectionMandatory());
       } else if (phase.equals(GameResources.ADD_UNITS)) {
         addUnits();
       } else if (phase.equals(GameResources.REINFORCE)) {
@@ -163,8 +166,6 @@ public class RiskPresenter {
         view.attack();
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
         view.attackResult();
-      } else if (phase.equals(GameResources.ATTACK_TRADE)) {
-        view.tradeCardsInAttackPhase();
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
         view.reinforceTerritories();
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
@@ -177,6 +178,16 @@ public class RiskPresenter {
     }
   }
   
+  private boolean isCardSelectionMandatory() {
+    if (currentPhase.equals(GameResources.ATTACK_TRADE)) {
+      return true;
+    } 
+    Player myPlayer = riskState.getPlayersMap().get(myPlayerKey);
+    if (myPlayer.getCards().size() >= GameResources.MAX_CARDS_IN_ATTACK_TRADE - 1) {
+      return true;
+    }
+    return false;
+  }
   RiskState getRiskState() {
     return riskState;
   }
@@ -204,7 +215,8 @@ public class RiskPresenter {
    * @param playerIds
    */
   private void sendInitialMove(List<Integer> playerIds) {
-    container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds)));
+   //container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds)));
+    container.sendMakeMove(riskLogic.getInitialOperations());
   }
   
   /**
@@ -271,10 +283,14 @@ public class RiskPresenter {
    * @param cards being traded
    */
   public void cardsTraded(List<Integer> cards) {
-    if (cards == null || cards.isEmpty()) {
-      container.sendMakeMove(riskLogic.skipCardTrade(myPlayerKey));
-    } else {
-      container.sendMakeMove(riskLogic.performTrade(riskState, cards, myPlayerKey, null));
+    if (currentPhase.equals(GameResources.CARD_TRADE)) {
+      if (cards == null || cards.isEmpty()) {
+        container.sendMakeMove(riskLogic.skipCardTrade(myPlayerKey));
+      } else {
+        container.sendMakeMove(riskLogic.performTrade(riskState, cards, myPlayerKey, null));
+      }
+    } else if (currentPhase.equals(GameResources.ATTACK_TRADE)) {
+      attackTradeMove(cards);
     }
   }
   
@@ -302,7 +318,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#moveUnitsAfterAttack()}.
    * @param newUnitsAtUnclaimed
    */
-  void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
+  public void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
     container.sendMakeMove(riskLogic.performAttackOccupy(
         riskState, newUnitsAtUnclaimed, myPlayerKey));
   }
@@ -313,7 +329,7 @@ public class RiskPresenter {
    * {@link View#tradeCardsInAttackPhase()}.
    * @param cardsToBeTraded
    */
-  void attackTradeMove(List<Integer> cardsToBeTraded) {
+  private void attackTradeMove(List<Integer> cardsToBeTraded) {
     container.sendMakeMove(riskLogic.performAttackTrade(
         riskState, cardsToBeTraded, myPlayerKey, null));
   }
@@ -336,7 +352,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#fortify()}.
    * @param territoryDelta
    */
-  void fortifyMove(Map<String, Integer> territoryDelta) {
+  public void fortifyMove(Map<String, Integer> territoryDelta) {
     if (territoryDelta != null && !territoryDelta.isEmpty()) {
       container.sendMakeMove(riskLogic.performFortify(
           riskState, territoryDelta, myPlayerKey));
@@ -351,7 +367,7 @@ public class RiskPresenter {
    * Perform end game operations.
    * This method is called by view only if the presenter called {@link View#endGame()}.
    */
-  void endGame() {
+  public void endGame() {
     container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
   }
   
