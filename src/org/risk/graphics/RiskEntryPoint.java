@@ -6,8 +6,6 @@ import org.risk.client.RiskLogic;
 import org.risk.client.RiskPresenter;
 import org.risk.client.GameApi.Game;
 import org.risk.client.GameApi.IteratingPlayerContainer;
-import org.risk.client.TempView;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

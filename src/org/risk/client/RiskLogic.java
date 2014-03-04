@@ -1,6 +1,7 @@
 package org.risk.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -244,7 +245,7 @@ public class RiskLogic {
     check(tradedCardsInt.size() == 3, tradedCards);
     List<Operation> move = Lists.newArrayList();
     int continuousTradeNumber = lastState.getContinuousTrade();
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
         GameResources.CARDS, player.getCards(),
@@ -320,6 +321,10 @@ public class RiskLogic {
     attackOperations.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
         attack.getAttackerTerritoryId()));
     attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
+    for (int i : defender.getCards()) {
+      attackOperations.add(new SetVisibility(GameResources.RISK_CARD + i, 
+          ImmutableList.<Integer>of(GameResources.playerIdToInt(attacker.getPlayerId()))));
+    }
     for (int dice = 0; dice < attack.getAttackerDiceRolls().size(); ++dice) {
       attackOperations.add(new Delete(
           GameResources.ATTACKER + GameResources.DICE_ROLL + (dice + 1)));
@@ -424,6 +429,10 @@ public class RiskLogic {
     attackOperations.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
         attack.getAttackerTerritoryId()));
     attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
+    for (int i : defender.getCards()) {
+      attackOperations.add(new SetVisibility(GameResources.RISK_CARD + i, 
+          ImmutableList.<Integer>of(GameResources.playerIdToInt(attacker.getPlayerId()))));
+    }
     for (int dice = 0; dice < attack.getAttackerDiceRolls().size(); ++dice) {
       attackOperations.add(new Delete(
           GameResources.ATTACKER + GameResources.DICE_ROLL + (dice + 1)));
@@ -472,7 +481,7 @@ public class RiskLogic {
         }
       }
     }
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     List<Operation> attackOperations = Lists.newArrayList();
     attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     attackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
@@ -612,7 +621,7 @@ public class RiskLogic {
         playerIdToString);
     endAttackOperations.add(new SetTurn(playerId));
     Player player = lastState.getPlayersMap().get(playerIdToString);
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     int card = Integer.parseInt(deck.get(0).substring(2));
     player.getCards().add(card);
     Collections.sort(player.getCards());
@@ -729,7 +738,7 @@ public class RiskLogic {
     int addUnits = GameResources.getNewUnits(
         player.getTerritoryUnitMap().size(), player.getContinent());
     player.setUnclaimedUnits(unclaimedTerritoryOld + addUnits);
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0));
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1));
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2));
@@ -958,19 +967,19 @@ public class RiskLogic {
     operations.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
     operations.add(new Set("P1", ImmutableMap.<String, Object>of(
         GameResources.CARDS, ImmutableList.<Integer>of(),
-        GameResources.TERRITORY, getTerritoriesInRange(0, 13, 6),
+        GameResources.TERRITORY, getTerritoriesInRange(0, 38, 6),
         GameResources.UNCLAIMED_UNITS, 0,
-        GameResources.CONTINENT, ImmutableList.<String>of("0", "1"))));
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "3", "4"))));
     operations.add(new Set("P2", ImmutableMap.<String, Object>of(
         GameResources.CARDS, ImmutableList.<Integer>of(),
-        GameResources.TERRITORY, getTerritoriesInRange(14, 27, 6),
+        GameResources.TERRITORY, getTerritoriesInRange(39, 40, 1),
         GameResources.UNCLAIMED_UNITS, 0,
-        GameResources.CONTINENT, ImmutableList.<String>of("3"))));
+        GameResources.CONTINENT, ImmutableList.<String>of())));
         operations.add(new Set("P3", ImmutableMap.<String, Object>of(
         GameResources.CARDS, GameResources.EMPTYLISTINT,
-        GameResources.TERRITORY, getTerritoriesInRange(28, 41, 6),
+        GameResources.TERRITORY, getTerritoriesInRange(41, 41, 1),
         GameResources.UNCLAIMED_UNITS, 0,
-        GameResources.CONTINENT, ImmutableList.<String>of("5"))));
+        GameResources.CONTINENT, ImmutableList.<String>of())));
         for (int i = 0; i < 44; i++) {
           operations.add(
               new Set(GameResources.RISK_CARD + i,
@@ -979,7 +988,7 @@ public class RiskLogic {
       }
         operations.add(new Set(GameResources.DECK, GameResources.getCardsInRange(
             0, GameResources.TOTAL_RISK_CARDS - 1)));
-        operations.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(1,2,3)));
+        operations.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(1, 2, 3)));
     return operations;
     
   }
@@ -1186,8 +1195,8 @@ public class RiskLogic {
 
   private void check(boolean val, Object... debugArguments) {
     if (!val) {
-      throw new RuntimeException("Hacker found");
-          //+ Arrays.toString(debugArguments));
+      throw new RuntimeException("Hacker found" 
+          + Arrays.toString(debugArguments));
     }
   }
 
