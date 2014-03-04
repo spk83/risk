@@ -38,7 +38,6 @@ public class RiskLogic {
       checkMoveIsLegal(verifyMove);
       return new VerifyMoveDone();
     } catch (Exception e) {
-      //return new VerifyMoveDone();
       return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
     }
   }
@@ -67,8 +66,8 @@ public class RiskLogic {
     
     // Initial Operations from empty state
     if (lastApiState.isEmpty()) {
-      //return getInitialOperations(GameResources.getPlayerKeys(playerIds));
-      return getInitialOperations();
+      return getInitialOperations(GameResources.getPlayerKeys(playerIds));
+      //return getInitialOperations();
     }
     //Converting the lastState from the API to RiskState
     RiskState lastState = 
@@ -883,6 +882,15 @@ public class RiskLogic {
     } else {
       nextPlayerIndex++;
     }
+    
+    while (!isDeploymentDone && lastState.getPlayersMap()
+        .get(GameResources.playerIdToString(turnOrder.get(nextPlayerIndex)))
+        .getUnclaimedUnits() == 0) {
+      nextPlayerIndex++;
+      if (nextPlayerIndex == (turnOrder.size() - 1)) {
+        nextPlayerIndex = 0;
+      }
+    }
     move.add(new SetTurn(turnOrder.get(nextPlayerIndex)));
     move.add(new Set(playerKey, ImmutableMap.<String, Object>of(
         GameResources.CARDS, playerMap.getCards(),
@@ -963,6 +971,7 @@ public class RiskLogic {
     return null;
   }
   
+  // Only for testing
   public List<Operation> getInitialOperations() {
     List<Operation> operations = Lists.newArrayList();
     operations.add(new SetTurn(1));
@@ -977,7 +986,7 @@ public class RiskLogic {
         GameResources.TERRITORY, getTerritoriesInRange(40, 40, 1),
         GameResources.UNCLAIMED_UNITS, 0,
         GameResources.CONTINENT, ImmutableList.<String>of("3"))));
-        operations.add(new Set("P3", ImmutableMap.<String, Object>of(
+    operations.add(new Set("P3", ImmutableMap.<String, Object>of(
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.TERRITORY, getTerritoriesInRange(41, 41, 1),
         GameResources.UNCLAIMED_UNITS, 0,

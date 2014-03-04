@@ -67,7 +67,8 @@ public final class PanelHandler {
     if (state.getTurnOrder() != null) {
       panel.add(new HTML("Turn Order: " + "<b>" + state.getTurnOrder() + "</b>"));
     }
-    panel.add(new HTML("Phase: " + "<b>" + state.getPhase() + "</b>"));
+    panel.add(new HTML("Phase: " + "<b>" + GameResources.UI_PHASE_MAPPING.get(state.getPhase()) 
+        + "</b>"));
     return panel;
   }
   
