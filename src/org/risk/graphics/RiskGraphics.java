@@ -273,8 +273,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   boolean flag = false;
   
   public RiskGraphics() {
-    currentRiskState = new RiskLogic().gameApiStateToRiskState(
-        hasToTrade1, 1,  ImmutableList.<Integer>of(1, 2, 3));
+    /*currentRiskState = new RiskLogic().gameApiStateToRiskState(
+        hasToTrade1, 1,  ImmutableList.<Integer>of(1, 2, 3));*/
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -388,8 +388,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else {
       currentRiskState = riskState;
     }*/
-    //currentRiskState = riskState;
-    riskState = currentRiskState;
+    currentRiskState = riskState;
+    //riskState = currentRiskState;
     changeSVGMap(riskState);
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -420,7 +420,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       flag = true;
     }*/
     //attackResult();
-    chooseCardsForTrading(true);
+    //chooseCardsForTrading(true);
     //reinforceTerritories();
     //attack();
   

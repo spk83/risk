@@ -6,6 +6,7 @@ import org.risk.client.RiskLogic;
 import org.risk.client.RiskPresenter;
 import org.risk.client.GameApi.Game;
 import org.risk.client.GameApi.IteratingPlayerContainer;
+import org.risk.client.TempView;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -54,6 +55,7 @@ public class RiskEntryPoint implements EntryPoint {
         };
         container = new IteratingPlayerContainer(game, selectedIndex + 3);
         RiskGraphics riskGraphics = new RiskGraphics();
+        //riskPresenter = new RiskPresenter(new TempView(), container, new RiskLogic());
         riskPresenter = new RiskPresenter(riskGraphics, container, new RiskLogic());
         //riskGraphics.setPresenter(riskPresenter);
         container.sendGameReady();

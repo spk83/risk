@@ -215,7 +215,8 @@ public class RiskPresenter {
    * @param playerIds
    */
   private void sendInitialMove(List<Integer> playerIds) {
-    container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds)));
+   //container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds)));
+    container.sendMakeMove(riskLogic.getInitialOperations());
   }
   
   /**
