@@ -143,7 +143,7 @@ public class AbstractTest {
   /*
    * This is a helper method which returns a list of RISK cards of given range.
    */
-  protected static List<String> getCardsInRange(int fromInclusive, int toInclusive) {
+  public static List<String> getCardsInRange(int fromInclusive, int toInclusive) {
     List<String> keys = Lists.newArrayList();
     for (int i = fromInclusive; i <= toInclusive; i++) {
       keys.add(GameResources.RISK_CARD + i);
@@ -163,7 +163,7 @@ public class AbstractTest {
   /* 
    * This is a helper method to get list of territories for a playerID.
    */
-  protected static Map<String, Integer> getTerritories(String playerID) {
+  public static Map<String, Integer> getTerritories(String playerID) {
     Map<String, Integer> territoryMap = new HashMap<String, Integer>();
     switch(playerID) {
     case "P1":

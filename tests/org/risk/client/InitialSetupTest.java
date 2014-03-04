@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.risk.client.GameApi.Delete;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
 import org.risk.client.GameApi.SetTurn;
@@ -76,10 +77,15 @@ public class InitialSetupTest extends AbstractTest {
     
     Map<String, Object> state = stateBuilder.build();
     
-    List<Operation> setupTurnOrder = ImmutableList.<Operation>of(
-        new SetTurn(CID),
-        new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY),
-        new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)));
+    List<Operation> setupTurnOrder = Lists.newArrayList();
+    setupTurnOrder.add(new SetTurn(CID));
+    List<String> deleteKeys = GameResources.getDiceRollKeys(GameResources.getPlayerKeys(
+        ImmutableList.<Integer>of(AID, BID, CID)));
+    for (String deleteKey : deleteKeys) {
+      setupTurnOrder.add(new Delete(deleteKey));
+    }
+    setupTurnOrder.add(new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY));
+    setupTurnOrder.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)));
     
     // Check valid move
     assertMoveOk(move(AID, state, setupTurnOrder));

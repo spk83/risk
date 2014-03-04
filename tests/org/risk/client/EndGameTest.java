@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.risk.client.GameApi.Operation;
 import org.risk.client.GameApi.Set;
 import org.risk.client.GameApi.EndGame;
+import org.risk.client.GameApi.SetTurn;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -32,7 +33,9 @@ public class EndGameTest extends AbstractTest {
         .build();
         
     List<Operation> claimEndGameByC = ImmutableList.<Operation>of(
-        new EndGame(CID));
+        new SetTurn(CID),
+        new EndGame(CID),
+        new Set(GameResources.PHASE, GameResources.GAME_ENDED));
 
     assertMoveOk(move(CID, state, claimEndGameByC));
     

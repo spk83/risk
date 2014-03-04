@@ -5,3 +5,8 @@
 *.war
 *.ear
 /bin
+/gwt-unitCache
+/.gwt
+/lib
+/.classpath
+/.DS_Store

@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+   xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui' >
+  <ui:with field='resources' type='org.risk.graphics.MapSVG' />
+  <g:VerticalPanel>
+    <g:HorizontalPanel height="380px">
+      <g:HorizontalPanel ui:field="playerArea">
+           <g:VerticalPanel ui:field="gameStatus" height="380px" width="180px" />
+           <g:HTML ui:field="mapContainer"/> 
+           <g:VerticalPanel>
+             <g:TabPanel ui:field="playersStatusPanel" width="300px" />
+             <g:TabPanel ui:field="instructions" width="300 px" />
+           </g:VerticalPanel>
+      </g:HorizontalPanel>
+    </g:HorizontalPanel>
+    <g:HorizontalPanel ui:field="diceAttackPanel"/>
+  </g:VerticalPanel>
+</ui:UiBinder> 

@@ -1,6 +1,7 @@
 package org.risk.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ public class RiskLogic {
     // Initial Operations from empty state
     if (lastApiState.isEmpty()) {
       return getInitialOperations(GameResources.getPlayerKeys(playerIds));
+      //return getInitialOperations();
     }
     //Converting the lastState from the API to RiskState
     RiskState lastState = 
@@ -74,7 +76,7 @@ public class RiskLogic {
     if (lastState.getPhase().equals(GameResources.SET_TURN_ORDER)) {
       
       //Getting operations for setting the turn order of all the players
-      return setTurnOrderMove(lastState); 
+      return setTurnOrderMove(lastState, GameResources.getPlayerKeys(playerIds)); 
     } else if (lastState.getPhase().equals(GameResources.CLAIM_TERRITORY)) {
       
       //Getting operations when a player claims a territory at inital setup of the game
@@ -242,7 +244,7 @@ public class RiskLogic {
     check(tradedCardsInt.size() == 3, tradedCards);
     List<Operation> move = Lists.newArrayList();
     int continuousTradeNumber = lastState.getContinuousTrade();
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     move.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     move.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
         GameResources.CARDS, player.getCards(),
@@ -318,6 +320,10 @@ public class RiskLogic {
     attackOperations.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
         attack.getAttackerTerritoryId()));
     attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
+    for (int i : defender.getCards()) {
+      attackOperations.add(new SetVisibility(GameResources.RISK_CARD + i, 
+          ImmutableList.<Integer>of(GameResources.playerIdToInt(attacker.getPlayerId()))));
+    }
     for (int dice = 0; dice < attack.getAttackerDiceRolls().size(); ++dice) {
       attackOperations.add(new Delete(
           GameResources.ATTACKER + GameResources.DICE_ROLL + (dice + 1)));
@@ -347,7 +353,9 @@ public class RiskLogic {
     Player player = lastState.getPlayersMap().get(playerIdToString);
     check(player.getContinent().size() == Continent.CONTINENT_NAMES.size() - 1);
     check(player.getTerritoryUnitMap().size() == GameResources.TOTAL_TERRITORIES - 1);
+    endGameOperations.add(new SetTurn(lastState.getTurn()));
     endGameOperations.add(new EndGame(GameResources.playerIdToInt(playerIdToString)));
+    endGameOperations.add(new Set(GameResources.PHASE, GameResources.GAME_ENDED));
     return endGameOperations;
   }
 
@@ -422,6 +430,10 @@ public class RiskLogic {
     attackOperations.add(new Set(GameResources.LAST_ATTACKING_TERRITORY, 
         attack.getAttackerTerritoryId()));
     attackOperations.add(new Set(GameResources.TERRITORY_WINNER, attack.getAttackerPlayerId()));
+    for (int i : defender.getCards()) {
+      attackOperations.add(new SetVisibility(GameResources.RISK_CARD + i, 
+          ImmutableList.<Integer>of(GameResources.playerIdToInt(attacker.getPlayerId()))));
+    }
     for (int dice = 0; dice < attack.getAttackerDiceRolls().size(); ++dice) {
       attackOperations.add(new Delete(
           GameResources.ATTACKER + GameResources.DICE_ROLL + (dice + 1)));
@@ -470,7 +482,7 @@ public class RiskLogic {
         }
       }
     }
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     List<Operation> attackOperations = Lists.newArrayList();
     attackOperations.add(new SetTurn(GameResources.playerIdToInt(playerIdToString)));
     attackOperations.add(new Set(playerIdToString, ImmutableMap.<String, Object>of(
@@ -610,7 +622,7 @@ public class RiskLogic {
         playerIdToString);
     endAttackOperations.add(new SetTurn(playerId));
     Player player = lastState.getPlayersMap().get(playerIdToString);
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     int card = Integer.parseInt(deck.get(0).substring(2));
     player.getCards().add(card);
     Collections.sort(player.getCards());
@@ -727,7 +739,7 @@ public class RiskLogic {
     int addUnits = GameResources.getNewUnits(
         player.getTerritoryUnitMap().size(), player.getContinent());
     player.setUnclaimedUnits(unclaimedTerritoryOld + addUnits);
-    List<String> deck = lastState.getDeck();
+    List<String> deck = Lists.newArrayList(lastState.getDeck());
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(0));
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(1));
     deck.add(GameResources.RISK_CARD + lastState.getCardsTraded().get().get(2));
@@ -855,8 +867,8 @@ public class RiskLogic {
     check(differenceTerritoryMap.size() == 1, differenceTerritoryMap);
     check(differenceTerritoryMap.entrySet().iterator().next().getValue() == 1, 
         differenceTerritoryMap);
-    oldTerritoryMap.put(differenceTerritoryMap.entrySet().iterator().next().getKey(), 
-        oldTerritoryMap.entrySet().iterator().next().getValue() + 1);
+    String key = differenceTerritoryMap.entrySet().iterator().next().getKey();
+    oldTerritoryMap.put(key, oldTerritoryMap.get(key) + 1);
     boolean isDeploymentDone = true;
     for (Entry<String, Player> playerStateMap : lastState.getPlayersMap().entrySet()) {
       isDeploymentDone = isDeploymentDone && playerStateMap.getValue().getUnclaimedUnits() == 0;
@@ -870,6 +882,15 @@ public class RiskLogic {
     } else {
       nextPlayerIndex++;
     }
+    
+    while (!isDeploymentDone && lastState.getPlayersMap()
+        .get(GameResources.playerIdToString(turnOrder.get(nextPlayerIndex)))
+        .getUnclaimedUnits() == 0) {
+      nextPlayerIndex++;
+      if (nextPlayerIndex == (turnOrder.size() - 1)) {
+        nextPlayerIndex = 0;
+      }
+    }
     move.add(new SetTurn(turnOrder.get(nextPlayerIndex)));
     move.add(new Set(playerKey, ImmutableMap.<String, Object>of(
         GameResources.CARDS, playerMap.getCards(),
@@ -882,7 +903,7 @@ public class RiskLogic {
     return move;
   }
 
-  List<Operation> setTurnOrderMove(RiskState lastState) {
+  List<Operation> setTurnOrderMove(RiskState lastState, List<String> playerIds) {
     List<Operation> turnOrderMove = Lists.newArrayList();
     int nextTurn;
     ImmutableSortedSet<Integer> turnOrder;
@@ -900,11 +921,17 @@ public class RiskLogic {
         Functions.forMap(result)).compound(Ordering.natural());
     ImmutableSortedMap<Integer, Integer> resultMap = ImmutableSortedMap.copyOf(
         result, valueComparator);
-    turnOrder = resultMap.descendingKeySet();
-    nextTurn = turnOrder.first();
+    turnOrder = resultMap.keySet();
+    List<Integer> turnOrderList = Lists.newArrayList(turnOrder.asList());
+    Collections.reverse(turnOrderList);
+    nextTurn = turnOrderList.get(0);
     turnOrderMove.add(new SetTurn(nextTurn));
+    List<String> deleteKeys = GameResources.getDiceRollKeys(playerIds);
+    for (String deleteKey : deleteKeys) {
+      turnOrderMove.add(new Delete(deleteKey));
+    }
     turnOrderMove.add(new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY));
-    turnOrderMove.add(new Set(GameResources.TURN_ORDER, turnOrder.asList()));
+    turnOrderMove.add(new Set(GameResources.TURN_ORDER, turnOrderList));
     return turnOrderMove;
   }
 
@@ -924,7 +951,7 @@ public class RiskLogic {
           GameResources.playerIdToString(lastMovePlayerId));
     }
     
-    //Operations where the player is eliminated and the attacked gets >=6 cards which require
+    //Operations where the player is eliminated and the attacker gets >=6 cards which require
     //a mandatory trade.
     if (attackResult.isTradeRequired()) {
       return performAttackResultOnPlayerElimination(lastState, 
@@ -943,6 +970,64 @@ public class RiskLogic {
     }
     return null;
   }
+  
+  // Only for testing
+  public List<Operation> getInitialOperations() {
+    List<Operation> operations = Lists.newArrayList();
+    operations.add(new SetTurn(1));
+    operations.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
+    operations.add(new Set("P1", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, ImmutableList.<Integer>of(),
+        GameResources.TERRITORY, getTerritoriesInRange(0, 39, 10),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4"))));
+    operations.add(new Set("P2", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, ImmutableList.<Integer>of(),
+        GameResources.TERRITORY, getTerritoriesInRange(40, 40, 1),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of("3"))));
+    operations.add(new Set("P3", ImmutableMap.<String, Object>of(
+        GameResources.CARDS, GameResources.EMPTYLISTINT,
+        GameResources.TERRITORY, getTerritoriesInRange(41, 41, 1),
+        GameResources.UNCLAIMED_UNITS, 0,
+        GameResources.CONTINENT, ImmutableList.<String>of())));
+        for (int i = 0; i < 44; i++) {
+          operations.add(
+              new Set(GameResources.RISK_CARD + i,
+              GameResources.cardIdToString(i),
+              GameResources.EMPTYLISTINT));
+      }
+        operations.add(new Set(GameResources.DECK, GameResources.getCardsInRange(
+            0, GameResources.TOTAL_RISK_CARDS - 1)));
+        operations.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(1, 2, 3)));
+    return operations;
+    
+  }
+  
+  private static boolean isTerritoryInRange(int territoryId) {
+    if (territoryId >= 0 && territoryId < 42) {
+      return true;
+    }
+    return false;
+  }
+  
+  private static Map<String, Integer> getTerritoriesInRange(
+      int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
+          {
+    if (isTerritoryInRange(highestTerritoryIdInclusive) 
+        && isTerritoryInRange(lowestTerritoryIdInclusive)
+            && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
+      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
+      for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
+        territoryMap.put(i + "", baseUnits);
+      }
+      return territoryMap;
+    } else {
+      return null;
+      //throw new Exception("Invalid Territory ID");
+    }
+  }
+  
   public List<Operation> getInitialOperations(List<String> playerIds) {
     List<Operation> operations = Lists.newArrayList();
 
@@ -1013,7 +1098,8 @@ public class RiskLogic {
          Player newPlayer = new Player(playerId, tempPlayersMap);
          playersMap.put(playerId, newPlayer);
          for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
-           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId());
+           Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId(), 
+               entry.getValue());
            if (territoryMap.containsKey(entry.getKey())) {
              throw new IllegalStateException(
                  "Territory ID " + entry.getKey() + " occupied by multiple" + "players.");
@@ -1055,7 +1141,9 @@ public class RiskLogic {
           j++;
         }
       }
-      diceResultMap.put(playerId, results);
+      if (!results.isEmpty()) {
+        diceResultMap.put(playerId, results);
+      }
     }
     riskState.setDiceResult(diceResultMap);
     
@@ -1095,8 +1183,8 @@ public class RiskLogic {
 
   private void check(boolean val, Object... debugArguments) {
     if (!val) {
-      throw new RuntimeException("Hacker found");
-          //+ Arrays.toString(debugArguments));
+      throw new RuntimeException("Hacker found" 
+          + Arrays.toString(debugArguments));
     }
   }
 

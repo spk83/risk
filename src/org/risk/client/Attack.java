@@ -23,12 +23,12 @@ public class Attack {
       List<Integer> attackerDiceRolls, List<Integer> defenderDiceRolls,
       int totalDefenderTerritories, int totalPlayers, int totalAttackerCards,
       int totalDefenderCards) {
-    attackUnits = (int) attacker.get(GameResources.UNITS);
-    defendUnits = (int) defender.get(GameResources.UNITS);
+    attackUnits = (Integer) attacker.get(GameResources.UNITS);
+    defendUnits = (Integer) defender.get(GameResources.UNITS);
     attackerPlayerId = (String) attacker.get(GameResources.PLAYER);
     defenderPlayerId = (String) defender.get(GameResources.PLAYER);
-    attackerTerritoryId = (int) attacker.get(GameResources.TERRITORY);
-    defenderTerritoryId = (int) defender.get(GameResources.TERRITORY);
+    attackerTerritoryId = (Integer) attacker.get(GameResources.TERRITORY);
+    defenderTerritoryId = (Integer) defender.get(GameResources.TERRITORY);
     this.attackerDiceRolls = attackerDiceRolls;
     this.defenderDiceRolls = defenderDiceRolls;
     

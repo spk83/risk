@@ -1,14 +1,15 @@
 package org.risk.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class Card {
-  private enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
+  public enum Type { INFANTRY, CAVALRY, ARTILLERY, WILD };
   private Type cardType;
-  @SuppressWarnings("unused")
+  
   private String cardId;
 
   public Card(String cardValue, String cardId) {
@@ -38,16 +39,36 @@ public class Card {
     return cardType;
   }
 
+  public static boolean isTradePossible(List<Card> cards) {
+    if (cards.size() >= 5) {
+      return true;
+    }
+    if (cards.size() <= 3) {
+      return getUnits(cards, 1) > 0;
+    }
+    Map<Type, Integer> cardTypeCountMap = getCardTypeCountMap(cards);
+    if (cardTypeCountMap.size() == 2 
+        && cardTypeCountMap.entrySet().iterator().next().getValue() == 2) {
+      return false;
+    }
+    return true;
+  }
+  
+  private static Map<Type, Integer> getCardTypeCountMap(List<Card> cards) {
+    Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
+    for (Card card : cards) {
+      Integer count = cardTypeCountMap.get(card.getCardType());
+      if (count == null) {
+        count = 0;
+      }
+      cardTypeCountMap.put(card.getCardType(), count + 1);
+    }
+    return cardTypeCountMap;
+  }
+  
   public static int getUnits(List<Card> cards, int tradeNumber) {
     if (cards.size() == 3) {
-      Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
-      for (Card card : cards) {
-        Integer count = cardTypeCountMap.get(card.getCardType());
-        if (count == null) {
-          count = 0;
-        }
-        cardTypeCountMap.put(card.getCardType(), count + 1);
-      }
+      Map<Type, Integer> cardTypeCountMap = getCardTypeCountMap(cards);
       int validCount = 0;
       int twoPlusWild = 0;
       for (Entry<Type, Integer> entry : cardTypeCountMap.entrySet()) {
@@ -69,5 +90,27 @@ public class Card {
       }
     }
     return 0;
+  }
+  
+  public static List<Card> getCardsById(Map<String, Card> cardMap, List<Integer> cardIds) {
+    List<Card> cards = new ArrayList<Card>();
+    for (int cardId : cardIds) {
+      String cardKey = GameResources.RISK_CARD + cardId;
+      Card card = cardMap.get(cardKey);
+      if (card != null) {
+        cards.add(card);
+      }
+    }
+    return cards;
+  }
+  
+  public static List<Integer> getCardIdsFromCardObjects(List<Card> cardObjects) {
+    List<Integer> cards = new ArrayList<Integer>();
+    for (Card card : cardObjects) {
+      if (card != null) {
+        cards.add(Integer.parseInt(card.cardId.substring(2)));
+      }
+    }
+    return cards;
   }
 }

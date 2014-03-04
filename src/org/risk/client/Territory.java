@@ -10,7 +10,16 @@ public class Territory {
   
   private String territoryId;
   private String playerKey;
+  private int currentUnits;
   
+  public int getCurrentUnits() {
+    return currentUnits;
+  }
+
+  public void setCurrentUnits(int currentUnits) {
+    this.currentUnits = currentUnits;
+  }
+
   public String getTerritoryId() {
     return territoryId;
   }
@@ -27,9 +36,10 @@ public class Territory {
     this.playerKey = playerKey;
   }
 
-  public Territory(String territoryId, String playerKey) {
+  public Territory(String territoryId, String playerKey, int currentUnits) {
     this.territoryId = territoryId;
     this.playerKey = playerKey;
+    this.currentUnits = currentUnits;
   }
   
   public static final Map<Integer, String> TERRITORY_NAME = ImmutableMap.<Integer, String>builder()
@@ -76,6 +86,52 @@ public class Territory {
       .put(40, "Western Australia")
       .put(41, "Eastern Australia")
       .build();
+  
+  public static final Map<String, Integer> SVG_ID_MAP = ImmutableMap.<String, Integer>builder()
+      .put("alaska", 0)
+      .put("northwest_territory", 1)
+      .put("alberta", 2)
+      .put("western_united_states", 3)
+      .put("central_america", 4)
+      .put("greenland", 5)
+      .put("ontario", 6)
+      .put("quebec", 7)
+      .put("eastern_united_states", 8)
+      .put("venezuela", 9)
+      .put("peru", 10)
+      .put("brazil", 11)
+      .put("argentina", 12)
+      .put("iceland", 13)
+      .put("scandinavia", 14)
+      .put("ukraine", 15)
+      .put("great_britain", 16)
+      .put("northern_europe", 17)
+      .put("western_europe", 18)
+      .put("southern_europe", 19)
+      .put("north_africa", 20)
+      .put("egypt", 21)
+      .put("congo", 22)
+      .put("east_africa", 23)
+      .put("south_africa", 24)
+      .put("madagascar", 25)
+      .put("siberia", 26)
+      .put("ural", 27)
+      .put("china", 28)
+      .put("afghanistan", 29)
+      .put("middle_east", 30)
+      .put("india", 31)
+      .put("siam", 32)
+      .put("yakutsk", 33)
+      .put("irkutsk", 34)
+      .put("mongolia", 35)
+      .put("japan", 36)
+      .put("kamchatka", 37)
+      .put("indonesia", 38)
+      .put("new_guinea", 39)
+      .put("western_australia", 40)
+      .put("eastern_australia", 41)
+      .build();
+  
 
   public static String getContinentId(int territoryId) {
     if (territoryId >= 0 && territoryId <= 8) {
@@ -99,7 +155,7 @@ public class Territory {
     = ImmutableMap.<Integer, List<Integer>>builder()
       .put(0, ImmutableList.<Integer>of(1, 2, 37))
       .put(1, ImmutableList.<Integer>of(0, 2, 6, 5))
-      .put(2, ImmutableList.<Integer>of(0, 1, 6, 4))
+      .put(2, ImmutableList.<Integer>of(0, 1, 6, 3))
       .put(3, ImmutableList.<Integer>of(2, 6, 4, 8))
       .put(4, ImmutableList.<Integer>of(3, 8, 9))
       .put(5, ImmutableList.<Integer>of(1, 6, 7, 13))
@@ -110,7 +166,7 @@ public class Territory {
       .put(10, ImmutableList.<Integer>of(9, 11, 12))
       .put(11, ImmutableList.<Integer>of(9, 10, 12, 20))
       .put(12, ImmutableList.<Integer>of(10, 11))
-      .put(13, ImmutableList.<Integer>of(5, 16, 15))
+      .put(13, ImmutableList.<Integer>of(5, 16, 14))
       .put(14, ImmutableList.<Integer>of(15, 17, 13, 16))
       .put(15, ImmutableList.<Integer>of(14, 27, 29, 30, 17, 19))
       .put(16, ImmutableList.<Integer>of(13, 17, 18, 14))
@@ -120,14 +176,14 @@ public class Territory {
       .put(20, ImmutableList.<Integer>of(11, 18, 19, 21, 22, 23))
       .put(21, ImmutableList.<Integer>of(19, 20, 23, 30))
       .put(22, ImmutableList.<Integer>of(20, 23, 24))
-      .put(23, ImmutableList.<Integer>of(20, 21, 22, 24, 25))
+      .put(23, ImmutableList.<Integer>of(20, 21, 22, 24, 25, 30))
       .put(24, ImmutableList.<Integer>of(22, 23, 25))
       .put(25, ImmutableList.<Integer>of(23, 24))
       .put(26, ImmutableList.<Integer>of(27, 28, 33, 34, 35))
       .put(27, ImmutableList.<Integer>of(15, 26, 28, 29))
       .put(28, ImmutableList.<Integer>of(26, 27, 29, 31, 32, 35))
       .put(29, ImmutableList.<Integer>of(15, 27, 28, 30, 31))
-      .put(30, ImmutableList.<Integer>of(15, 21, 29, 31, 19))
+      .put(30, ImmutableList.<Integer>of(15, 21, 29, 31, 19, 23))
       .put(31, ImmutableList.<Integer>of(28, 29, 30, 32))
       .put(32, ImmutableList.<Integer>of(28, 31, 38))
       .put(33, ImmutableList.<Integer>of(26, 34, 37))

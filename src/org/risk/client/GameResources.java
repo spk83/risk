@@ -81,6 +81,7 @@ public final class GameResources {
   public static final String CONTINUOUS_TRADE = "continuousTrade";
   public static final Integer MIN_CARDS_IN_ATTACK_TRADE = 4;
   public static final Integer MAX_CARDS_IN_ATTACK_TRADE = 6;
+  public static final String GAME_ENDED = "gameEnded";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
@@ -91,6 +92,23 @@ public final class GameResources {
   public static final Map<Integer, Integer> EMPTYINTMAP = ImmutableMap.<Integer, Integer>of();
   public static final int TOTAL_INITIAL_DICE_ROLL = 3;
   
+  public static final Map<String, String> UI_PHASE_MAPPING = ImmutableMap.<String, String>builder()
+      .put(SET_TURN_ORDER, "Decide Turn Order")
+      .put(CLAIM_TERRITORY, "Claim Territory")
+      .put(DEPLOYMENT, "Deploy Units")
+      .put(CARD_TRADE, "Trade Cards")
+      .put(ADD_UNITS, "Add units for Reinforcement")
+      .put(REINFORCE, "Reinforce Territories")
+      .put(ATTACK_PHASE, "Attack")
+      .put(ATTACK_TRADE, "Trade Cards in Attack Phase")
+      .put(ATTACK_REINFORCE, "Reinforce Territory in Attack Phase")
+      .put(ATTACK_RESULT, "Result of Attack")
+      .put(ATTACK_OCCUPY, "Occupy new territory")
+      .put(END_ATTACK, "End of attack")
+      .put(FORTIFY, "Fortify Territory")
+      .put(END_GAME, "End of Game")
+      .put(GAME_ENDED, "End of Game")
+      .build();
   
   /*
    * This is a helper method to get risk card value from its ID.
