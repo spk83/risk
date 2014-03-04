@@ -1,6 +1,8 @@
 risk
 ====
 
-NYU gaming course - multiplayer game http://en.wikipedia.org/wiki/Risk_(game)
+NYU gaming course - multiplayer game 
 
-http://risk-smg.appspot.com/RiskGame.html
+Instructions at http://en.wikipedia.org/wiki/Risk_(game)
+
+Deployed at http://risk-smg.appspot.com/RiskGame.html
