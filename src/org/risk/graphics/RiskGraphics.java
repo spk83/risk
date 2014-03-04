@@ -10,7 +10,6 @@ import org.risk.client.Attack.AttackResult;
 import org.risk.client.Card;
 import org.risk.client.GameApi;
 import org.risk.client.GameApi.IteratingPlayerContainer;
-import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
@@ -212,93 +211,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });
   }
 
-<<<<<<< HEAD
-=======
-  public void addPlayerSelection(final IteratingPlayerContainer container, final int totalPlayers) {
-    final ListBox playerSelect = new ListBox();
-    for (int i = 1; i <= totalPlayers; ++i) {
-      playerSelect.addItem(i + "");
-    }
-    playerSelect.addItem("Viewer");
-    Label playerSelectLabel = new Label("Select player: ");
-    RootPanel.get("mainDiv").add(playerSelectLabel);
-    RootPanel.get("mainDiv").add(playerSelect);
-    playerSelect.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        int currentSelectedIndex = playerSelect.getSelectedIndex();
-        if (currentSelectedIndex == totalPlayers) {
-          container.updateUi(GameApi.VIEWER_ID);
-          return;
-        }
-        container.updateUi(playerSelect.getSelectedIndex() + 1);
-      }
-    });
-  }
-  
-  @Override
-  public void setPresenter(RiskPresenter riskPresenter) {
-    this.riskPresenter = riskPresenter;
-  }
-
-  @Override
-  public void setViewerState(RiskState riskState) {
-    setPlayerState(riskState);
-  }
-
-  @Override
-  public void setPlayerState(RiskState riskState) {
-    gameStatus.clear();
-    playersStatusPanel.clear();
-    /*if (!flag) {
-      //&& riskPresenter.getMyPlayerId() == 3) {
-      riskState = currentRiskState;
-      riskPresenter.setRiskState(riskState);
-    } else {
-      currentRiskState = riskState;
-    }*/
-    currentRiskState = riskState;
-    //riskState = currentRiskState;
-    changeSVGMap(riskState);
-    Map<String, Player> playersMap = currentRiskState.getPlayersMap();
-    int count = 0;
-    int index = 0;
-    for (Player player : playersMap.values()) {
-      playersStatusPanel.add(PanelHandler.getPlayerPanel(
-          cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
-          cardImagesOfCurrentPlayer), player.getPlayerId());
-      if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
-        index = count;
-      }
-      count++;
-    }
-    playersStatusPanel.setSize("300px", "450px");
-    playersStatusPanel.selectTab(index);
-    gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
-    diceAttackPanel.clear();
-    if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
-      for (Map.Entry<String, List<Integer>> entry : riskState.getDiceResult().entrySet()) {
-        diceAttackPanel.add(PanelHandler.getNewDicePanel(
-            diceImages, entry.getKey(), entry.getValue()));
-      }
-    }
-    /*if (!flag && riskPresenter.getMyPlayerId() == 3) {
-      Window.alert("inside player s");
-      //chooseCardsForTrading();
-      //attack();
-      attackResult();
-      flag = true;
-    }*/
-    //attackResult();
-    //moveUnitsAfterAttack();
-    //reinforceTerritories();
-    //attack();
-    //fortify();
-    //endGame();
-  
-  }
-  
->>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
   private void addMapHandlers() {
     if (territoryHandlers.isEmpty()) {
       for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
