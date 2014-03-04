@@ -58,7 +58,8 @@ public class RiskEntryPoint implements EntryPoint {
         //riskGraphics.setPresenter(riskPresenter);
         container.sendGameReady();
         container.updateUi(1);
-        riskGraphics.addPlayerSelection(container, selectedIndex);
+        int totalPlayers = selectedIndex + 3;
+        riskGraphics.addPlayerSelection(container, totalPlayers);
         RootPanel.get("mainDiv").add(riskGraphics);
       }
     });

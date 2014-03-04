@@ -9,6 +9,7 @@ import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
 import org.risk.client.Card;
 import org.risk.client.GameApi.IteratingPlayerContainer;
+import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskLogic;
@@ -373,17 +374,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });
   }
 
-  public void addPlayerSelection(final IteratingPlayerContainer container, int selectedIndex) {
+  public void addPlayerSelection(final IteratingPlayerContainer container, final int totalPlayers) {
     final ListBox playerSelect = new ListBox();
-    for (int i = 1; i <= selectedIndex + 3; ++i) {
+    for (int i = 1; i <= totalPlayers; ++i) {
       playerSelect.addItem(i + "");
     }
+    playerSelect.addItem("Viewer");
     Label playerSelectLabel = new Label("Select player: ");
     RootPanel.get("mainDiv").add(playerSelectLabel);
     RootPanel.get("mainDiv").add(playerSelect);
     playerSelect.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
+        int currentSelectedIndex = playerSelect.getSelectedIndex();
+        if (currentSelectedIndex == totalPlayers) {
+          container.updateUi(GameApi.VIEWER_ID);
+          return;
+        }
         container.updateUi(playerSelect.getSelectedIndex() + 1);
       }
     });
@@ -396,6 +403,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setViewerState(RiskState riskState) {
+    setPlayerState(riskState);
   }
 
   @Override

@@ -568,7 +568,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
         put(PLAYER_B, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(0, 1),
+            GameResources.CARDS, ImmutableList.<Integer>of(),
             GameResources.TERRITORY, territoryMapB,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
@@ -683,6 +683,11 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
         new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
+        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC1", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC2", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC3", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC4", ImmutableList.<Integer>of(AID)),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
@@ -1078,6 +1083,8 @@ Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 13, 6);
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41)),
         new Set(GameResources.LAST_ATTACKING_TERRITORY, 40),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
+        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC1", ImmutableList.<Integer>of(AID)),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),

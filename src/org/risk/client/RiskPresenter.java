@@ -174,6 +174,8 @@ public class RiskPresenter {
         view.fortify();
       } else if (phase.equals(GameResources.END_GAME)) {
         view.endGame();
+      } else if (phase.equals(GameResources.GAME_ENDED)) {
+        return;
       }
     }
   }
