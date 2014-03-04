@@ -25,8 +25,8 @@ public class RiskPresenter {
     
     /**
      * Sets the presenter. The viewer will call certain methods on the presenter, e.g.,
-     * when a territory is selected ({@link #newTerritorySelected}),
-     * when attack selection is done ({@link #performAttack}), etc.
+     * when a territory is selected ({@link #newTerritorySelected()}),
+     * when attack selection is done ({@link #performAttack()}), etc.
      */
     void setPresenter(RiskPresenter riskPresenter);
     
@@ -41,60 +41,60 @@ public class RiskPresenter {
     /**
      * Asks the player to claim a territory.
      * The player can finish selecting a territory for claim,
-     * by calling {@link #newTerritorySelected}. 
+     * by calling {@link #newTerritorySelected()}. 
      */
     void chooseNewTerritory();
     
     /**
      * Asks the player to select a territory where he want to deploy army units.
      * The player can finish selecting a territory for deployment,
-     * by calling {@link #territoryForDeployment}}.
+     * by calling {@link #territoryForDeployment()}}.
      */
     void chooseTerritoryForDeployment();
     
     /**
      * Asks the player to select 3 cards for trading.
-     * Player can finish selecting cards by calling {@link #cardsTraded}.
+     * If player defeated an opponent and gains his RISK cards, he might have to trade cards if 
+     * he has more than 5 cards now.
+     * Player can finish selecting cards by calling {@link #cardsTraded()}.
      */
     void chooseCardsForTrading(boolean mandatoryCardSelection);
     
     /**
      * Asks the player to select territories to reinforce.
      * Player can finish selecting territories to reinforce,
-     * by calling {@link #territoriesReinforced}.
+     * by calling {@link #territoriesReinforced()}.
      */
     void reinforceTerritories();
     
     /**
      * Asks the player to select attacking and defending territory. 
-     * Player can either call {@link #performAttack} to attack or,
+     * Player can either call {@link #performAttack()} to attack or,
      * {@link #endAttack} to end the attack.
      */
     void attack();
     
+    /**
+     * Display attack result to the player. 
+     * Player can either call {@link #attackResult()} to confirm.
+     */
     void attackResult();
     
     /**
      * If a player wins a territory after attack, he needs to select number of units to move 
-     * in the new territory. Player can call {@link #moveUnitsAfterAttack} to do so.
+     * in the new territory. Player can call {@link #moveUnitsAfterAttack()} to do so.
      */
     void moveUnitsAfterAttack();
     
     /**
-     * If player defeated an opponent and gains his RISK cards, he might have to trade cards if 
-     * he has more than 5 cards now. To do so, player can call {@link #attackTradeMove} to do so.
-     */
-   /* void tradeCardsInAttackPhase();*/
-    
-    /**
-     * Player can perform fortification by calling {@link #fortifyMove} with territories and 
+     * Player can perform fortification by calling {@link #fortifyMove()} with territories and 
      * number of units where he wants to perform fortification.
      */
     void fortify();
     
     /**
      * Player gets informed about end game by this method and he needs to confirm it by 
-     * calling {@link #endgame}. 
+     * calling {@link #endgame()}. 
      */
     void endGame();
   }
@@ -174,6 +174,8 @@ public class RiskPresenter {
         view.fortify();
       } else if (phase.equals(GameResources.END_GAME)) {
         view.endGame();
+      } else if (phase.equals(GameResources.GAME_ENDED)) {
+        return;
       }
     }
   }
@@ -307,6 +309,7 @@ public class RiskPresenter {
   
   /**
    * Peform the attack result operations based on the output of attack phase state.
+   * This method is called by view only if the presenter called {@link View#attackResult()}.
    */
   public void attackResultMove() {
     container.sendMakeMove(riskLogic.attackResultOperations(

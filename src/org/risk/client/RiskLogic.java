@@ -354,7 +354,9 @@ public class RiskLogic {
     Player player = lastState.getPlayersMap().get(playerIdToString);
     check(player.getContinent().size() == Continent.CONTINENT_NAMES.size() - 1);
     check(player.getTerritoryUnitMap().size() == GameResources.TOTAL_TERRITORIES - 1);
+    endGameOperations.add(new SetTurn(lastState.getTurn()));
     endGameOperations.add(new EndGame(GameResources.playerIdToInt(playerIdToString)));
+    endGameOperations.add(new Set(GameResources.PHASE, GameResources.GAME_ENDED));
     return endGameOperations;
   }
 
@@ -967,14 +969,14 @@ public class RiskLogic {
     operations.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
     operations.add(new Set("P1", ImmutableMap.<String, Object>of(
         GameResources.CARDS, ImmutableList.<Integer>of(),
-        GameResources.TERRITORY, getTerritoriesInRange(0, 38, 6),
+        GameResources.TERRITORY, getTerritoriesInRange(0, 39, 10),
         GameResources.UNCLAIMED_UNITS, 0,
-        GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "3", "4"))));
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4"))));
     operations.add(new Set("P2", ImmutableMap.<String, Object>of(
         GameResources.CARDS, ImmutableList.<Integer>of(),
-        GameResources.TERRITORY, getTerritoriesInRange(39, 40, 1),
+        GameResources.TERRITORY, getTerritoriesInRange(40, 40, 1),
         GameResources.UNCLAIMED_UNITS, 0,
-        GameResources.CONTINENT, ImmutableList.<String>of())));
+        GameResources.CONTINENT, ImmutableList.<String>of("3"))));
         operations.add(new Set("P3", ImmutableMap.<String, Object>of(
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.TERRITORY, getTerritoriesInRange(41, 41, 1),
@@ -1015,29 +1017,6 @@ public class RiskLogic {
       return null;
       //throw new Exception("Invalid Territory ID");
     }
-  }
-  
-  private static Map<String, Integer> getTerritories(String playerID) {
-    Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-    switch(playerID) {
-    case "P1":
-      for (int i = 0; i < 14; i++) {
-        territoryMap.put(i + "", 6);
-      }
-      break;
-    case "P2": 
-      for (int i = 14; i < 28; i++) {
-        territoryMap.put(i + "", 6);
-      }
-      break;
-    case "P3": 
-      for (int i = 28; i < 42; i++) {
-        territoryMap.put(i + "", 3);
-      }
-      break;
-    default:
-    }
-    return territoryMap;
   }
   
   public List<Operation> getInitialOperations(List<String> playerIds) {

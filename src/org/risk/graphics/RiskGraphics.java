@@ -8,10 +8,11 @@ import java.util.Map;
 import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
 import org.risk.client.Card;
+import org.risk.client.GameApi;
 import org.risk.client.GameApi.IteratingPlayerContainer;
+import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
-import org.risk.client.RiskLogic;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
@@ -20,8 +21,6 @@ import org.vectomatic.dom.svg.OMNode;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.utils.OMSVGParser;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -51,161 +50,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     public interface RiskGraphicsUiBinder extends UiBinder<Widget, RiskGraphics> {
     }
     
-    public static Map<String, Integer> getTerritories(String playerID) {
-      Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-      switch(playerID) {
-      case "P1":
-        for (int i = 0; i < 14; i++) {
-          territoryMap.put(i + "", 6);
-        }
-        break;
-      case "P2": 
-        for (int i = 14; i < 28; i++) {
-          territoryMap.put(i + "", 6);
-        }
-        break;
-      case "P3": 
-        for (int i = 28; i < 42; i++) {
-          territoryMap.put(i + "", 3);
-        }
-        break;
-      default:
-      }
-      return territoryMap;
-    }
-    
-    public static List<String> getCardsInRange(int fromInclusive, int toInclusive) {
-      List<String> keys = Lists.newArrayList();
-      for (int i = fromInclusive; i <= toInclusive; i++) {
-        keys.add(GameResources.RISK_CARD + i);
-      }
-      return keys;
-    }
-    
-    public static boolean isTerritoryInRange(int territoryId) {
-      if (territoryId >= 0 && territoryId < 42) {
-        return true;
-      }
-      return false;
-    }
-    
-    public static Map<String, Integer> getTerritoriesInRange(
-        int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 
-            {
-      if (isTerritoryInRange(highestTerritoryIdInclusive) 
-          && isTerritoryInRange(lowestTerritoryIdInclusive)
-              && lowestTerritoryIdInclusive <= highestTerritoryIdInclusive) {
-        Map<String, Integer> territoryMap = new HashMap<String, Integer>();
-        for (int i = lowestTerritoryIdInclusive; i <= highestTerritoryIdInclusive; i++) {
-          territoryMap.put(i + "", baseUnits);
-        }
-        return territoryMap;
-      } else {
-        return null;
-        //throw new Exception("Invalid Territory ID");
-      }
-    }
-    String PLAYER_A = "P1";
-    String PLAYER_B = "P2";
-    String PLAYER_C = "P3";
-    int AID = 1;
-    int BID = 2;
-    int CID = 3;
-    
-    Map<String, Object> hasToTrade1 = ImmutableMap.<String, Object>builder().
-        put(GameResources.PHASE, GameResources.ATTACK_TRADE).
-        put(PLAYER_A, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4, 5),
-            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(PLAYER_C, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)).
-        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
-        put(GameResources.LAST_ATTACKING_TERRITORY, 5).
-        put(GameResources.TERRITORY_WINNER, PLAYER_A).
-        put(GameResources.DECK, getCardsInRange(6, 43)).
-        put("RC0", "I1")
-        .put("RC1", "I4")
-        .put("RC2", "I7")
-        .put("RC3", "W2")
-        .put("RC4", "C3")
-        .put("RC5", "A8").
-        build();
-    
-    Map<String, Object> hasToTrade = ImmutableMap.<String, Object>builder().
-        put(GameResources.PHASE, GameResources.ATTACK_RESULT).
-        put(PLAYER_A, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(5),
-            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(PLAYER_B, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4),
-            GameResources.TERRITORY, getTerritoriesInRange(13, 13, 1),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(PLAYER_C, ImmutableMap.<String, Object>of(
-            GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put("RC5", "C1").
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
-        put(GameResources.DECK, getCardsInRange(6, 43)).
-        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
-        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
-        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
-        put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
-            GameResources.PLAYER, PLAYER_A,
-            GameResources.TERRITORY, 5,
-            GameResources.UNITS, 6)).
-        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
-        put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
-            GameResources.PLAYER, PLAYER_B,
-            GameResources.TERRITORY, 13,
-            GameResources.UNITS, 1)).
-        build();
-    
-    Map<String, Object> fortifyState = ImmutableMap.<String, Object>builder()
-        .put(GameResources.PHASE, GameResources.FORTIFY)
-        .put("P1", ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(),
-            GameResources.TERRITORY, getTerritories("P1"),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put("P2", ImmutableMap.<String, Object>of(
-            GameResources.CARDS, ImmutableList.<Integer>of(),
-            GameResources.TERRITORY, getTerritories("P2"),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put("P3", ImmutableMap.<String, Object>of(
-            GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritories("P3"),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(3, 2, 1))
-        .put(GameResources.DECK, getCardsInRange(2, 43))
-        .build();
-    
-    Map<String, Object> endGameState = ImmutableMap.<String, Object>builder()
-        .put(GameResources.PHASE, GameResources.END_GAME)
-        .put("P3", ImmutableMap.<String, Object>of(
-            GameResources.CARDS, GameResources.EMPTYLISTINT,
-            GameResources.TERRITORY, getTerritoriesInRange(0, 40, 1),
-            GameResources.UNCLAIMED_UNITS, 0,
-            GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(3))
-        .put(GameResources.DECK, getCardsInRange(0, 43))
-        .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41))
-        .put(GameResources.LAST_ATTACKING_TERRITORY, 40)
-        .put(GameResources.TERRITORY_WINNER, "P3")
-        .build();
-    
   private final DiceImages diceImages;
   private final CardImages cardImages;
   private final MapSVG riskMapSVG;
@@ -227,40 +71,39 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @UiField
   TabPanel playersStatusPanel;
   
+  @UiField
+  TabPanel instructions;
+  
   private RiskState currentRiskState;
-  private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
-  private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
   private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
   private List<Card> selectedCards = new ArrayList<Card>();
+  
+  private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
+  private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private Button selectCardsButton = new Button("Finish Selecting");
   private Button turnOrderButton = new Button("Continue");
   private Button continueToAttackPhaseButton = new Button("Continue");
   private Button endAttack = new Button("End Attack Phase");
   private Button endReinforce = new Button("End Reinforce Phase");
   private Button endFortify = new Button("End Fortify");
-  
   private VerticalPanel attackResultPanel = new VerticalPanel();
-  //private HorizontalPanel diceHorizontalPanel = new HorizontalPanel();
+  private Label errorLabel = new Label();
+  private Label reinforceLabel = new Label();
+  
   private int unclaimedUnits;
   private String attackToTerritory;
   private String attackFromTerritory;
   private String fortifyToTerritory;
   private String fortifyFromTerritory;
-  private Label errorLabel = new Label();
-  private Label reinforceLabel = new Label();
   private boolean claimTerritory = false;
   private boolean deployment = false;
   private boolean reinforce = false;
   private boolean attack = false;
   private boolean fortify = false;
   private boolean mandatoryCardSelection = false;
-  boolean flag = false;
   
   public RiskGraphics() {
-    /*currentRiskState = new RiskLogic().gameApiStateToRiskState(
-        fortifyState, 3,  ImmutableList.<Integer>of(1, 2, 3));
-    */
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -270,9 +113,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     mapContainer.getElement().appendChild(boardElt.getElement());
     playerArea.setSpacing(5);
     diceAttackPanel.setSpacing(20);
-    //diceHorizontalPanel.setBorderWidth(1);
-    /*diceAttackPanel.setBorderWidth(1);
-    diceAttackPanel.setBorderWidth(5);*/
     createSelectCardsButtonHandler();
     createTurnOrderButton();
     createContinueToAttackPhaseButton();
@@ -280,7 +120,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndReinforceButton();
     createEndFortifyButton();
     addMapHandlers();
-    flag = false;
   }
   
   private void createSelectCardsButtonHandler() {
@@ -324,7 +163,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       public void onClick(ClickEvent event) {
         gameStatus.remove(turnOrderButton);
         attackResultPanel.clear();
-        //diceHorizontalPanel.clear();
         diceAttackPanel.clear();
         riskPresenter.setTurnOrderMove();
       }
@@ -362,6 +200,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       }
     });
   }
+  
   private void createEndFortifyButton() {
     endFortify.addClickHandler(new ClickHandler() {
       @Override
@@ -373,83 +212,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });
   }
 
-  public void addPlayerSelection(final IteratingPlayerContainer container, int selectedIndex) {
-    final ListBox playerSelect = new ListBox();
-    for (int i = 1; i <= selectedIndex + 3; ++i) {
-      playerSelect.addItem(i + "");
-    }
-    Label playerSelectLabel = new Label("Select player: ");
-    RootPanel.get("mainDiv").add(playerSelectLabel);
-    RootPanel.get("mainDiv").add(playerSelect);
-    playerSelect.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        container.updateUi(playerSelect.getSelectedIndex() + 1);
-      }
-    });
-  }
-  
-  @Override
-  public void setPresenter(RiskPresenter riskPresenter) {
-    this.riskPresenter = riskPresenter;
-  }
-
-  @Override
-  public void setViewerState(RiskState riskState) {
-  }
-
-  @Override
-  public void setPlayerState(RiskState riskState) {
-    gameStatus.clear();
-    playersStatusPanel.clear();
-    /*if (!flag) {
-      //&& riskPresenter.getMyPlayerId() == 3) {
-      riskState = currentRiskState;
-      riskPresenter.setRiskState(riskState);
-    } else {
-      currentRiskState = riskState;
-    }*/
-    currentRiskState = riskState;
-    //riskState = currentRiskState;
-    changeSVGMap(riskState);
-    Map<String, Player> playersMap = currentRiskState.getPlayersMap();
-    int count = 0;
-    int index = 0;
-    for (Player player : playersMap.values()) {
-      playersStatusPanel.add(PanelHandler.getPlayerPanel(
-          cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
-          cardImagesOfCurrentPlayer), player.getPlayerId());
-      if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
-        index = count;
-      }
-      count++;
-    }
-    playersStatusPanel.setSize("300px", "450px");
-    playersStatusPanel.selectTab(index);
-    gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
-    diceAttackPanel.clear();
-    if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
-      for (Map.Entry<String, List<Integer>> entry : riskState.getDiceResult().entrySet()) {
-        diceAttackPanel.add(PanelHandler.getNewDicePanel(
-            diceImages, entry.getKey(), entry.getValue()));
-      }
-    }
-    /*if (!flag && riskPresenter.getMyPlayerId() == 3) {
-      Window.alert("inside player s");
-      //chooseCardsForTrading();
-      //attack();
-      attackResult();
-      flag = true;
-    }*/
-    //attackResult();
-    //moveUnitsAfterAttack();
-    //reinforceTerritories();
-    //attack();
-    //fortify();
-    //endGame();
-  
-  }
-  
   private void addMapHandlers() {
     if (territoryHandlers.isEmpty()) {
       for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
@@ -477,6 +239,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         @Override
         public void onMouseDown(MouseDownEvent event) {
           int playerId = riskPresenter.getMyPlayerId();
+          gameStatus.remove(errorLabel);
+          
           if (currentRiskState.getTurn() == playerId) {
             if (claimTerritory) {
               claimTerritory(territoryId);
@@ -490,7 +254,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify(territoryId);
             }
           } else {
-            gameStatus.remove(errorLabel);
             errorLabel = new Label("Please wait for your turn");
             gameStatus.add(errorLabel);
           }
@@ -509,7 +272,71 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     return new ArrayList<HandlerRegistration>();
   }
+
+  public void addPlayerSelection(final IteratingPlayerContainer container, final int totalPlayers) {
+    final ListBox playerSelect = new ListBox();
+    for (int i = 1; i <= totalPlayers; ++i) {
+      playerSelect.addItem(i + "");
+    }
+    playerSelect.addItem("Viewer");
+    Label playerSelectLabel = new Label("Select player: ");
+    RootPanel.get("mainDiv").add(playerSelectLabel);
+    RootPanel.get("mainDiv").add(playerSelect);
+    playerSelect.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        int currentSelectedIndex = playerSelect.getSelectedIndex();
+        if (currentSelectedIndex == totalPlayers) {
+          container.updateUi(GameApi.VIEWER_ID);
+          return;
+        }
+        container.updateUi(playerSelect.getSelectedIndex() + 1);
+      }
+    });
+  }
+ 
   
+  @Override
+  public void setPresenter(RiskPresenter riskPresenter) {
+    this.riskPresenter = riskPresenter;
+  }
+
+  @Override
+  public void setViewerState(RiskState riskState) {
+    setPlayerState(riskState);
+  }
+
+  @Override
+  public void setPlayerState(RiskState riskState) {
+    gameStatus.clear();
+    playersStatusPanel.clear();
+    currentRiskState = riskState;
+    changeSVGMap(riskState);
+    Map<String, Player> playersMap = currentRiskState.getPlayersMap();
+    int count = 0;
+    int index = 0;
+    for (Player player : playersMap.values()) {
+      playersStatusPanel.add(PanelHandler.getPlayerPanel(
+          cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
+          cardImagesOfCurrentPlayer), player.getPlayerId());
+      if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
+        index = count;
+      }
+      count++;
+    }
+    playersStatusPanel.setWidth("300px");
+    playersStatusPanel.selectTab(index);
+    gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
+    diceAttackPanel.clear();
+    if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
+      for (Map.Entry<String, List<Integer>> entry : riskState.getDiceResult().entrySet()) {
+        diceAttackPanel.add(PanelHandler.getNewDicePanel(
+            diceImages, entry.getKey(), entry.getValue()));
+      }
+    }
+    setInstructionPanel();
+  }
+
   private void claimTerritory(String territoryName) {
 
     String playerKey = riskPresenter.getMyPlayerKey();
@@ -581,6 +408,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       if (unclaimedUnits == 0) {
         reinforce = false;
         gameStatus.remove(errorLabel);
+        gameStatus.remove(reinforceLabel);
         riskPresenter.territoriesReinforced(territoryDelta);
       }
     } else {
@@ -611,9 +439,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         }
         attackFromTerritory = territoryId;
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
+        gameStatus.remove(errorLabel);
       } else if (attackFromTerritory.equals(territoryId)) {
         attackFromTerritory = null;
         style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
+        gameStatus.remove(errorLabel);
       } else {
         gameStatus.remove(errorLabel);
         errorLabel = new Label("Select opponent's territory to attack");
@@ -636,6 +466,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         style = style.replaceFirst("stroke:#000000", "stroke:red");
         territory.setAttribute("style", style);
         attack = false;
+        gameStatus.remove(errorLabel);
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
         gameStatus.remove(errorLabel);
@@ -705,6 +536,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               territoryDelta.put(fortifyFromTerritory, -Integer.parseInt(option));
               territoryDelta.put(fortifyToTerritory, Integer.parseInt(option));
               fortify = false;
+              gameStatus.remove(errorLabel);
               riskPresenter.fortifyMove(territoryDelta);
             }
           }).center();
@@ -725,17 +557,20 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @Override
   public void chooseNewTerritory() {
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
     claimTerritory = true;
   }
   
   @Override
   public void chooseTerritoryForDeployment() {
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
     deployment = true;
   }
   
   @Override
   public void chooseCardsForTrading(boolean mandatoryCardSelection) {
-    //String playingPlayerKey = riskPresenter.getMyPlayerKey();
     this.mandatoryCardSelection = mandatoryCardSelection;
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
@@ -743,7 +578,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     if (playingPlayerId == turnPlayerId) {
       Player currentPlayer = currentRiskState.getPlayersMap().get(turnPlayerKey);
       List<Integer> playerCards = currentPlayer.getCards();
-      Window.alert(playerCards.size() + "");
       if (playerCards != null && playerCards.size() >= 3) {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
         if (Card.isTradePossible(cardObjects)) {
@@ -778,6 +612,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void reinforceTerritories() {
+    gameStatus.remove(errorLabel);
+    //gameStatus.remove(reinforceLabel);
+    
     if (territoryDelta == null) {
       territoryDelta = new HashMap<String, Integer>();
     }
@@ -785,31 +622,30 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
         .get(GameResources.playerIdToString(riskPresenter.getMyPlayerId())))
             .getUnclaimedUnits();
-    gameStatus.remove(reinforceLabel);
     reinforceLabel = new Label("You got " + unclaimedUnits + " for reinforce!");
-    gameStatus.add(errorLabel);
     gameStatus.add(endReinforce);
     reinforce = true;
   }
   
   @Override
   public void attack() {
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
     attackToTerritory = null;
     attackFromTerritory = null;
     gameStatus.add(endAttack);
     attack = true;
-    Window.alert("Ready to attack");
   }
   
   @Override
   public void attackResult() {
-    //diceHorizontalPanel.clear();
     attackResultPanel.clear();
     diceAttackPanel.clear();
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
+
     String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
     String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
-    /*int attackerId = GameResources.playerIdToInt(attackerKey);
-    int defenderId = GameResources.playerIdToInt(defenderKey);*/
     String attackingTerritory = Territory.TERRITORY_NAME.get(
         currentRiskState.getAttack().getAttackerTerritoryId());
     String defendingTerritory = Territory.TERRITORY_NAME.get(
@@ -821,8 +657,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         diceImages, attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
     Panel defenderDicePanel = PanelHandler.getNewDicePanel(
         diceImages, defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
- /*   diceHorizontalPanel.add(attackerDicePanel);
-    diceHorizontalPanel.add(defenderDicePanel);*/
     diceAttackPanel.add(attackerDicePanel);
     diceAttackPanel.add(defenderDicePanel);
     AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
@@ -844,7 +678,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
     }
     
-    //diceAttackPanel.add(diceHorizontalPanel);
     diceAttackPanel.add(attackResultPanel);
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
@@ -878,6 +711,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void fortify() {
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId == turnPlayerId) {
@@ -890,6 +725,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void endGame() {
+    gameStatus.remove(errorLabel);
+    gameStatus.remove(reinforceLabel);
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
     gameStatus.add(new Label("Game Ended"));
@@ -904,6 +741,83 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @Override
   public void turnOrderMove() {
     gameStatus.add(turnOrderButton);
+  }
+  
+  private void setInstructionPanel() {
+    instructions.clear();
+    int playingPlayerId = riskPresenter.getMyPlayerId();
+    int turnPlayerId = currentRiskState.getTurn();
+    String phase = (String) currentRiskState.getPhase();
+    boolean playerLost = !currentRiskState.getTurnOrder().contains(playingPlayerId);
+    
+    if (playingPlayerId == turnPlayerId) {
+      if (phase.equals(GameResources.SET_TURN_ORDER)) {
+        instructions.add(new Label("Turn Order will be decided by rolling dice for all players"), 
+            "Instructions");
+      } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
+        instructions.add(new Label("Select a empty territory to claim. One territory at a time."), 
+            "Instructions");
+      } else if (phase.equals(GameResources.DEPLOYMENT)) {
+        instructions.add(new Label("Deploy your remaining army units to territory you own. "
+            + "One unit at a time."), "Instructions");
+      } else if (phase.equals(GameResources.CARD_TRADE) 
+          || phase.equals(GameResources.ATTACK_TRADE)) {
+        instructions.add(new Label("Select cards to trade. You must trade if you have more than "
+            + "4 cards or you are in attack phase and you have more than 5 cards. "
+            + "You'll get units for this card trade. Number of units you get for trading cards will"
+            + " increase as number of trades performed in the game increases."), "Instructions");
+      } else if (phase.equals(GameResources.REINFORCE)) {
+        instructions.add(new Label("Reinforce your territories by putting units on territories "
+            + "you own. You got these unclaimed units based on territories and continents you own "
+            + "and cards traded, if any. Phase will end when you have 0 unclaimed units or "
+            + "if you choose to end phase"), "Instructions");
+      } else if (phase.equals(GameResources.ATTACK_PHASE)) {
+        instructions.add(new Label("Attack on opponent's territory by selecting your territory "
+            + "first and then opponent's territory. Make sure opponent's territory is adjacent "
+            + "to your attacking territory and you have at least 2 units on your "
+            + "attacking territory. \n You can end this phase by clicking End Attack.")
+        , "Instructions");
+      } else if (phase.equals(GameResources.ATTACK_RESULT)) {
+        instructions.add(new Label("Check the result of your attack. "
+            + "Compare the highest die of attacker and defender. If attacker's is higher, "
+            + "the defender loses one army from the territory under attack. But if "
+            + "the defender's die is higher than yours, you lose one army from the territory you "
+            + "attacked from. If each of you rolled more than one die, now compare the two "
+            + "next-highest dice and repeat the process. In case of a tie, the defender always "
+            + "wins.\nPress Continue to go back to attack phase."), "Instructions");
+      } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
+        instructions.add(new Label("Reinforce your territories by putting units on territories "
+            + "you own. Phase will end when you have 0 unclaimed units or "
+            + "if you choose to end phase"), "Instructions");
+      } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
+        instructions.add(new Label("Move units to new territory you just won from your attacking "
+            + "territory. You must leave at least one unit behind on your attacking territory. "
+            + "Also, you have to move units at least equal to the number of dice rolled in "
+            + "last attack."), "Instructions");
+      } else if (phase.equals(GameResources.FORTIFY)) {
+        instructions.add(new Label("Move units from one territory you own to other territory "
+            + "you own. You must leave at least one unit on territory. "
+            + "You can skip this phase by clicking End Fortify."), "Instructions");
+      } else if (phase.equals(GameResources.END_GAME)) {
+        instructions.add(new Label("You won all the territories. "
+            + "Congratulations, you are the winner!"), 
+            "Instructions");
+      } else {
+        instructions.add(new Label(phase), "Instructions");
+      }
+    } else {
+      if (phase.equals(GameResources.SET_TURN_ORDER)) {
+        instructions.add(new Label("Turn Order will be decided by rolling dice for all players"), 
+            "Instructions");
+      } else if (playerLost || phase.equals(GameResources.END_GAME)) {
+        instructions.add(new Label("You lost. Better luck next time."), "Instructions");
+      } else {
+        instructions.add(new Label("Wait for your turn! Watch what your enemy is doing!"), 
+            "Instructions");
+      }
+    }
+    instructions.setWidth("300px");
+    instructions.selectTab(0);
   }
   
   private void changeSVGMap(RiskState riskState) {

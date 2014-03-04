@@ -81,6 +81,7 @@ public final class GameResources {
   public static final String CONTINUOUS_TRADE = "continuousTrade";
   public static final Integer MIN_CARDS_IN_ATTACK_TRADE = 4;
   public static final Integer MAX_CARDS_IN_ATTACK_TRADE = 6;
+  public static final String GAME_ENDED = "gameEnded";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(

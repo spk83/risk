@@ -12,7 +12,10 @@
           </g:map> -->
            <g:VerticalPanel ui:field="gameStatus" height="380px" width="180px" />
            <g:HTML ui:field="mapContainer"/> 
-           <g:TabPanel ui:field="playersStatusPanel" height="380px" width="300px" />
+           <g:VerticalPanel>
+             <g:TabPanel ui:field="playersStatusPanel" width="300px" />
+             <g:TabPanel ui:field="instructions" width="300 px" />
+           </g:VerticalPanel>
            <!-- <svgui:SVGImage ui:field="riskMap" resource="{resources.riskMap}" /> -->
       </g:HorizontalPanel>
     </g:HorizontalPanel>
