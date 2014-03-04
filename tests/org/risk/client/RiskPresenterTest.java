@@ -245,7 +245,7 @@ public class RiskPresenterTest {
     riskPresenter.cardsTraded(cardsBeingTraded);
     
     verify(mockView).setPlayerState(mockRiskState);
-    verify(mockView).chooseCardsForTrading();
+    verify(mockView).chooseCardsForTrading(false);
     verify(mockRiskLogic).performTrade(
         mockRiskState, cardsBeingTraded, AbstractTest.PLAYER_A, null);
     verify(mockContainer).sendMakeMove(operations);
@@ -284,7 +284,7 @@ public class RiskPresenterTest {
     riskPresenter.cardsTraded(cardsBeingTraded);
     
     verify(mockView).setPlayerState(mockRiskState);
-    verify(mockView).chooseCardsForTrading();
+    verify(mockView).chooseCardsForTrading(false);
     verify(mockRiskLogic).skipCardTrade(AbstractTest.PLAYER_A);
     verify(mockContainer).sendMakeMove(operations);
   }
@@ -670,10 +670,10 @@ public class RiskPresenterTest {
         .thenReturn(operations);
 
     riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, AbstractTest.AID, state));
-    riskPresenter.attackTradeMove(cards);
+    riskPresenter.cardsTraded(cards);
     
     verify(mockView).setPlayerState(mockRiskState);
-    verify(mockView).tradeCardsInAttackPhase();
+    verify(mockView).chooseCardsForTrading(true);
     verify(mockRiskLogic).performAttackTrade(mockRiskState, cards, AbstractTest.PLAYER_A, null);
     verify(mockContainer).sendMakeMove(operations);
   }

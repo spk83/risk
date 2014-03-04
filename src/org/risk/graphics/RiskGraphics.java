@@ -111,6 +111,68 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     int AID = 1;
     int BID = 2;
     int CID = 3;
+<<<<<<< HEAD
+=======
+    
+    Map<String, Object> hasToTrade1 = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_TRADE).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4, 5),
+            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)).
+        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
+        put(GameResources.LAST_ATTACKING_TERRITORY, 5).
+        put(GameResources.TERRITORY_WINNER, PLAYER_A).
+        put(GameResources.DECK, getCardsInRange(6, 43)).
+        put("RC0", "I1")
+        .put("RC1", "I4")
+        .put("RC2", "I7")
+        .put("RC3", "W2")
+        .put("RC4", "C3")
+        .put("RC5", "A8").
+        build();
+    
+    Map<String, Object> hasToTrade = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(5),
+            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4),
+            GameResources.TERRITORY, getTerritoriesInRange(13, 13, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put("RC5", "C1").
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.DECK, getCardsInRange(6, 43)).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
+        put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 5,
+            GameResources.UNITS, 6)).
+        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
+        put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 13,
+            GameResources.UNITS, 1)).
+        build();
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
     
     Map<String, Object> hasToTrade1 = ImmutableMap.<String, Object>builder().
         put(GameResources.PHASE, GameResources.ATTACK_TRADE).
@@ -253,13 +315,21 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private boolean deployment = false;
   private boolean reinforce = false;
   private boolean attack = false;
+<<<<<<< HEAD
   private boolean fortify = false;
+=======
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
   private boolean mandatoryCardSelection = false;
   boolean flag = false;
   
   public RiskGraphics() {
+<<<<<<< HEAD
     currentRiskState = new RiskLogic().gameApiStateToRiskState(
         fortifyState, 3,  ImmutableList.<Integer>of(1, 2, 3));
+=======
+    /*currentRiskState = new RiskLogic().gameApiStateToRiskState(
+        hasToTrade1, 1,  ImmutableList.<Integer>of(1, 2, 3));*/
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -408,8 +478,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else {
       currentRiskState = riskState;
     }*/
+<<<<<<< HEAD
     //currentRiskState = riskState;
     riskState = currentRiskState;
+=======
+    currentRiskState = riskState;
+    //riskState = currentRiskState;
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
     changeSVGMap(riskState);
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -441,7 +516,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       flag = true;
     }*/
     //attackResult();
+<<<<<<< HEAD
     //moveUnitsAfterAttack();
+=======
+    //chooseCardsForTrading(true);
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
     //reinforceTerritories();
     //attack();
     fortify();
@@ -852,6 +931,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
    
   @Override
   public void moveUnitsAfterAttack() {
+<<<<<<< HEAD
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId == turnPlayerId) {
@@ -871,6 +951,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         }
       }).center();
     }
+=======
+    // TODO Auto-generated method stub
+    
+>>>>>>> branch 'HW4' of ssh://git@github.com/spk83/risk.git
   }
 
   @Override
