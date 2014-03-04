@@ -37,8 +37,8 @@ public class RiskLogic {
       checkMoveIsLegal(verifyMove);
       return new VerifyMoveDone();
     } catch (Exception e) {
-      return new VerifyMoveDone();
-      //return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
+      //return new VerifyMoveDone();
+      return new VerifyMoveDone(verifyMove.getLastMovePlayerId(), e.getMessage());
     }
   }
   

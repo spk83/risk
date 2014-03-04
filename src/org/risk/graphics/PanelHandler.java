@@ -55,7 +55,8 @@ public final class PanelHandler {
         }
         panel.add(cardsPanel);
       }
-    } 
+    }
+    panel.add(new HTML("Unclaimed Units:<b>" + player.getUnclaimedUnits() + "</b>"));
     return panel;
   }
   

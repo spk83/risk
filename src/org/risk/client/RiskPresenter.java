@@ -318,7 +318,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#moveUnitsAfterAttack()}.
    * @param newUnitsAtUnclaimed
    */
-  void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
+  public void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
     container.sendMakeMove(riskLogic.performAttackOccupy(
         riskState, newUnitsAtUnclaimed, myPlayerKey));
   }
@@ -352,7 +352,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#fortify()}.
    * @param territoryDelta
    */
-  void fortifyMove(Map<String, Integer> territoryDelta) {
+  public void fortifyMove(Map<String, Integer> territoryDelta) {
     if (territoryDelta != null && !territoryDelta.isEmpty()) {
       container.sendMakeMove(riskLogic.performFortify(
           riskState, territoryDelta, myPlayerKey));
@@ -367,7 +367,7 @@ public class RiskPresenter {
    * Perform end game operations.
    * This method is called by view only if the presenter called {@link View#endGame()}.
    */
-  void endGame() {
+  public void endGame() {
     container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
   }
   
