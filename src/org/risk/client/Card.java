@@ -39,16 +39,36 @@ public class Card {
     return cardType;
   }
 
+  public static boolean isTradePossible(List<Card> cards) {
+    if (cards.size() >= 5) {
+      return true;
+    }
+    if (cards.size() <= 3) {
+      return getUnits(cards, 1) > 0;
+    }
+    Map<Type, Integer> cardTypeCountMap = getCardTypeCountMap(cards);
+    if (cardTypeCountMap.size() == 2 
+        && cardTypeCountMap.entrySet().iterator().next().getValue() == 2) {
+      return false;
+    }
+    return true;
+  }
+  
+  private static Map<Type, Integer> getCardTypeCountMap(List<Card> cards) {
+    Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
+    for (Card card : cards) {
+      Integer count = cardTypeCountMap.get(card.getCardType());
+      if (count == null) {
+        count = 0;
+      }
+      cardTypeCountMap.put(card.getCardType(), count + 1);
+    }
+    return cardTypeCountMap;
+  }
+  
   public static int getUnits(List<Card> cards, int tradeNumber) {
     if (cards.size() == 3) {
-      Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
-      for (Card card : cards) {
-        Integer count = cardTypeCountMap.get(card.getCardType());
-        if (count == null) {
-          count = 0;
-        }
-        cardTypeCountMap.put(card.getCardType(), count + 1);
-      }
+      Map<Type, Integer> cardTypeCountMap = getCardTypeCountMap(cards);
       int validCount = 0;
       int twoPlusWild = 0;
       for (Entry<Type, Integer> entry : cardTypeCountMap.entrySet()) {

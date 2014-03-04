@@ -104,6 +104,71 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         //throw new Exception("Invalid Territory ID");
       }
     }
+    String PLAYER_A = "P1";
+    String PLAYER_B = "P2";
+    String PLAYER_C = "P3";
+    int AID = 1;
+    int BID = 2;
+    int CID = 3;
+    
+    Map<String, Object> hasToTrade1 = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_TRADE).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4, 5),
+            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)).
+        put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
+        put(GameResources.LAST_ATTACKING_TERRITORY, 5).
+        put(GameResources.TERRITORY_WINNER, PLAYER_A).
+        put(GameResources.DECK, getCardsInRange(6, 43)).
+        put("RC0", "I1")
+        .put("RC1", "I4")
+        .put("RC2", "I7")
+        .put("RC3", "W2")
+        .put("RC4", "C3")
+        .put("RC5", "A8").
+        build();
+    
+    Map<String, Object> hasToTrade = ImmutableMap.<String, Object>builder().
+        put(GameResources.PHASE, GameResources.ATTACK_RESULT).
+        put(PLAYER_A, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(5),
+            GameResources.TERRITORY, getTerritoriesInRange(0, 12, 6),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_B, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, ImmutableList.<Integer>of(0, 1, 2, 3, 4),
+            GameResources.TERRITORY, getTerritoriesInRange(13, 13, 1),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put(PLAYER_C, ImmutableMap.<String, Object>of(
+            GameResources.CARDS, GameResources.EMPTYLISTINT,
+            GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
+            GameResources.UNCLAIMED_UNITS, 0,
+            GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
+        put("RC5", "C1").
+        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.DECK, getCardsInRange(6, 43)).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
+        put(GameResources.ATTACKER + GameResources.DICE_ROLL + "3", 5).
+        put(GameResources.ATTACKER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_A,
+            GameResources.TERRITORY, 5,
+            GameResources.UNITS, 6)).
+        put(GameResources.DEFENDER + GameResources.DICE_ROLL + "1", 4).
+        put(GameResources.DEFENDER, ImmutableMap.<String, Object>of(
+            GameResources.PLAYER, PLAYER_B,
+            GameResources.TERRITORY, 13,
+            GameResources.UNITS, 1)).
+        build();
     
     Map<String, Object> attackState = ImmutableMap.<String, Object>builder().
         put(GameResources.PHASE, GameResources.ATTACK_RESULT).
@@ -204,11 +269,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private boolean deployment = false;
   private boolean reinforce = false;
   private boolean attack = false;
+  private boolean mandatoryCardSelection = false;
   boolean flag = false;
   
   public RiskGraphics() {
     currentRiskState = new RiskLogic().gameApiStateToRiskState(
-        attackState, 3,  ImmutableList.<Integer>of(1, 2, 3));
+        hasToTrade1, 1,  ImmutableList.<Integer>of(1, 2, 3));
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -240,10 +306,15 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       
       @Override
       public void onClick(ClickEvent event) {
+        int units = Card.getUnits(selectedCards, currentRiskState.getTradeNumber() + 1);
+        if (mandatoryCardSelection && units == 0) {
+          Window.alert("Invalid selection: Card selection is mandatory, please select again !");
+          return;
+        }
         if (selectedCards.size() == 0) {
           cleanup();
           riskPresenter.cardsTraded(null);
-        } else if (Card.getUnits(selectedCards, currentRiskState.getTradeNumber() + 1) > 0) {
+        } else if (units > 0) {
           List<Integer> selectedIntCards = Card.getCardIdsFromCardObjects(selectedCards);
           cleanup();
           riskPresenter.cardsTraded(selectedIntCards);
@@ -310,15 +381,15 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   public void setPlayerState(RiskState riskState) {
     gameStatus.clear();
     playersStatusPanel.clear();
-    if (!flag) {
+    /*if (!flag) {
       //&& riskPresenter.getMyPlayerId() == 3) {
       //riskState = currentRiskState;
       riskPresenter.setRiskState(riskState);
     } else {
       currentRiskState = riskState;
-    }
+    }*/
     //currentRiskState = riskState;
-    
+    riskState = currentRiskState;
     changeSVGMap(riskState);
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -342,12 +413,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             diceImages, entry.getKey(), entry.getValue()));
       }
     }
-    if (!flag && riskPresenter.getMyPlayerId() == 3) {
+    /*if (!flag && riskPresenter.getMyPlayerId() == 3) {
       Window.alert("inside player s");
       //chooseCardsForTrading();
       attackResult();
       flag = true;
-    }
+    }*/
+    //attackResult();
+    chooseCardsForTrading(true);
     //reinforceTerritories();
     //attack();
   
@@ -537,23 +610,26 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   @Override
-  public void chooseCardsForTrading() {
+  public void chooseCardsForTrading(boolean mandatoryCardSelection) {
     //String playingPlayerKey = riskPresenter.getMyPlayerKey();
+    this.mandatoryCardSelection = mandatoryCardSelection;
     int playingPlayerId = riskPresenter.getMyPlayerId();
     int turnPlayerId = currentRiskState.getTurn();
     String turnPlayerKey = GameResources.playerIdToString(turnPlayerId);
     if (playingPlayerId == turnPlayerId) {
       Player currentPlayer = currentRiskState.getPlayersMap().get(turnPlayerKey);
       List<Integer> playerCards = currentPlayer.getCards();
+      Window.alert(playerCards.size() + "");
       if (playerCards != null && playerCards.size() >= 3) {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
-        int units = Card.getUnits(cardObjects, currentRiskState.getTradeNumber() + 1);
-        if (units > 0) {
+        if (Card.isTradePossible(cardObjects)) {
           for (Map.Entry<Image, Card> imageCard : cardImagesOfCurrentPlayer.entrySet()) { 
             cardHandlers.add(addCardHandlers(imageCard.getKey(), imageCard.getValue()));
           }
+          gameStatus.add(selectCardsButton);
         }
-        gameStatus.add(selectCardsButton);
+      } else {
+        riskPresenter.cardsTraded(null);
       }
     }
   }
@@ -644,18 +720,18 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         + " units</b>"));
     
     if (attackResult.isAttackerATerritoryWinner()) {
-      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " captures " + defendingTerritory 
+      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " captures " + defendingTerritory
           + " </b>"));
     }
     if (attackResult.isDefenderOutOfGame()) {
       attackResultPanel.add(new HTML("<b>Player " + defenderKey + " out of the game</b>"));
     }
-    if (attackResult.isTradeRequired()) {
-      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
-    }
     if (attackResult.isAttackerAWinnerOfGame()) {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " wins the game !</b>"));
+    } else if (attackResult.isTradeRequired()) {
+      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
     }
+    
     //diceAttackPanel.add(diceHorizontalPanel);
     diceAttackPanel.add(attackResultPanel);
     gameStatus.add(continueAttackButton);
@@ -663,12 +739,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
    
   @Override
   public void moveUnitsAfterAttack() {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void tradeCardsInAttackPhase() {
     // TODO Auto-generated method stub
     
   }
