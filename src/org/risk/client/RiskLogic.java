@@ -1032,7 +1032,7 @@ public class RiskLogic {
     List<Operation> operations = Lists.newArrayList();
 
     // set TURN to first player 
-    operations.add(new SetTurn(GameResources.START_PLAYER_ID));
+    operations.add(new SetTurn(GameResources.playerIdToInt(playerIds.get(0))));
     
     // set PHASE to SET_TURN_ORDER
     operations.add(new Set(GameResources.PHASE, GameResources.SET_TURN_ORDER));

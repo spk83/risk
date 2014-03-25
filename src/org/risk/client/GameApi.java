@@ -36,11 +36,10 @@ public final class GameApi {
     void sendUpdateUI(UpdateUI updateUI);
   }
 
+  
   /**
-* A container for games that iterates over all the players for every MakeMove received.
-* The container will first call UpdateUI for a viewer,
-* then (after next() is called) for the first player, then the second player, etc.
-*/
+   * A container for games that can iterates over all the players and send them Game API messages.
+   */
   public static class IteratingPlayerContainer implements Container {
     private final Game game;
     private final List<Map<String, Object>> playersInfo = Lists.newArrayList();
@@ -50,13 +49,12 @@ public final class GameApi {
     private GameState lastGameState = null;
     private List<Operation> lastMove = null;
     private int lastMovePlayerId = 0;
-    private Map<Integer, Integer> playerIdToNumberOfTokensInPot = Maps.newHashMap();
 
     public IteratingPlayerContainer(Game game, int numberOfPlayers) {
       this.game = game;
       List<Integer> playerIds = Lists.newArrayList();
       for (int i = 0; i < numberOfPlayers; i++) {
-        int playerId = 1 + i;
+        int playerId = 42 + i;
         playerIds.add(playerId);
         playersInfo.add(ImmutableMap.<String, Object>of(PLAYER_ID, playerId));
       }
@@ -76,11 +74,17 @@ public final class GameApi {
       game.sendUpdateUI(new UpdateUI(yourPlayerId, playersInfo,
           gameState.getStateForPlayerId(yourPlayerId),
           lastGameState == null ? null : lastGameState.getStateForPlayerId(yourPlayerId),
-          lastMove, lastMovePlayerId, playerIdToNumberOfTokensInPot));
+          lastMove, lastMovePlayerId, gameState.getPlayerIdToNumberOfTokensInPot()));
     }
 
     @Override
     public void sendMakeMove(List<Operation> operations) {
+      
+      postMessageToParent("-- Make move call --");
+      for(Operation operation : operations) {
+        postMessageToParent(operation.toString());
+      }
+      
       lastMovePlayerId = updateUiPlayerId;
       lastMove = ImmutableList.copyOf(operations);
       lastGameState = gameState.copy();
@@ -90,7 +94,7 @@ public final class GameApi {
         game.sendVerifyMove(new VerifyMove(playersInfo,
             gameState.getStateForPlayerId(playerId),
             lastGameState.getStateForPlayerId(playerId), lastMove, lastMovePlayerId,
-            playerIdToNumberOfTokensInPot));
+            gameState.getPlayerIdToNumberOfTokensInPot()));
       }
       updateUi(updateUiPlayerId);
     }
@@ -101,17 +105,27 @@ public final class GameApi {
         throw new RuntimeException("Found a hacker! verifyMoveDone=" + verifyMoveDone);
       }
     }
+    
+    public static native void postMessageToParent(String message) /*-{
+      $wnd.parent.postMessage(message, "*");
+    }-*/;
+    
   }
 
   public static class GameState {
     private final Map<String, Object> state = Maps.newHashMap();
     private final Map<String, Object> visibleTo = Maps.newHashMap();
+    private Map<Integer, Integer> playerIdToNumberOfTokensInPot = Maps.newHashMap();
 
     public GameState copy() {
       GameState result = new GameState();
       result.state.putAll(state);
       result.visibleTo.putAll(visibleTo);
       return result;
+    }
+
+    public Map<Integer, Integer> getPlayerIdToNumberOfTokensInPot() {
+      return playerIdToNumberOfTokensInPot;
     }
 
     @SuppressWarnings("unchecked")
@@ -171,6 +185,9 @@ public final class GameApi {
           state.put(toKey, oldState.get(fromKey));
           visibleTo.put(toKey, oldVisibleTo.get(fromKey));
         }
+      } else if (operation instanceof AttemptChangeTokens) {
+        playerIdToNumberOfTokensInPot =
+            ((AttemptChangeTokens) operation).getPlayerIdToNumberOfTokensInPot();
       }
     }
 
@@ -192,24 +209,24 @@ public final class GameApi {
     protected final Map<String, Object> lastState;
 
     /**
-* You should verify this lastMove is legal given lastState; some imperfect information
-* games will need to also examine state to determine if the lastMove was legal.
-*/
+     * You should verify this lastMove is legal given lastState; some imperfect information
+     * games will need to also examine state to determine if the lastMove was legal.
+     */
     protected final List<Operation> lastMove;
 
     /**
-* lastMovePlayerId can either be the ID of a player in playersInfo,
-* or 0 for the Artificial Intelligence (AI) player.
-*/
+     * lastMovePlayerId can either be the ID of a player in playersInfo,
+     * or 0 for the Artificial Intelligence (AI) player.
+     */
     protected final int lastMovePlayerId;
 
     /**
-* The number of tokens each player currently has in the pot (see {@link AttemptChangeTokens});
-* The sum of values is always non-negative (i.e., the total pot can NOT be negative).
-* If the game ends when the total pot is non-zero,
-* the pot is given to the player with the highest score (see {@link EndGame}),
-* or if all players have the same score then the pot is distributed evenly.
-*/
+     * The number of tokens each player currently has in the pot (see {@link AttemptChangeTokens});
+     * The sum of values is always non-negative (i.e., the total pot can NOT be negative).
+     * If the game ends when the total pot is non-zero,
+     * the pot is given to the player with the highest score (see {@link EndGame}),
+     * or if all players have the same score then the pot is distributed evenly.
+     */
     protected final Map<Integer, Integer> playerIdToNumberOfTokensInPot;
 
     public VerifyMove(List<Map<String, Object>> playersInfo,
@@ -299,11 +316,11 @@ public final class GameApi {
 
   public static class UpdateUI extends VerifyMove {
     /**
-* yourPlayerId can either be the ID of a player in playersInfo,
-* or 0 for the Artificial Intelligence (AI) player,
-* or -1 to represent that you're VIEWING a match (i.e., you're not one of the players and
-* therefore you cannot make moves).
-*/
+     * yourPlayerId can either be the ID of a player in playersInfo,
+     * or 0 for the Artificial Intelligence (AI) player,
+     * or -1 to represent that you're VIEWING a match (i.e., you're not one of the players and
+     * therefore you cannot make moves).
+     */
     protected final int yourPlayerId;
 
     public UpdateUI(int yourPlayerId, List<Map<String, Object>> playersInfo,
@@ -421,9 +438,9 @@ public final class GameApi {
   }
 
   /**
-* An operation to set a random integer in the range [from,to),
-* so from {@code from} (inclusive) until {@code to} (exclusive).
-*/
+   * An operation to set a random integer in the range [from,to),
+   * so from {@code from} (inclusive) until {@code to} (exclusive).
+   */
   public static class SetRandomInteger extends Operation {
     private final String key;
     private final int from;
@@ -497,9 +514,9 @@ public final class GameApi {
   public static class SetTurn extends Operation {
     private final int playerId;
     /** The number of seconds playerId will have to send MakeMove;
-* if it is 0 then the container will decide on the time limit
-* (or the container may decide that there is no time limit).
-*/
+     * if it is 0 then the container will decide on the time limit
+     * (or the container may decide that there is no time limit).
+     */
     private final int numberOfSecondsForTurn;
 
     public SetTurn(int playerId) {
@@ -555,39 +572,39 @@ public final class GameApi {
 
   public static class AttemptChangeTokens extends Operation {
     /**
-* Map each playerId to the number of tokens that should be increased/decreased.
-* The server will verify that the total change in tokens (in playerIdToTokenChange)
-* is equal to minus the total change in the pot (in playerIdToNumberOfTokensInPot).
-*
-* For example, suppose the total pot is initially empty, i.e.,
-* playerIdToNumberOfTokensInPot={} (see {@link VerifyMove})
-* Then you do the operation:
-* AttemptChangeTokens({42: -3000, 43: -2000}, {42: 3000, 43: 2000})
-* If playerId=42 indeed has at least 3000 tokens and playerId=43 has at least 2000 tokens
-* then the operation will succeed and the total pot will have 5000 tokens and you will have
-* in {@link VerifyMove}:
-* playerIdToNumberOfTokensInPot={42: 3000, 43: 2000}
-* If one of the players does not have sufficient token then the operation will fail, and
-* playerIdToNumberOfTokensInPot={}
-*
-* Assume the operation succeeded. As the game continues, playerId=43 might risk more money:
-* AttemptChangeTokens({43: -3000}, {42: 3000, 43: 5000})
-* and if he has enough tokens then the total pot will increase to 8000:
-* playerIdToNumberOfTokensInPot={42: 3000, 43: 5000}
-* When the game ends you should distribute the pot, e.g., if the game ends in a tie you could
-* call:
-* AttemptChangeTokens({42: 4000, 43: 4000}, {42: 0, 43:0})
-* and then the total pot will be 0.
-* If the game ends when the total pot is non-zero,
-* the pot is given to the player with the highest score (see {@link EndGame}).
-*/
+     * Map each playerId to the number of tokens that should be increased/decreased.
+     * The server will verify that the total change in tokens (in playerIdToTokenChange)
+     * is equal to minus the total change in the pot (in playerIdToNumberOfTokensInPot).
+     *
+     * For example, suppose the total pot is initially empty, i.e.,
+     * playerIdToNumberOfTokensInPot={} (see {@link VerifyMove})
+     * Then you do the operation:
+     * AttemptChangeTokens({42: -3000, 43: -2000}, {42: 3000, 43: 2000})
+     * If playerId=42 indeed has at least 3000 tokens and playerId=43 has at least 2000 tokens
+     * then the operation will succeed and the total pot will have 5000 tokens and you will have
+     * in {@link VerifyMove}:
+     * playerIdToNumberOfTokensInPot={42: 3000, 43: 2000}
+     * If one of the players does not have sufficient token then the operation will fail, and
+     * playerIdToNumberOfTokensInPot={}
+     *
+     * Assume the operation succeeded. As the game continues, playerId=43 might risk more money:
+     * AttemptChangeTokens({43: -3000}, {42: 3000, 43: 5000})
+     * and if he has enough tokens then the total pot will increase to 8000:
+     * playerIdToNumberOfTokensInPot={42: 3000, 43: 5000}
+     * When the game ends you should distribute the pot, e.g., if the game ends in a tie you could
+     * call:
+     * AttemptChangeTokens({42: 4000, 43: 4000}, {42: 0, 43:0})
+     * and then the total pot will be 0.
+     * If the game ends when the total pot is non-zero,
+     * the pot is given to the player with the highest score (see {@link EndGame}).
+     */
     private final Map<Integer, Integer> playerIdToTokenChange;
 
     /**
-* The number of tokens each player currently has in the pot;
-* The sum of values is always non-negative (i.e., the total pot can NOT be negative).
-* When the game ends, the pot is given to the player with the highest score.
-*/
+     * The number of tokens each player currently has in the pot;
+     * The sum of values is always non-negative (i.e., the total pot can NOT be negative).
+     * When the game ends, the pot is given to the player with the highest score.
+     */
     protected final Map<Integer, Integer> playerIdToNumberOfTokensInPot;
 
     public AttemptChangeTokens(Map<Integer, Integer> playerIdToTokenChange,
@@ -913,12 +930,12 @@ public final class GameApi {
 
 
   /**
-* Checks the object has a JSON-supported data type, i.e.,
-* the object is either a primitive (String, Integer, Double, Boolean, null)
-* or the object is a List and every element in the list has a JSON-supported data type,
-* or the object is a Map and the keys are String and the values have JSON-supported data types.
-* @return the given object.
-*/
+   * Checks the object has a JSON-supported data type, i.e.,
+   * the object is either a primitive (String, Integer, Double, Boolean, null)
+   * or the object is a List and every element in the list has a JSON-supported data type,
+   * or the object is a Map and the keys are String and the values have JSON-supported data types.
+   * @return the given object.
+   */
   static <T> T checkHasJsonSupportedType(T object) {
     if (object == null) {
       return object;
@@ -953,4 +970,3 @@ public final class GameApi {
   private GameApi() { }
 
 }
-

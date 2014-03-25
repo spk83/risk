@@ -9,6 +9,7 @@ import org.risk.client.GameApi.SetTurn;
 import org.risk.client.GameApi.UpdateUI;
 
 import com.google.common.collect.Maps;
+import com.google.gwt.user.client.Window;
 
 /**
  * The presenter that controls the cheat graphics.
@@ -123,10 +124,9 @@ public class RiskPresenter {
     myPlayerKey = GameResources.playerIdToString(myPlayerId);
     Map<String, Object> state = updateUI.getState();
     if (state.isEmpty()) {
-      if (myPlayerId == GameResources.START_PLAYER_ID) {
+      if (myPlayerId == playerIds.get(0)) {
         sendInitialMove(playerIds);
       }
-      
       //show a basic UI
       return;
     }

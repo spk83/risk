@@ -10,7 +10,6 @@ import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
 import org.risk.client.Card;
 import org.risk.client.GameApi;
-import org.risk.client.GameApi.IteratingPlayerContainer;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
@@ -23,8 +22,6 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -39,9 +36,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -276,29 +271,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     return new ArrayList<HandlerRegistration>();
   }
 
-  public void addPlayerSelection(final IteratingPlayerContainer container, final int totalPlayers) {
-    final ListBox playerSelect = new ListBox();
-    for (int i = 1; i <= totalPlayers; ++i) {
-      playerSelect.addItem(i + "");
-    }
-    playerSelect.addItem("Viewer");
-    Label playerSelectLabel = new Label("Select player: ");
-    RootPanel.get("mainDiv").add(playerSelectLabel);
-    RootPanel.get("mainDiv").add(playerSelect);
-    playerSelect.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        int currentSelectedIndex = playerSelect.getSelectedIndex();
-        if (currentSelectedIndex == totalPlayers) {
-          container.updateUi(GameApi.VIEWER_ID);
-          return;
-        }
-        container.updateUi(playerSelect.getSelectedIndex() + 1);
-      }
-    });
-  }
- 
-  
   @Override
   public void setPresenter(RiskPresenter riskPresenter) {
     this.riskPresenter = riskPresenter;
@@ -357,7 +329,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
     if (territorySelected == null) {
       String style = territory.getAttribute("style");
-      style = style.replaceFirst("fill:#ffffff", "fill:" + Player.PLAYER_COLOR.get(playerId));
+      style = style.replaceFirst("fill:#ffffff", "fill:" + Player.getPlayerColor(playerId));
       territory.setAttribute("style", style);
       territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
       claimTerritory = false;
@@ -877,7 +849,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       if (territory != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.PLAYER_COLOR.get(GameResources.playerIdToInt(territory.getPlayerKey())));
+          + Player.getPlayerColor(GameResources.playerIdToInt(territory.getPlayerKey())));
         int units = territory.getCurrentUnits();
         if (territoryKey.equals(attackTerritoryId)) {
           style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
@@ -895,9 +867,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       } else if (riskState.getTerritoryWinner() != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.PLAYER_COLOR.get(GameResources.playerIdToInt(riskState.getTerritoryWinner())));
+          + Player.getPlayerColor(GameResources.playerIdToInt(riskState.getTerritoryWinner())));
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:red", "stroke:#000000");
+        territoryElement.setAttribute("style", style);
+        territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(0 + "");
+      } else {
+        String style = territoryElement.getAttribute("style");
+        style = style.replaceFirst("fill:[^;]+", "fill:white");
         territoryElement.setAttribute("style", style);
         territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(0 + "");
       }
