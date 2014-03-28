@@ -31,7 +31,7 @@ public final class PanelHandler {
     HorizontalPanel colorPanel = new HorizontalPanel();
     colorPanel.setSpacing(5);
     colorPanel.add(new Label("Color: "));
-    colorPanel.add(new HTML("<div style='background-color: " + Player.PLAYER_COLOR.get(myPlayerId) 
+    colorPanel.add(new HTML("<div style='background-color: " + Player.getPlayerColor(myPlayerId) 
         + "; height: 25px; width: 25px;'>" + "</div>"));
     panel.add(new HTML("Player: <b>" + myPlayerKey + "</b>"));
     panel.add(colorPanel);
