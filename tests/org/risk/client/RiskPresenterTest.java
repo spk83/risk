@@ -80,9 +80,9 @@ public class RiskPresenterTest {
   private RiskState mockRiskState;
   
   private List<Operation> operations = ImmutableList.<Operation>of();
-  private final int viewerId = GameApi.VIEWER_ID;
+  private final String viewerId = GameApi.VIEWER_ID;
   private final ImmutableMap<String, Object> emptyState = ImmutableMap.<String, Object>of();
-  private final ImmutableList<Integer> playerIds = ImmutableList.<Integer>of(1, 2, 3);
+  private final ImmutableList<String> playerIds = ImmutableList.<String>of("1", "2", "3");
   
   @Before
   public void runBefore() {
@@ -102,24 +102,24 @@ public class RiskPresenterTest {
 
   @Test
   public void testEmptyStateForA() {
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, 0, emptyState));
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.AID, "0", emptyState));
     verify(mockContainer).sendMakeMove(mockRiskLogic.getInitialOperations(
-        AbstractTest.getPlayerIds()));
+        AbstractTest.getPlayerIds(), AbstractTest.AID));
   }
 
   @Test
   public void testEmptyStateForB() {
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, 0, emptyState));
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, "0", emptyState));
   }
 
   @Test
   public void testEmptyStateForC() {
-    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, 0, emptyState));
+    riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, "0", emptyState));
   }
 
   @Test
   public void testEmptyStateForViewer() {
-    riskPresenter.updateUI(createUpdateUI(viewerId, 0, emptyState));
+    riskPresenter.updateUI(createUpdateUI(viewerId, "0", emptyState));
   }
 
   @Test
@@ -920,7 +920,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 35,
             GameResources.TERRITORY, GameResources.EMPTYMAP,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.CARDS, AbstractTest.getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, unclaimedTerritories)
@@ -946,7 +946,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.CARDS, AbstractTest.getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
@@ -972,7 +972,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             3, GameResources.TOTAL_RISK_CARDS - 1))
@@ -999,7 +999,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_C),
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             5, GameResources.TOTAL_RISK_CARDS - 1))
@@ -1027,7 +1027,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_C),
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             5, GameResources.TOTAL_RISK_CARDS - 1))
@@ -1055,7 +1055,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 8,
             GameResources.TERRITORY, AbstractTest.getTerritories(AbstractTest.PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             2, GameResources.TOTAL_RISK_CARDS - 1))
@@ -1083,7 +1083,7 @@ public class RiskPresenterTest {
             GameResources.UNCLAIMED_UNITS, 8,
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             0, GameResources.TOTAL_RISK_CARDS - 1))
@@ -1121,7 +1121,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
         put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
         put(GameResources.TERRITORY_WINNER, AbstractTest.PLAYER_A).
@@ -1147,7 +1147,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
         put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
         build();
@@ -1172,7 +1172,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
         put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
@@ -1212,7 +1212,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID)).
         put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
@@ -1235,7 +1235,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.AID)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
         put(GameResources.LAST_ATTACKING_TERRITORY, 5).
@@ -1258,7 +1258,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(
             6, GameResources.TOTAL_RISK_CARDS - 1))
@@ -1291,7 +1291,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, territoryC,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(
             AbstractTest.CID, AbstractTest.BID, AbstractTest.AID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(2, 43))
         .build();
@@ -1306,7 +1306,7 @@ public class RiskPresenterTest {
             GameResources.TERRITORY, AbstractTest.getTerritoriesInRange(0, 40, 1),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(AbstractTest.CID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(AbstractTest.CID))
         .put(GameResources.DECK, AbstractTest.getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41))
         .put(GameResources.LAST_ATTACKING_TERRITORY, 40)
@@ -1315,13 +1315,13 @@ public class RiskPresenterTest {
     return state;
   }
   private UpdateUI createUpdateUI(
-      int yourPlayerId, int turnOfPlayerId, Map<String, Object> state) {
+      String yourPlayerId, String turnOfPlayerId, Map<String, Object> state) {
     // Our UI only looks at the current state
     // (we ignore: lastState, lastMovePlayerId, playerIdToNumberOfTokensInPot)
     return new UpdateUI(yourPlayerId, AbstractTest.PLAYERSINFO, state,
         emptyState, // we ignore lastState
         ImmutableList.<Operation>of(new SetTurn(turnOfPlayerId)),
-        0,
-        ImmutableMap.<Integer, Integer>of());
+        "0",
+        ImmutableMap.<String, Integer>of());
   }
 }

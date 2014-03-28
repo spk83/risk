@@ -39,7 +39,7 @@ public class FortifyPhaseTest extends AbstractTest {
             GameResources.TERRITORY, territoryC,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
     
@@ -126,7 +126,7 @@ public class FortifyPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
         

@@ -1,6 +1,6 @@
 package org.risk.graphics;
 
-import org.risk.client.ContainerConnector;
+import org.risk.client.GameApi.ContainerConnector;
 import org.risk.client.GameApi.Container;
 import org.risk.client.GameApi.Game;
 import org.risk.client.GameApi.UpdateUI;

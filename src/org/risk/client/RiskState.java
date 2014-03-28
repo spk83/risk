@@ -7,13 +7,13 @@ import com.google.common.base.Optional;
 
 public class RiskState {
   
-  private int turn;
+  private String turn;
   private String phase;
   private List<String> deck;
   private List<Integer> unclaimedTerritory;
   private Map<String, Player> playersMap;
   private Map<String, Territory> territoryMap;
-  private List<Integer> turnOrder;
+  private List<String> turnOrder;
   private Map<String, List<Integer>> diceResult;
   private List<String> cardsVisibleToAll;
   private Map<String, Card> cardMap;
@@ -48,10 +48,10 @@ public class RiskState {
   public void setAttack(Attack attack) {
     this.attack = attack;
   }
-  public int getTurn() {
+  public String getTurn() {
     return turn;
   }
-  public void setTurn(int turn) {
+  public void setTurn(String turn) {
     this.turn = turn;
   }
   public String getPhase() {
@@ -78,10 +78,10 @@ public class RiskState {
   public void setPlayersMap(Map<String, Player> playersMap) {
     this.playersMap = playersMap;
   }
-  public List<Integer> getTurnOrder() {
+  public List<String> getTurnOrder() {
     return turnOrder;
   }
-  public void setTurnOrder(List<Integer> turnOrder) {
+  public void setTurnOrder(List<String> turnOrder) {
     this.turnOrder = turnOrder;
   }
   public Map<String, List<Integer>> getDiceResult() {

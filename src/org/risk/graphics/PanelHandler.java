@@ -23,9 +23,9 @@ public final class PanelHandler {
   }
   
   public static Panel getPlayerPanel(CardImages cardImages, RiskState state, 
-      Player player, int currentPlayerId, Map<Image, Card> currentPlayerCardImages) {
+      Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages) {
     String myPlayerKey = player.getPlayerId();
-    int myPlayerId = GameResources.playerIdToInt(myPlayerKey);
+    String myPlayerId = GameResources.playerKeyToId(myPlayerKey);
     VerticalPanel panel = new VerticalPanel();
     panel.setSpacing(5);
     HorizontalPanel colorPanel = new HorizontalPanel();
@@ -41,7 +41,7 @@ public final class PanelHandler {
       totalCards = cards.size();
     }
     panel.add(new HTML("Total cards: <b>" + totalCards + "</b>"));
-    if (myPlayerId == currentPlayerId) {
+    if (myPlayerId.equals(currentPlayerId)) {
       if (totalCards > 0) { 
         FlowPanel cardsPanel = new FlowPanel();
         for (int cardId : cards) {

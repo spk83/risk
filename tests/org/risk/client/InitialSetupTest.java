@@ -29,7 +29,7 @@ public class InitialSetupTest extends AbstractTest {
   @Test
   public void testgetInitialOperations() {
     assertEquals(1 + 1 + 3 + 44 + 1 + 1 + 1 + 9, riskLogic.getInitialOperations(
-        getPlayerIds()).size());
+        getPlayerIds(), AID).size());
   }
   
   /*
@@ -39,7 +39,7 @@ public class InitialSetupTest extends AbstractTest {
    */
   @Test
   public void testInitialSetup() {
-    List<Operation> initialOperations = riskLogic.getInitialOperations(getPlayerIds());
+    List<Operation> initialOperations = riskLogic.getInitialOperations(getPlayerIds(), AID);
 
     // Check valid move
     assertMoveOk(move(AID, GameResources.EMPTYSTATE, initialOperations));
@@ -80,12 +80,12 @@ public class InitialSetupTest extends AbstractTest {
     List<Operation> setupTurnOrder = Lists.newArrayList();
     setupTurnOrder.add(new SetTurn(CID));
     List<String> deleteKeys = GameResources.getDiceRollKeys(GameResources.getPlayerKeys(
-        ImmutableList.<Integer>of(AID, BID, CID)));
+        ImmutableList.<String>of(AID, BID, CID)));
     for (String deleteKey : deleteKeys) {
       setupTurnOrder.add(new Delete(deleteKey));
     }
     setupTurnOrder.add(new Set(GameResources.PHASE, GameResources.CLAIM_TERRITORY));
-    setupTurnOrder.add(new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)));
+    setupTurnOrder.add(new Set(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)));
     
     // Check valid move
     assertMoveOk(move(AID, state, setupTurnOrder));

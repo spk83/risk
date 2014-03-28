@@ -69,7 +69,7 @@ public final class GameResources {
   public static final String FORTIFY = "fortify";
   public static final String END_GAME = "endGame";
   public static final String SET_TURN_ORDER = "setTurnOrder";
-  public static final int START_PLAYER_ID = 1;
+  public static final int START_PLAYER_ID_INDEX = 0;
   public static final int MAX_PLAYERS = 6;
   public static final String REINFORCE = "reinforce";
   public static final String REINFORCE_UNITS = "reinforceUnits";
@@ -122,25 +122,25 @@ public final class GameResources {
     return categoryString + cardId;
   }
   
-  public static List<String> getPlayerKeys(List<Integer> playerIds) {
+  public static List<String> getPlayerKeys(List<String> playerIds) {
    Builder<String> playerKeysBuilder = ImmutableList.<String>builder();
-   for (int playerId : playerIds) {
-     playerKeysBuilder.add(playerIdToString(playerId));
+   for (String playerId : playerIds) {
+     playerKeysBuilder.add(playerIdToKey(playerId));
    }
     return playerKeysBuilder.build();
   }
   /*
-   * This is a helper method to convert player's ID from int to String.
+   * This is a helper method to convert player's ID from player key.
    */
-  public static String playerIdToString(int playerId) {
+  public static String playerIdToKey(String playerId) {
     return "P" + playerId;
   }
   
   /*
-   * This is a helper method to convert player's ID from String to int.
+   * This is a helper method to convert player's key to player ID.
    */
-  public static int playerIdToInt(String playerId) {
-    return Integer.parseInt(playerId.substring(1));
+  public static String playerKeyToId(String playerKey) {
+    return playerKey.substring(1);
   }
   
   /*
@@ -215,11 +215,11 @@ public final class GameResources {
   
   @SuppressWarnings("unchecked")
   public static Map<String, Integer> differenceTerritoryMap(
-      Map<String, Object> currentPlayerState, RiskState lastPlayerState, int lastMovePlayerId) {
+      Map<String, Object> currentPlayerState, RiskState lastPlayerState, String lastMovePlayerId) {
     Map<String, Integer> territoryUnitMap = 
         (Map<String, Integer>) currentPlayerState.get(GameResources.TERRITORY);
     Map<String, Integer> oldTerritoryMap = lastPlayerState.getPlayersMap().get(
-        GameResources.playerIdToString(lastMovePlayerId)).getTerritoryUnitMap();
+        GameResources.playerIdToKey(lastMovePlayerId)).getTerritoryUnitMap();
     Map<String, Integer> differenceTerritoryMap = 
         GameResources.differenceTerritoryMap(oldTerritoryMap, territoryUnitMap);
     return differenceTerritoryMap;
@@ -278,5 +278,13 @@ public final class GameResources {
       }
     }
     return null;
+  }
+  
+  public static String getStartPlayerId(List<String> playerIds) {
+    String startPlayerId = playerIds.get(GameResources.START_PLAYER_ID_INDEX);
+    if (startPlayerId.equals(GameApi.AI_PLAYER_ID)) {
+      startPlayerId = playerIds.get((GameResources.START_PLAYER_ID_INDEX + 1) % playerIds.size());
+    }
+    return startPlayerId;
   }
 }

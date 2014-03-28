@@ -44,7 +44,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
@@ -81,7 +81,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC0", "I1")
         .put("RC1", "I4")
@@ -115,7 +115,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC0", "I1")
         .put("RC1", "C4")
@@ -149,7 +149,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
@@ -176,7 +176,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
@@ -212,7 +212,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 4,
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(5, 43))
         .put(GameResources.CARDS_BEING_TRADED, ImmutableList.<Integer>of(0, 1, 2))
         .build();
@@ -230,9 +230,9 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 10,
             GameResources.CONTINENT, ImmutableList.<String>of("5"))),
         new Delete(GameResources.CARDS_BEING_TRADED),
-        new SetVisibility("RC0", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC1", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC2", GameResources.EMPTYLISTINT),
+        new SetVisibility("RC0", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC1", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC2", GameResources.EMPTYLISTSTRING),
         new Shuffle(deck),
         new Set(GameResources.DECK, deck),
         new Set(GameResources.PHASE, GameResources.REINFORCE));
@@ -254,9 +254,9 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 10,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)),
         new Delete(GameResources.CARDS_BEING_TRADED),
-        new SetVisibility("RC0", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC1", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC2", GameResources.EMPTYLISTINT),
+        new SetVisibility("RC0", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC1", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC2", GameResources.EMPTYLISTSTRING),
         new Shuffle(deck),
         new Set(GameResources.DECK, deck),
         new Set(GameResources.PHASE, GameResources.REINFORCE));
@@ -283,7 +283,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, ImmutableList.<String>of("5")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(3, 43))
         .put(GameResources.TRADE_NUMBER, 1)
         .build();
@@ -337,7 +337,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 8,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
     
@@ -413,7 +413,7 @@ public class ReinforcementPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.UNCLAIMED_UNITS, 8,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(2, 43))
         .build();
     
