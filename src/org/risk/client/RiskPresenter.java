@@ -104,10 +104,10 @@ public class RiskPresenter {
   private final Container container;
   private RiskState riskState;
   private String myPlayerKey;
-  private List<Integer> playerIds;
-  private int myPlayerId;
+  private List<String> playerIds;
+  private String myPlayerId;
   private String currentPhase;
-  private int turnPlayerId;
+  private String turnPlayerId;
   
   public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
@@ -120,13 +120,13 @@ public class RiskPresenter {
   public void updateUI(UpdateUI updateUI) {
     playerIds = updateUI.getPlayerIds();
     myPlayerId = updateUI.getYourPlayerId();
-    myPlayerKey = GameResources.playerIdToString(myPlayerId);
+    myPlayerKey = GameResources.playerIdToKey(myPlayerId);
     Map<String, Object> state = updateUI.getState();
     if (state.isEmpty()) {
-      if (myPlayerId == GameResources.START_PLAYER_ID) {
-        sendInitialMove(playerIds);
+      String startPlayerId = GameResources.getStartPlayerId(playerIds);
+      if (myPlayerId.equals(startPlayerId)) {
+        sendInitialMove(playerIds, startPlayerId);
       }
-      
       //show a basic UI
       return;
     }
@@ -146,7 +146,7 @@ public class RiskPresenter {
     view.setPlayerState(riskState);
     
     // If it's your turn, call appropriate method for next move based on current phase in state
-    if (turnPlayerId == myPlayerId) {
+    if (turnPlayerId.equals(myPlayerId)) {
       String phase = (String) state.get(GameResources.PHASE);
       currentPhase = phase;
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
@@ -203,7 +203,7 @@ public class RiskPresenter {
    * @param operations
    * @return id of player who has the turn
    */
-  private int getTurnPlayer(List<Operation> operations) {
+  private String getTurnPlayer(List<Operation> operations) {
     for (Operation operation : operations) {
       if (operation instanceof SetTurn) {
         return ((SetTurn) operation).getPlayerId();
@@ -216,8 +216,9 @@ public class RiskPresenter {
    * Perform the initial operations when current state of the game is empty.
    * @param playerIds
    */
-  private void sendInitialMove(List<Integer> playerIds) {
-   container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds)));
+  private void sendInitialMove(List<String> playerIds, String startPlayerId) {
+   container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds),
+       startPlayerId));
    //container.sendMakeMove(riskLogic.getInitialOperations());
   }
   
@@ -313,7 +314,7 @@ public class RiskPresenter {
    */
   public void attackResultMove() {
     container.sendMakeMove(riskLogic.attackResultOperations(
-        riskState, GameResources.playerIdToInt(myPlayerKey)));
+        riskState, GameResources.playerKeyToId(myPlayerKey)));
   }
   
   /**
@@ -346,7 +347,7 @@ public class RiskPresenter {
       container.sendMakeMove(riskLogic.performEndAttack(riskState, myPlayerKey));
     } else {
       container.sendMakeMove(riskLogic.performEndAttackWithNoCard(
-          GameResources.playerIdToInt(myPlayerKey)));
+          GameResources.playerKeyToId(myPlayerKey)));
     }
   }
   
@@ -374,7 +375,7 @@ public class RiskPresenter {
     container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
   }
   
-  public int getMyPlayerId() {
+  public String getMyPlayerId() {
     return myPlayerId;
   }
   

@@ -38,7 +38,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 35,
             GameResources.TERRITORY, GameResources.EMPTYMAP,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.CARDS, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, unclaimedTerritories)
         .build();
@@ -112,7 +112,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 34,
             GameResources.TERRITORY, ImmutableMap.<String, Integer>of("30", 1),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.CARDS, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, unclaimedTerritory)
         .build();
@@ -198,7 +198,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 21,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.CARDS, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13))
         .build();
@@ -254,7 +254,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 21,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.DECK, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();
@@ -316,7 +316,7 @@ public class DeploymentPhaseTest extends AbstractTest {
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.TERRITORY, getTerritories(PLAYER_C),
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID))
         .put(GameResources.CARDS, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT)
         .build();

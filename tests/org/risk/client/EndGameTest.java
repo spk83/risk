@@ -25,7 +25,7 @@ public class EndGameTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(0, 40, 1),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, ImmutableList.<String>of("0", "1", "2", "3", "4")))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID))
         .put(GameResources.DECK, getCardsInRange(0, 43))
         .put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41))
         .put(GameResources.LAST_ATTACKING_TERRITORY, 40)

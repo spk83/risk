@@ -10,13 +10,13 @@ import com.google.common.collect.Lists;
 
 public class Player {
 
-  public static final Map<Integer, String> PLAYER_COLOR = ImmutableMap.<Integer, String>builder()
-    .put(1, "lightskyblue")
-    .put(2, "lightgreen")
-    .put(3, "orange")
-    .put(4, "lightcoral")
-    .put(5, "lightsalmon")
-    .put(6, "khaki")
+  public static final Map<String, String> PLAYER_COLOR = ImmutableMap.<String, String>builder()
+    .put("0", "lightskyblue")
+    .put("1", "lightgreen")
+    .put("2", "orange")
+    .put("3", "lightcoral")
+    .put("4", "lightsalmon")
+    .put("5", "khaki")
     .build();
       
   private String playerId;
@@ -66,5 +66,9 @@ public class Player {
   public void setContinent(List<String> continent) {
     this.continent = continent;
   }
-  
+ 
+  public static String getPlayerColor(String playerId) {
+    String playerIdModulous = String.valueOf((Integer.parseInt(playerId) % 6));
+    return PLAYER_COLOR.get(playerIdModulous);
+  }
 }

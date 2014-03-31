@@ -23,9 +23,9 @@ import com.google.common.collect.Lists;
 public class AbstractTest {
   protected static final String PLAYER_ID = "playerId";
   protected static final int TOTAL_PLAYERS = 3; // Number of players playing  
-  protected static final int AID = 1; // Player A
-  protected static final int BID = 2; // Player B
-  protected static final int CID = 3; // Player C
+  protected static final String AID = "1"; // Player A
+  protected static final String BID = "2"; // Player B
+  protected static final String CID = "3"; // Player C
   protected static final String PLAYER_A = playerIdToString(AID);
   protected static final String PLAYER_B = playerIdToString(BID);
   protected static final String PLAYER_C = playerIdToString(CID);
@@ -60,7 +60,7 @@ public class AbstractTest {
    * This method is used to create object of VerifyMove class.
    */
   protected VerifyMove move(
-      int lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
+      String lastMovePlayerId, Map<String, Object> lastState, List<Operation> lastMove) {
     return new VerifyMove(
         PLAYERSINFO, GameResources.EMPTYSTATE, lastState, lastMove, lastMovePlayerId, null);
   }
@@ -110,7 +110,7 @@ public class AbstractTest {
   /*
    * This is a helper method to convert player's ID from int to String.
    */
-  protected static String playerIdToString(int playerId) {
+  protected static String playerIdToString(String playerId) {
     return "P" + playerId;
   }
   

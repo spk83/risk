@@ -64,7 +64,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         build();
     
@@ -165,7 +165,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
@@ -286,7 +286,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 4).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 3).
@@ -355,7 +355,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
         put(GameResources.LAST_ATTACKING_TERRITORY, 5).
@@ -470,7 +470,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         put(GameResources.TERRITORY_WINNER, PLAYER_A).build();
     
@@ -483,7 +483,7 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.DECK, getCardsInRange(1, 43)),
-        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<String>of(AID)),
         new Delete(GameResources.TERRITORY_WINNER),
         new Set(GameResources.PHASE, GameResources.FORTIFY));
     
@@ -502,7 +502,7 @@ public class AttackPhaseTest extends AbstractTest {
         new SetTurn(AID),
         new Set(PLAYER_A, playerAMap),
         new Set(GameResources.DECK, getCardsInRange(2, 43)),
-        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<String>of(AID)),
         new Delete(GameResources.TERRITORY_WINNER),
         new Set(GameResources.PHASE, GameResources.FORTIFY));
     
@@ -529,7 +529,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(30, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(0, 43)).
         build();
     
@@ -577,7 +577,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(2, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
@@ -614,7 +614,7 @@ public class AttackPhaseTest extends AbstractTest {
         new Delete(GameResources.ATTACKER),
         new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.DEFENDER),
-        new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)),
+        new Set(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID)),
         new Set(GameResources.PHASE, GameResources.ATTACK_OCCUPY));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
@@ -649,7 +649,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, BID, AID)).
         put(GameResources.DECK, getCardsInRange(6, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
@@ -683,18 +683,18 @@ public class AttackPhaseTest extends AbstractTest {
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)),
         new Set(GameResources.LAST_ATTACKING_TERRITORY, 5),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
-        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
-        new SetVisibility("RC1", ImmutableList.<Integer>of(AID)),
-        new SetVisibility("RC2", ImmutableList.<Integer>of(AID)),
-        new SetVisibility("RC3", ImmutableList.<Integer>of(AID)),
-        new SetVisibility("RC4", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<String>of(AID)),
+        new SetVisibility("RC1", ImmutableList.<String>of(AID)),
+        new SetVisibility("RC2", ImmutableList.<String>of(AID)),
+        new SetVisibility("RC3", ImmutableList.<String>of(AID)),
+        new SetVisibility("RC4", ImmutableList.<String>of(AID)),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
         new Delete(GameResources.ATTACKER),
         new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.DEFENDER),
-        new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)),
+        new Set(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID)),
         new Set(GameResources.PHASE, GameResources.ATTACK_TRADE));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
@@ -723,7 +723,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
         put(GameResources.LAST_ATTACKING_TERRITORY, 5).
         put(GameResources.TERRITORY_WINNER, PLAYER_A).
@@ -758,7 +758,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(6, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC0", "I1")
         .put("RC1", "I4")
@@ -792,7 +792,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID)).
         put(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(13)).
         put(GameResources.LAST_ATTACKING_TERRITORY, 5).
         put(GameResources.TERRITORY_WINNER, PLAYER_A).
@@ -827,7 +827,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(9, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC0", "I1")
         .put("RC1", "I4")
@@ -887,9 +887,9 @@ public class AttackPhaseTest extends AbstractTest {
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, newPlayerMap),
-        new SetVisibility("RC0", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC1", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC2", GameResources.EMPTYLISTINT),
+        new SetVisibility("RC0", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC1", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC2", GameResources.EMPTYLISTSTRING),
         new SetVisibility("RC3"),
         new SetVisibility("RC4"),
         new SetVisibility("RC5"),
@@ -911,7 +911,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(9, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC3", "W1")
         .put("RC4", "C2")
@@ -953,7 +953,7 @@ public class AttackPhaseTest extends AbstractTest {
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(6, GameResources.TOTAL_RISK_CARDS - 1))
         .put("RC0", "W1")
         .put("RC1", "C2")
@@ -976,9 +976,9 @@ public class AttackPhaseTest extends AbstractTest {
     final List<Operation> movementOperations = ImmutableList.<Operation>of(
         new SetTurn(AID),
         new Set(PLAYER_A, newPlayerMap),
-        new SetVisibility("RC0", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC1", GameResources.EMPTYLISTINT),
-        new SetVisibility("RC2", GameResources.EMPTYLISTINT),
+        new SetVisibility("RC0", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC1", GameResources.EMPTYLISTSTRING),
+        new SetVisibility("RC2", GameResources.EMPTYLISTSTRING),
         new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT),
         new Delete(GameResources.LAST_ATTACKING_TERRITORY),
         new Delete(GameResources.CARDS_BEING_TRADED),
@@ -1015,7 +1015,7 @@ Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 13, 6);
             GameResources.TERRITORY, getTerritoriesInRange(14, 41, 3),
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING))
-        .put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(CID, AID))
+        .put(GameResources.TURN_ORDER, ImmutableList.<String>of(CID, AID))
         .put(GameResources.DECK, getCardsInRange(6, GameResources.TOTAL_RISK_CARDS - 1))
         .put(GameResources.TRADE_NUMBER, 2)
         .put(GameResources.TERRITORY_WINNER, PLAYER_A)
@@ -1054,7 +1054,7 @@ Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 13, 6);
             GameResources.TERRITORY, territoryMapB,
             GameResources.UNCLAIMED_UNITS, 0,
             GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)).
-        put(GameResources.TURN_ORDER, ImmutableList.<Integer>of(BID, AID)).
+        put(GameResources.TURN_ORDER, ImmutableList.<String>of(BID, AID)).
         put(GameResources.CARDS, getCardsInRange(2, 43)).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "1", 6).
         put(GameResources.ATTACKER + GameResources.DICE_ROLL + "2", 6).
@@ -1083,15 +1083,15 @@ Map<String, Integer> territoryMapA = getTerritoriesInRange(0, 13, 6);
         new Set(GameResources.UNCLAIMED_TERRITORY, ImmutableList.<Integer>of(41)),
         new Set(GameResources.LAST_ATTACKING_TERRITORY, 40),
         new Set(GameResources.TERRITORY_WINNER, PLAYER_A),
-        new SetVisibility("RC0", ImmutableList.<Integer>of(AID)),
-        new SetVisibility("RC1", ImmutableList.<Integer>of(AID)),
+        new SetVisibility("RC0", ImmutableList.<String>of(AID)),
+        new SetVisibility("RC1", ImmutableList.<String>of(AID)),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "2"),
         new Delete(GameResources.ATTACKER + GameResources.DICE_ROLL + "3"),
         new Delete(GameResources.ATTACKER),
         new Delete(GameResources.DEFENDER + GameResources.DICE_ROLL + "1"),
         new Delete(GameResources.DEFENDER),
-        new Set(GameResources.TURN_ORDER, ImmutableList.<Integer>of(AID)),
+        new Set(GameResources.TURN_ORDER, ImmutableList.<String>of(AID)),
         new Set(GameResources.PHASE, GameResources.END_GAME));
     
     final List<Operation> emptyOperations = ImmutableList.<Operation>of();
