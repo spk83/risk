@@ -53,10 +53,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @UiField
   HorizontalPanel playerArea;
-  
-  @UiField
-  HorizontalPanel diceAttackPanel;
-  
+    
   @UiField
   HTML mapContainer;
   
@@ -98,6 +95,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private boolean fortify = false;
   private boolean mandatoryCardSelection = false;
   
+  private PopupPanel dicePanel;
+  
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
@@ -107,7 +106,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
     playerArea.setSpacing(5);
-    diceAttackPanel.setSpacing(20);
+    dicePanel = new PopupPanel();
+    dicePanel.hide();
     createSelectCardsButtonHandler();
     createTurnOrderButton();
     createContinueToAttackPhaseButton();
@@ -158,7 +158,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       public void onClick(ClickEvent event) {
         gameStatus.remove(turnOrderButton);
         attackResultPanel.clear();
-        diceAttackPanel.clear();
         riskPresenter.setTurnOrderMove();
       }
     });
@@ -287,6 +286,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     playersStatusPanel.clear();
     currentRiskState = riskState;
     changeSVGMap(riskState);
+    dicePanel.clearPanel();
+    dicePanel.hide();
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
     int index = 0;
@@ -306,16 +307,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     playersStatusPanel.setWidth("300px");
     playersStatusPanel.selectTab(index);
     gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
-    diceAttackPanel.clear();
     if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
       for (String dice: diceList) {
-        diceAttackPanel.add(PanelHandler.getNewDicePanel(
+        dicePanel.addPanel(PanelHandler.getNewDicePanel(
             diceImages, dice, riskState.getDiceResult().get(dice)));
         }
+      dicePanel.setText("Turn Order");
+      dicePanel.center();
    }
     setInstructionPanel();
+    claimTerritory = false;
+    deployment = false;
+    reinforce = false;
+    attack = false;
+    fortify = false;
+    mandatoryCardSelection = false;
   }
 
   private void claimTerritory(String territoryName) {
@@ -621,7 +629,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @Override
   public void attackResult() {
     attackResultPanel.clear();
-    diceAttackPanel.clear();
     gameStatus.remove(errorLabel);
     gameStatus.remove(reinforceLabel);
 
@@ -638,8 +645,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         diceImages, attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
     Panel defenderDicePanel = PanelHandler.getNewDicePanel(
         diceImages, defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
-    diceAttackPanel.add(attackerDicePanel);
-    diceAttackPanel.add(defenderDicePanel);
+    dicePanel.clearPanel();
+    dicePanel.setText("Attack Result");
+    dicePanel.addPanel(attackerDicePanel);
+    dicePanel.addPanel(defenderDicePanel);
     AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
     attackResultPanel.add(new HTML("Attacker lost <b>" + (-1 * attackResult.getDeltaAttack()) 
         + " units</b>"));
@@ -661,7 +670,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
     }
     
-    diceAttackPanel.add(attackResultPanel);
+    dicePanel.addPanel(attackResultPanel);
+    dicePanel.center();
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {

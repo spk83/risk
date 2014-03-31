@@ -146,9 +146,9 @@ public class RiskPresenter {
     view.setPlayerState(riskState);
     
     // If it's your turn, call appropriate method for next move based on current phase in state
+    String phase = (String) state.get(GameResources.PHASE);
+    currentPhase = phase;
     if (turnPlayerId.equals(myPlayerId)) {
-      String phase = (String) state.get(GameResources.PHASE);
-      currentPhase = phase;
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
         view.turnOrderMove();
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
@@ -164,8 +164,6 @@ public class RiskPresenter {
         view.reinforceTerritories();
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
         view.attack();
-      } else if (phase.equals(GameResources.ATTACK_RESULT)) {
-        view.attackResult();
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
         view.reinforceTerritories();
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
@@ -177,6 +175,9 @@ public class RiskPresenter {
       } else if (phase.equals(GameResources.GAME_ENDED)) {
         return;
       }
+    }
+    if (phase.equals(GameResources.ATTACK_RESULT)) {
+      view.attackResult();
     }
   }
   
