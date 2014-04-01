@@ -15,7 +15,7 @@ public class DiceAnimation extends Animation {
   private String text;
   private List<Integer> rolls;
   private Panel panel;
-  private int count = 0;
+  private int delayCount = 0;
   private int delay;
   
   public DiceAnimation(DiceImages diceImages, Panel panel, int delay, String text, 
@@ -47,16 +47,16 @@ public class DiceAnimation extends Animation {
   
   @Override
   protected void onUpdate(double progress) {
-    if (count == 0) {
+    if (delayCount == 0) {
       panel.clear();
       panel.add(new Label(text + "   "));
       for (int i = 0; i < rolls.size(); ++i) {
         panel.add(new Image(diceImageList.get(Random.nextInt(18))));
       }
     }
-    count++;
-    if (count == delay) {
-      count = 0;
+    delayCount++;
+    if (delayCount == delay) {
+      delayCount = 0;
     }
   }
   
