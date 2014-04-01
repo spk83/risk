@@ -14,6 +14,7 @@ import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
+import org.risk.client.SoundResource;
 import org.risk.client.Territory;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
@@ -22,11 +23,13 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.media.client.Audio;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
@@ -45,10 +48,12 @@ import com.google.gwt.user.client.ui.Widget;
 public class RiskGraphics extends Composite implements RiskPresenter.View {
     public interface RiskGraphicsUiBinder extends UiBinder<Widget, RiskGraphics> {
     }
-    
+  
+  private final GameSounds gameSounds;
   private final DiceImages diceImages;
   private final CardImages cardImages;
   private final MapSVG riskMapSVG;
+  private final SoundResource soundResource;
   private RiskPresenter riskPresenter;
   private OMSVGSVGElement boardElt;
   
@@ -102,6 +107,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
+    gameSounds = GWT.create(GameSounds.class);
+    soundResource = new SoundResource(gameSounds);
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
@@ -316,6 +323,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         DiceAnimation diceAnimation = new DiceAnimation(
             diceImages, diceFlowPanel, 3, dice, riskState.getDiceResult().get(dice));
         dicePanel.addPanel(diceFlowPanel);
+        soundResource.playDiceAudio();
         diceAnimation.run(1000);
         /*dicePanel.addPanel(PanelHandler.getNewDicePanel(
             diceImages, dice, riskState.getDiceResult().get(dice)));*/
@@ -662,6 +670,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     dicePanel.setText("Attack Result");
     dicePanel.addPanel(attackerDicePanel);
     dicePanel.addPanel(defenderDicePanel);
+    soundResource.playDiceAudio();
     diceAnimationAttacker.run(1000);
     diceAnimationDefender.run(1000);
 
