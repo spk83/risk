@@ -17,6 +17,7 @@ public class RiskEntryPoint implements EntryPoint {
 
   Container container;
   RiskPresenter riskPresenter;
+  final RiskLogic riskLogic = new RiskLogic();
   
   @UiField
   Button submitButton;
@@ -26,7 +27,7 @@ public class RiskEntryPoint implements EntryPoint {
     Game game = new Game() {
       @Override
       public void sendVerifyMove(VerifyMove verifyMove) {
-        container.sendVerifyMoveDone(new RiskLogic().verify(verifyMove));
+        container.sendVerifyMoveDone(riskLogic.verify(verifyMove));
       }
 
       @Override

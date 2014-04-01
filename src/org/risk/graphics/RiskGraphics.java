@@ -32,6 +32,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -311,9 +312,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
       for (String dice: diceList) {
-        dicePanel.addPanel(PanelHandler.getNewDicePanel(
-            diceImages, dice, riskState.getDiceResult().get(dice)));
-        }
+        FlowPanel diceFlowPanel = new FlowPanel();
+        DiceAnimation diceAnimation = new DiceAnimation(
+            diceImages, diceFlowPanel, 3, dice, riskState.getDiceResult().get(dice));
+        dicePanel.addPanel(diceFlowPanel);
+        diceAnimation.run(1000);
+        /*dicePanel.addPanel(PanelHandler.getNewDicePanel(
+            diceImages, dice, riskState.getDiceResult().get(dice)));*/
+      }
       dicePanel.setText("Turn Order");
       dicePanel.center();
    }
@@ -641,14 +647,24 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String attackerText = attackerKey + " (" + attackingTerritory + ")";
     String defenderText = defenderKey + " (" + defendingTerritory + ")";
     
-    Panel attackerDicePanel = PanelHandler.getNewDicePanel(
+    FlowPanel attackerDicePanel = new FlowPanel();
+    DiceAnimation diceAnimationAttacker = new DiceAnimation(diceImages, attackerDicePanel, 3, 
+        attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
+    
+    FlowPanel defenderDicePanel = new FlowPanel();
+    DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
+        defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
+    /*Panel attackerDicePanel = PanelHandler.getNewDicePanel(
         diceImages, attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
     Panel defenderDicePanel = PanelHandler.getNewDicePanel(
-        diceImages, defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
+        diceImages, defenderText, currentRiskState.getAttack().getDefenderDiceRolls());*/
     dicePanel.clearPanel();
     dicePanel.setText("Attack Result");
     dicePanel.addPanel(attackerDicePanel);
     dicePanel.addPanel(defenderDicePanel);
+    diceAnimationAttacker.run(1000);
+    diceAnimationDefender.run(1000);
+
     AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
     attackResultPanel.add(new HTML("Attacker lost <b>" + (-1 * attackResult.getDeltaAttack()) 
         + " units</b>"));
