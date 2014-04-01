@@ -14,7 +14,6 @@ import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
-import org.risk.client.SoundResource;
 import org.risk.client.Territory;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
