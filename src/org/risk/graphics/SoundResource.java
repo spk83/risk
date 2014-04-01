@@ -55,8 +55,8 @@ public class SoundResource {
   private void loadCardAudio() {
     cardAudio = Audio.createIfSupported();
     if (cardAudio != null) {
-      cardAudio.addSource(gameSounds.attackMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
-      cardAudio.addSource(gameSounds.attackOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
+      cardAudio.addSource(gameSounds.cardMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
+      cardAudio.addSource(gameSounds.cardOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
       cardAudio.load();
     }
   }

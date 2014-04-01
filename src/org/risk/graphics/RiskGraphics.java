@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
@@ -22,8 +24,19 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DragEndEvent;
+import com.google.gwt.event.dom.client.DragEndHandler;
+import com.google.gwt.event.dom.client.DragOverEvent;
+import com.google.gwt.event.dom.client.DragOverHandler;
+import com.google.gwt.event.dom.client.DragStartEvent;
+import com.google.gwt.event.dom.client.DragStartHandler;
+import com.google.gwt.event.dom.client.DropEvent;
+import com.google.gwt.event.dom.client.DropHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -32,6 +45,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -71,6 +85,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @UiField
   TabPanel instructions;
   
+  @UiField
+  AbsolutePanel mapWrapper;
+  
+  @UiField
+  AbsolutePanel tankPanel;
+  
   private RiskState currentRiskState;
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
   private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
@@ -85,7 +105,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private VerticalPanel attackResultPanel = new VerticalPanel();
   private Label errorLabel = new Label();
   private Label reinforceLabel = new Label();
-  
   private int unclaimedUnits;
   private String attackToTerritory;
   private String attackFromTerritory;
@@ -101,6 +120,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private PopupPanel dicePanel;
   private PopupChoices fortifyOpt;
   private ImageResource attackImageResource;
+  private List<Image> tankImages = new ArrayList<Image>();
  
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
@@ -122,8 +142,83 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndReinforceButton();
     createEndFortifyButton();
     addMapHandlers();
+    createTankHandlers();
   }
   
+  private void createTankHandlers() {
+    for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
+      Image img = new Image(attackImageResource);
+      tankImages.add(img);
+      final int territoryId = i;
+      final String territory = Territory.SVG_NAME_MAP.get(i);
+      img.getElement().setDraggable(Element.DRAGGABLE_TRUE);
+      img.setPixelSize(40, 40);
+      img.setVisible(false);
+      img.addDragStartHandler(new DragStartHandler() {
+        @Override
+        public void onDragStart(DragStartEvent event) {
+          event.setData("text", territory);
+          displayOpponentTerritory(territoryId);
+        }
+      });
+     
+      img.addDragEndHandler(new DragEndHandler() {
+        @Override
+        public void onDragEnd(DragEndEvent event) {
+          attack();
+        }
+      });
+      
+      img.addDragOverHandler(new DragOverHandler() {
+        @Override
+        public void onDragOver(DragOverEvent event) {
+        }
+      });
+      img.addDropHandler(new DropHandler() {
+        @Override
+        public void onDrop(DropEvent event) {
+          soundResource.playAttackAudio();
+          event.preventDefault();
+          String attackTerritory = event.getData("text");
+          attack(attackTerritory);
+          attack(territory);
+        }
+      });
+    }
+  }
+
+  private void addTankImages() {
+    for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
+      Image img = tankImages.get(i);
+      final String territory = Territory.SVG_NAME_MAP.get(i);
+      OMElement unitsElement = boardElt.getElementById(territory + "_units");
+      int xCords = unitsElement.getElement().getAbsoluteLeft() 
+          - unitsElement.getElement().getParentElement().getAbsoluteLeft();
+      int yCords = unitsElement.getElement().getAbsoluteTop() 
+          - unitsElement.getElement().getParentElement().getAbsoluteTop();
+      tankPanel.add(img, xCords, yCords);
+      img.setVisible(false);
+    }
+  }
+  
+  private void displayOpponentTerritory(int territoryId) {
+    String playerKey = riskPresenter.getMyPlayerKey();
+    Player player = currentRiskState.getPlayersMap().get(playerKey);
+    List<Integer> connections = Territory.CONNECTIONS.get(territoryId);
+    Set<Entry<String, Integer>> territorySet = player.getTerritoryUnitMap().entrySet();
+    for (int i : connections) {
+      if (!territorySet.contains(i + "")) {
+          tankImages.get(i).setVisible(true);
+      }
+    }
+    for (Entry<String, Integer> t : territorySet) {
+      int id = Integer.parseInt(t.getKey());
+      if (id != territoryId) {
+        tankImages.get(id).setVisible(false);
+      }
+    }
+  }
+
   private void createSelectCardsButtonHandler() {
     selectCardsButton.addClickHandler(new ClickHandler() {
       
@@ -270,6 +365,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   public void setPlayerState(RiskState riskState) {
     gameStatus.clear();
     playersStatusPanel.clear();
+    tankPanel.clear();
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -324,6 +420,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     attack = false;
     fortify = false;
     mandatoryCardSelection = false;
+    tankPanel.getElement().getStyle().setOverflow(Overflow.VISIBLE);
+    tankPanel.getElement().getStyle().setPosition(Position.ABSOLUTE);
+    mapWrapper.getElement().getStyle().setPosition(Position.ABSOLUTE);
+    mapWrapper.getElement().getStyle().setOverflow(Overflow.VISIBLE);
+    mapContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
+    mapContainer.getElement().getStyle().setOverflow(Overflow.VISIBLE);
+    tankPanel.setVisible(false);
   }
 
   private void claimTerritory(String territoryName) {
@@ -594,6 +697,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       public void onClick(ClickEvent event) {
         if (image.getStyleName().equals("risk-cards")) {
           image.setStyleName("risk-cards-selected");
+          soundResource.playCardAudio();
           selectedCards.add(card);
         } else {
           image.setStyleName("risk-cards");
@@ -627,6 +731,19 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     attackToTerritory = null;
     attackFromTerritory = null;
     gameStatus.add(endAttack);
+    tankPanel.clear();
+    addTankImages();
+    tankPanel.setVisible(true);
+    String playerKey = riskPresenter.getMyPlayerKey();
+    Player player = currentRiskState.getPlayersMap().get(playerKey);
+    Set<Entry<String, Integer>> entrySet = player.getTerritoryUnitMap().entrySet();
+    for (Entry<String, Integer> key : entrySet) {
+      if (key.getValue() > 1) {
+         tankImages.get(Integer.parseInt(key.getKey())).setVisible(true);
+      } else {
+         tankPanel.remove(tankImages.get(Integer.parseInt(key.getKey())));
+      }
+    }
     attack = true;
   }
   
@@ -653,7 +770,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String turnPlayerId = currentRiskState.getTurn();
     int attackUnits = currentRiskState.getAttack().getAttackUnits();
     int defendUnits = currentRiskState.getAttack().getDefendUnits();
-    AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
+    final AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
 
     OMElement territoryUnitsElement = boardElt.getElementById(attackingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(attackUnits + "");
@@ -672,7 +789,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     TankMovingAnimation animation = new TankMovingAnimation(
         mapContainer, startAttackXCords, startAttackYCords, endAttackXCords, endAttackYCords, 
         attackImageResource, soundResource.getAttackAudio());
-    animation.run(3000);
     
     FlowPanel attackerDicePanel = new FlowPanel();
     final DiceAnimation diceAnimationAttacker = new DiceAnimation(diceImages, attackerDicePanel, 3, 
@@ -708,6 +824,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     if (attackResult.isAttackerAWinnerOfGame()) {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " wins the game !</b>"));
+      
     } else if (attackResult.isTradeRequired()) {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
     }
@@ -716,7 +833,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       @Override
       public void run() {
         dicePanel.addPanel(attackResultPanel);
-        //dicePanel.center();
+        if (attackResult.isAttackerAWinnerOfGame()) {
+          soundResource.playGameWonAudio();
+        } else if (attackResult.getDeltaAttack() == 0) {
+          soundResource.playAttackWonAudio();
+        } else {
+          soundResource.playAttackLostAudio();
+        }
       }
     };
     
@@ -730,6 +853,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         diceAnimationTimer.schedule(1000);
       }
     };
+    animation.run(3000);
     attackAnimationTimer.schedule(3000);
   }
    
@@ -798,7 +922,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     if (playingPlayerId.equals(turnPlayerId)) {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
         instructions.add(new HTML("Turn Order will be decided by rolling dice for all players."
-            + "<br><br>Press continue."), 
+            + "<br><br>Press OK."), 
             "Instructions");
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
         instructions.add(new HTML("Select a empty territory to claim. One territory at a time."
@@ -824,7 +948,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         instructions.add(new HTML("Attack on opponent's territory by selecting your territory "
             + "first and then opponent's territory. Make sure opponent's territory is adjacent "
             + "to your attacking territory and you have at least 2 units on your "
-            + "attacking territory.<br><br> You can end this phase by clicking End Attack.")
+            + "attacking territory.<br><br>You can also attack by dragging your tank on to "
+            + "opponent's tank. Opponent's tank will be visible once you start dragging."
+            + "<br><br> You can end this phase by clicking End Attack.")
         , "Instructions");
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
         instructions.add(new HTML("Check the result of your attack. "
@@ -833,7 +959,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             + "the defender's die is higher than yours, you lose one army from the territory you "
             + "attacked from. If each of you rolled more than one die, now compare the two "
             + "next-highest dice and repeat the process. In case of a tie, the defender always "
-            + "wins.<br><br>Press Continue to go back to attack phase."), "Instructions");
+            + "wins.<br><br>Press OK to go back to attack phase."), "Instructions");
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
         instructions.add(new HTML("Reinforce your territories by putting units on territories "
             + "you own. You got these units based on cards you traded. "
