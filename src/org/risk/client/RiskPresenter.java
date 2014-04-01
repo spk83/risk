@@ -21,8 +21,6 @@ public class RiskPresenter {
   
   public interface View {
     
-    void turnOrderMove();
-    
     /**
      * Sets the presenter. The viewer will call certain methods on the presenter, e.g.,
      * when a territory is selected ({@link #newTerritorySelected()}),
@@ -149,9 +147,7 @@ public class RiskPresenter {
     String phase = (String) state.get(GameResources.PHASE);
     currentPhase = phase;
     if (turnPlayerId.equals(myPlayerId)) {
-      if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        view.turnOrderMove();
-      } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
+      if (phase.equals(GameResources.CLAIM_TERRITORY)) {
         view.chooseNewTerritory();
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
         view.chooseTerritoryForDeployment();

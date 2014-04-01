@@ -1,6 +1,5 @@
 package org.risk.graphics;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,10 +8,6 @@ import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
 
-import com.google.gwt.animation.client.Animation;
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,7 +15,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public final class PanelHandler {
   
@@ -76,16 +70,4 @@ public final class PanelHandler {
         + "</b>"));
     return panel;
   }
-  
-  /*public static Panel getNewDicePanel(DiceImages diceImages, String text, List<Integer> rolls) {
-    Collections.sort(rolls);
-    FlowPanel imageContainer = new FlowPanel();
-    imageContainer.add(new Label(text + "   "));
-    for (Integer dots : rolls) {
-      Image diceImage = new Image(ImagesHandler.getDiceImageResource(diceImages, dots));
-      imageContainer.add(diceImage);
-    }
-    return imageContainer;
-  }*/
-  
 }

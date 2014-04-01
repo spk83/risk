@@ -128,7 +128,6 @@ public class RiskPresenterTest {
         AbstractTest.AID, AbstractTest.AID, getSetTurnOrderState());
     riskPresenter.updateUI(updateUI);
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
-    verify(mockView).turnOrderMove();
   }
 
   @Test
@@ -615,16 +614,30 @@ public class RiskPresenterTest {
   
   @Test
   public void testAttackResultByAForB() throws Exception {
+    Map<String, Object> state = getAttackResultStateByA(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.attackResultOperations(mockRiskState, AbstractTest.AID))
+        .thenReturn(operations);
     riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.AID, 
          getAttackResultStateByA()));
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
+    verify(mockView).attackResult();
   }
   
   @Test
   public void testAttackResultByAForC() throws Exception {
+    Map<String, Object> state = getAttackResultStateByA(); 
+    
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+        .thenReturn(mockRiskState);
+    when(mockRiskLogic.attackResultOperations(mockRiskState, AbstractTest.AID))
+        .thenReturn(operations);
     riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.AID, 
          getAttackResultStateByA()));
     verify(mockView).setPlayerState(riskPresenter.getRiskState());
+    verify(mockView).attackResult();
   }
   
   @Test
