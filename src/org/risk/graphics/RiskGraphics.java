@@ -113,7 +113,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
     attackImages = GWT.create(AttackImages.class);
-    
     gameSounds = GWT.create(GameSounds.class);
     soundResource = new SoundResource(gameSounds);
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
