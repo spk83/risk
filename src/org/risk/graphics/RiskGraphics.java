@@ -23,16 +23,15 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.AudioElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.media.client.Audio;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -102,10 +101,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private PopupPanel dicePanel;
   private PopupChoices fortifyOpt;
-  private int startAttackXCords;
-  private int startAttackYCords;
-  private int endAttackXCords;
-  private int endAttackYCords;
   private ImageResource attackImageResource;
  
   public RiskGraphics() {
@@ -235,7 +230,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             } else if (reinforce) {
               reinforce(territoryId);
             } else if (attack) {
-              attack(territoryId, event.getX(), event.getY());
+              attack(territoryId);
             } else if (fortify) {
               fortify(territoryId);
             }
@@ -349,6 +344,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       claimTerritory = false;
       gameStatus.remove(errorLabel);
       riskPresenter.newTerritorySelected(territoryId);
+      soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerKey)) {
         gameStatus.remove(errorLabel);
@@ -374,6 +370,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       deployment = false;
       gameStatus.remove(errorLabel);
       riskPresenter.territoryForDeployment(territoryId);
+      soundResource.playDeployAudio();
     } else {
       gameStatus.remove(errorLabel);
       errorLabel = new Label("Please select your territory");
@@ -413,7 +410,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
   }
   
-  private void attack(String territoryName, int x, int y) {
+  private void attack(String territoryName) {
     String playerKey = riskPresenter.getMyPlayerKey();
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     OMElement territory = boardElt.getElementById(territoryName);
@@ -445,10 +442,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         gameStatus.add(errorLabel);
       }
       territory.setAttribute("style", style);
-      startAttackXCords = territory.getElement().getAbsoluteLeft() 
-          - territory.getElement().getParentElement().getAbsoluteLeft() + x + 20;
-      startAttackYCords = territory.getElement().getAbsoluteTop() 
-          - territory.getElement().getParentElement().getAbsoluteTop() + y + 10;
+      
       return;
     } else {
       // Defending territory selected
@@ -466,10 +460,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         territory.setAttribute("style", style);
         attack = false;
         gameStatus.remove(errorLabel);
-        endAttackXCords = territory.getElement().getAbsoluteLeft() 
-            - territory.getElement().getParentElement().getAbsoluteLeft() + x + 20;
-        endAttackYCords = territory.getElement().getAbsoluteTop() 
-            - territory.getElement().getParentElement().getAbsoluteTop() + y + 10;
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
         gameStatus.remove(errorLabel);
@@ -647,31 +637,54 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     gameStatus.remove(errorLabel);
     gameStatus.remove(reinforceLabel);
    
-    PieceMovingAnimation animation = new PieceMovingAnimation(
-        mapContainer, startAttackXCords, startAttackYCords, endAttackXCords, endAttackYCords, 
-        attackImageResource, null);
-    animation.run(3000);
-    
     String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
     String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
     String attackingTerritory = Territory.TERRITORY_NAME.get(
         currentRiskState.getAttack().getAttackerTerritoryId());
     String defendingTerritory = Territory.TERRITORY_NAME.get(
         currentRiskState.getAttack().getDefenderTerritoryId());
+    String attackingTerritorySVG = Territory.SVG_NAME_MAP.get(
+        currentRiskState.getAttack().getAttackerTerritoryId());
+    String defendingTerritorySVG = Territory.SVG_NAME_MAP.get(
+        currentRiskState.getAttack().getDefenderTerritoryId());
+    
     String attackerText = attackerKey + " (" + attackingTerritory + ")";
     String defenderText = defenderKey + " (" + defendingTerritory + ")";
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
+    int attackUnits = currentRiskState.getAttack().getAttackUnits();
+    int defendUnits = currentRiskState.getAttack().getDefendUnits();
+    AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
+
+    OMElement territoryUnitsElement = boardElt.getElementById(attackingTerritorySVG + "_units");
+    territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(attackUnits + "");
+    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
+        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int startAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
+        - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
+    
+    territoryUnitsElement = boardElt.getElementById(defendingTerritorySVG + "_units");
+    territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(defendUnits + "");
+    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
+        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int endAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
+        - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
+    
+    TankMovingAnimation animation = new TankMovingAnimation(
+        mapContainer, startAttackXCords, startAttackYCords, endAttackXCords, endAttackYCords, 
+        attackImageResource, soundResource.getAttackAudio());
+    animation.run(3000);
     
     FlowPanel attackerDicePanel = new FlowPanel();
-    DiceAnimation diceAnimationAttacker = new DiceAnimation(diceImages, attackerDicePanel, 3, 
+    final DiceAnimation diceAnimationAttacker = new DiceAnimation(diceImages, attackerDicePanel, 3, 
         attackerText, currentRiskState.getAttack().getAttackerDiceRolls());
     
     FlowPanel defenderDicePanel = new FlowPanel();
-    DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
+    final DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
         defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
     dicePanel.clearPanel();
     dicePanel.setText("Attack Result");
+    dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
       dicePanel.setOkBtnHandler(riskPresenter, 2);
     } else {
@@ -679,11 +692,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     dicePanel.addPanel(attackerDicePanel);
     dicePanel.addPanel(defenderDicePanel);
-    soundResource.playDiceAudio();
-    diceAnimationAttacker.run(1000);
-    diceAnimationDefender.run(1000);
-
-    AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
+  
     attackResultPanel.add(new HTML("Attacker lost <b>" + (-1 * attackResult.getDeltaAttack()) 
         + " units</b>"));
     attackResultPanel.add(new HTML("Defender lost <b>" + (-1 * attackResult.getDeltaDefend()) 
@@ -704,8 +713,25 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
     }
     
-    dicePanel.addPanel(attackResultPanel);
-    dicePanel.center();
+    final Timer diceAnimationTimer = new Timer() {
+      @Override
+      public void run() {
+        dicePanel.addPanel(attackResultPanel);
+        //dicePanel.center();
+      }
+    };
+    
+    Timer attackAnimationTimer = new Timer() {
+      @Override
+      public void run() {
+        soundResource.playDiceAudio();
+        diceAnimationAttacker.run(1000);
+        diceAnimationDefender.run(1000);
+        dicePanel.center();
+        diceAnimationTimer.schedule(1000);
+      }
+    };
+    attackAnimationTimer.schedule(3000);
   }
    
   @Override
