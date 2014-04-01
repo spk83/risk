@@ -57,6 +57,10 @@ public class PopupPanel extends DialogBox {
   public void clearPanel() {
     panel.clear();
   }
+  
+  public void setPanelSize(String width, String height) {
+    panel.setSize(width, height);
+  }
   @Override
   public void center() {
     super.center();
