@@ -32,4 +32,40 @@ public interface GameSounds extends ClientBundle {
   @Source("sounds/attack.wav")
   DataResource attackWav();
   
+  @Source("sounds/cards.mp3")
+  DataResource cardMp3();
+  
+  @Source("sounds/cards.ogg")
+  DataResource cardOgg();
+  
+  @Source("sounds/cards.wav")
+  DataResource cardWav();
+  
+  @Source("sounds/attackWon.mp3")
+  DataResource attackWonMp3();
+  
+  @Source("sounds/attackWon.ogg")
+  DataResource attackWonOgg();
+  
+  @Source("sounds/attackWon.wav")
+  DataResource attackWonWav();
+  
+  @Source("sounds/attackLost.mp3")
+  DataResource attackLostMp3();
+  
+  @Source("sounds/attackLost.ogg")
+  DataResource attackLostOgg();
+  
+  @Source("sounds/attackLost.wav")
+  DataResource attackLostWav();
+  
+  @Source("sounds/gameWon.mp3")
+  DataResource gameWonMp3();
+  
+  @Source("sounds/gameWon.ogg")
+  DataResource gameWonOgg();
+  
+  @Source("sounds/gameWon.wav")
+  DataResource gameWonWav();
+  
 }
