@@ -1,2 +1,4 @@
 /classes
 /deploy
+/appengine-web.xml
+/.gitignore
