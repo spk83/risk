@@ -12,6 +12,7 @@ public class SoundResource {
   private Audio attackWonAudio;
   private Audio attackLostAudio;
   private Audio gameWonAudio;
+  private Audio addUnitsAudio;
   private GameSounds gameSounds;
   
   public SoundResource(GameSounds gameSounds) {
@@ -23,6 +24,7 @@ public class SoundResource {
     loadAttackWonAudio();
     loadAttackLostAudio();
     loadGameWonAudio();
+    loadAddUnitsAudio();
   }
   
   private void loadDiceAudio() {
@@ -68,6 +70,8 @@ public class SoundResource {
           AudioElement.TYPE_MP3);
       attackWonAudio.addSource(gameSounds.attackWonOgg().getSafeUri().asString(), 
           AudioElement.TYPE_OGG);
+      attackWonAudio.addSource(gameSounds.attackWonWav().getSafeUri().asString(), 
+          AudioElement.TYPE_WAV);
       attackWonAudio.load();
     }
   }
@@ -91,6 +95,17 @@ public class SoundResource {
       gameWonAudio.addSource(gameSounds.gameWonOgg().getSafeUri().asString(), 
           AudioElement.TYPE_OGG);
       gameWonAudio.load();
+    }
+  }
+  
+  private void loadAddUnitsAudio() {
+    addUnitsAudio = Audio.createIfSupported();
+    if (addUnitsAudio != null) {
+      addUnitsAudio.addSource(gameSounds.addUnitsMp3().getSafeUri().asString(), 
+          AudioElement.TYPE_MP3);
+      addUnitsAudio.addSource(gameSounds.addUnitsOgg().getSafeUri().asString(), 
+          AudioElement.TYPE_OGG);
+      addUnitsAudio.load();
     }
   }
   
@@ -161,6 +176,16 @@ public class SoundResource {
   public void playGameWonAudio() {
     if (gameWonAudio != null) {
       gameWonAudio.play();
+    }
+  }
+  
+  public Audio getAddUnitsAudio() {
+    return addUnitsAudio;
+  }
+  
+  public void playAddUnitsAudio() {
+    if (addUnitsAudio != null) {
+      addUnitsAudio.play();
     }
   }
 }

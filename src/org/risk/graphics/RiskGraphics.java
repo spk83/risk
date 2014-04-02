@@ -147,7 +147,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createTankHandlers() {
     for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
-      Image img = new Image(attackImageResource);
+      final Image img = new Image(attackImageResource);
       tankImages.add(img);
       final int territoryId = i;
       final String territory = Territory.SVG_NAME_MAP.get(i);
@@ -157,8 +157,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       img.addDragStartHandler(new DragStartHandler() {
         @Override
         public void onDragStart(DragStartEvent event) {
-          event.setData("text", territory);
           displayOpponentTerritory(territoryId);
+          event.getDataTransfer().setDragImage(img.getElement(), 10, 10);
+          event.setData("text", territory);
         }
       });
      
@@ -177,7 +178,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       img.addDropHandler(new DropHandler() {
         @Override
         public void onDrop(DropEvent event) {
-          soundResource.playAttackAudio();
           event.preventDefault();
           String attackTerritory = event.getData("text");
           attack(attackTerritory);
@@ -562,6 +562,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         territory.setAttribute("style", style);
         attack = false;
         gameStatus.remove(errorLabel);
+        soundResource.playAddUnitsAudio();
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
         gameStatus.remove(errorLabel);
@@ -722,6 +723,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     reinforceLabel = new Label("You got " + unclaimedUnits + " for reinforce!");
     gameStatus.add(endReinforce);
     reinforce = true;
+    soundResource.playAddUnitsAudio();
   }
   
   @Override
@@ -835,7 +837,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         dicePanel.addPanel(attackResultPanel);
         if (attackResult.isAttackerAWinnerOfGame()) {
           soundResource.playGameWonAudio();
-        } else if (attackResult.getDeltaAttack() == 0) {
+        } else if (attackResult.getDeltaAttack() > attackResult.getDeltaDefend()) {
           soundResource.playAttackWonAudio();
         } else {
           soundResource.playAttackLostAudio();
