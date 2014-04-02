@@ -68,4 +68,13 @@ public interface GameSounds extends ClientBundle {
   @Source("sounds/gameWon.wav")
   DataResource gameWonWav();
   
+  @Source("sounds/addUnits.wav")
+  DataResource addUnitsMp3();
+
+  @Source("sounds/addUnits.ogg")
+  DataResource addUnitsOgg();
+  
+  @Source("sounds/addUnits.wav")
+  DataResource addUnitsWav();
+  
 }

@@ -147,7 +147,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createTankHandlers() {
     for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
-      Image img = new Image(attackImageResource);
+      final Image img = new Image(attackImageResource);
       tankImages.add(img);
       final int territoryId = i;
       final String territory = Territory.SVG_NAME_MAP.get(i);
@@ -157,8 +157,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       img.addDragStartHandler(new DragStartHandler() {
         @Override
         public void onDragStart(DragStartEvent event) {
-          event.setData("text", territory);
           displayOpponentTerritory(territoryId);
+          event.setData("text", territory);
+          attack(territory);
         }
       });
      
@@ -177,10 +178,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       img.addDropHandler(new DropHandler() {
         @Override
         public void onDrop(DropEvent event) {
-          soundResource.playAttackAudio();
           event.preventDefault();
-          String attackTerritory = event.getData("text");
-          attack(attackTerritory);
           attack(territory);
         }
       });
@@ -557,6 +555,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       attackToTerritory = territoryId;
       if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
           .contains(Integer.parseInt(attackToTerritory))) {
+        soundResource.playAddUnitsAudio();
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:#000000", "stroke:red");
         territory.setAttribute("style", style);
@@ -722,6 +721,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     reinforceLabel = new Label("You got " + unclaimedUnits + " for reinforce!");
     gameStatus.add(endReinforce);
     reinforce = true;
+    soundResource.playAddUnitsAudio();
   }
   
   @Override
@@ -835,7 +835,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         dicePanel.addPanel(attackResultPanel);
         if (attackResult.isAttackerAWinnerOfGame()) {
           soundResource.playGameWonAudio();
-        } else if (attackResult.getDeltaAttack() == 0) {
+        } else if (attackResult.getDeltaAttack() > attackResult.getDeltaDefend()) {
           soundResource.playAttackWonAudio();
         } else {
           soundResource.playAttackLostAudio();
@@ -846,11 +846,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     Timer attackAnimationTimer = new Timer() {
       @Override
       public void run() {
-        soundResource.playDiceAudio();
         diceAnimationAttacker.run(1000);
         diceAnimationDefender.run(1000);
         dicePanel.center();
-        diceAnimationTimer.schedule(1000);
+        diceAnimationTimer.schedule(1200);
+        soundResource.playDiceAudio();
       }
     };
     animation.run(3000);
