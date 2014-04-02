@@ -29,6 +29,7 @@ public class PopupPanel extends DialogBox {
     });
     panel.add(okBtn);
     panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    panel.setWidth("200px");
     setWidget(panel);
   }
 
