@@ -32,6 +32,7 @@ public class SoundResource {
     if (diceAudio != null) {
       diceAudio.addSource(gameSounds.diceRollMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
       diceAudio.addSource(gameSounds.diceRollOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
+      diceAudio.addSource(gameSounds.diceRollWav().getSafeUri().asString(), AudioElement.TYPE_WAV);
       diceAudio.load();
     }
   }
@@ -41,6 +42,7 @@ public class SoundResource {
     if (deployAudio != null) {
       deployAudio.addSource(gameSounds.deployMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
       deployAudio.addSource(gameSounds.deployOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
+      deployAudio.addSource(gameSounds.deployWav().getSafeUri().asString(), AudioElement.TYPE_WAV);
       deployAudio.load();
     }
   }
@@ -50,6 +52,7 @@ public class SoundResource {
     if (attackAudio != null) {
       attackAudio.addSource(gameSounds.attackMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
       attackAudio.addSource(gameSounds.attackOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
+      attackAudio.addSource(gameSounds.attackWav().getSafeUri().asString(), AudioElement.TYPE_WAV);
       attackAudio.load();
     }
   }
@@ -59,6 +62,7 @@ public class SoundResource {
     if (cardAudio != null) {
       cardAudio.addSource(gameSounds.cardMp3().getSafeUri().asString(), AudioElement.TYPE_MP3);
       cardAudio.addSource(gameSounds.cardOgg().getSafeUri().asString(), AudioElement.TYPE_OGG);
+      cardAudio.addSource(gameSounds.cardWav().getSafeUri().asString(), AudioElement.TYPE_WAV);
       cardAudio.load();
     }
   }
@@ -83,6 +87,8 @@ public class SoundResource {
           AudioElement.TYPE_MP3);
       attackLostAudio.addSource(gameSounds.attackLostOgg().getSafeUri().asString(), 
           AudioElement.TYPE_OGG);
+      attackLostAudio.addSource(gameSounds.attackLostWav().getSafeUri().asString(), 
+          AudioElement.TYPE_WAV);
       attackLostAudio.load();
     }
   }
@@ -94,6 +100,8 @@ public class SoundResource {
           AudioElement.TYPE_MP3);
       gameWonAudio.addSource(gameSounds.gameWonOgg().getSafeUri().asString(), 
           AudioElement.TYPE_OGG);
+      gameWonAudio.addSource(gameSounds.gameWonWav().getSafeUri().asString(), 
+          AudioElement.TYPE_WAV);
       gameWonAudio.load();
     }
   }
@@ -105,6 +113,8 @@ public class SoundResource {
           AudioElement.TYPE_MP3);
       addUnitsAudio.addSource(gameSounds.addUnitsOgg().getSafeUri().asString(), 
           AudioElement.TYPE_OGG);
+      addUnitsAudio.addSource(gameSounds.addUnitsWav().getSafeUri().asString(), 
+          AudioElement.TYPE_WAV);
       addUnitsAudio.load();
     }
   }

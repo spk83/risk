@@ -158,8 +158,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         @Override
         public void onDragStart(DragStartEvent event) {
           displayOpponentTerritory(territoryId);
-          event.getDataTransfer().setDragImage(img.getElement(), 10, 10);
           event.setData("text", territory);
+          attack(territory);
         }
       });
      
@@ -179,8 +179,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         @Override
         public void onDrop(DropEvent event) {
           event.preventDefault();
-          String attackTerritory = event.getData("text");
-          attack(attackTerritory);
           attack(territory);
         }
       });
@@ -557,12 +555,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       attackToTerritory = territoryId;
       if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
           .contains(Integer.parseInt(attackToTerritory))) {
+        soundResource.playAddUnitsAudio();
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:#000000", "stroke:red");
         territory.setAttribute("style", style);
         attack = false;
         gameStatus.remove(errorLabel);
-        soundResource.playAddUnitsAudio();
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
         gameStatus.remove(errorLabel);
@@ -848,11 +846,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     Timer attackAnimationTimer = new Timer() {
       @Override
       public void run() {
-        soundResource.playDiceAudio();
         diceAnimationAttacker.run(1000);
         diceAnimationDefender.run(1000);
         dicePanel.center();
-        diceAnimationTimer.schedule(1000);
+        diceAnimationTimer.schedule(1200);
+        soundResource.playDiceAudio();
       }
     };
     animation.run(3000);

@@ -7,10 +7,12 @@
     <g:HorizontalPanel height="380px">
       <g:HorizontalPanel ui:field="playerArea">
            <g:VerticalPanel ui:field="gameStatus" height="380px" width="180px" />
-           <g:AbsolutePanel ui:field="mapWrapper">
-            <g:HTML ui:field="mapContainer"/> 
-            <g:AbsolutePanel ui:field="tankPanel"/>
-           </g:AbsolutePanel>
+           <g:HorizontalPanel width="800px">
+              <g:AbsolutePanel ui:field="mapWrapper">
+                <g:HTML ui:field="mapContainer"/> 
+                <g:AbsolutePanel ui:field="tankPanel"/>
+              </g:AbsolutePanel>
+           </g:HorizontalPanel>
            <g:VerticalPanel>
              <g:TabPanel ui:field="playersStatusPanel" width="300px"/>
              <g:TabPanel ui:field="instructions" width="300 px" />
