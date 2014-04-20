@@ -6,8 +6,8 @@ import java.util.List;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Random;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 
 public class DiceAnimation extends Animation {
@@ -49,7 +49,7 @@ public class DiceAnimation extends Animation {
   protected void onUpdate(double progress) {
     if (delayCount == 0) {
       panel.clear();
-      panel.add(new Label(text + "   "));
+      panel.add(new HTML(text));
       for (int i = 0; i < rolls.size(); ++i) {
         panel.add(new Image(diceImageList.get(Random.nextInt(18))));
       }
@@ -63,7 +63,7 @@ public class DiceAnimation extends Animation {
   @Override
   protected void onComplete() {
       panel.clear();
-      panel.add(new Label(text + "   "));
+      panel.add(new HTML(text));
       for (int i = 0; i < rolls.size(); ++i) {
         panel.add(new Image(diceImageList.get(rolls.get(i) - 1)));
       }

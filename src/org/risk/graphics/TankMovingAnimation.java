@@ -16,7 +16,7 @@ public class TankMovingAnimation extends Animation {
   ImageResource piece;
   int startX, startY, startWidth, startHeight;
   int endX, endY;
-  Audio soundAtEnd;
+  Audio sound;
   boolean cancelled;
 
   public TankMovingAnimation(HTML mapContainer, int startX, int startY, int endX, int endY,
@@ -28,7 +28,7 @@ public class TankMovingAnimation extends Animation {
     this.endY = endY;
     this.startWidth = 40;
     this.startHeight = 40;
-    soundAtEnd = sfx;
+    sound = sfx;
     cancelled = false;
 
     panel = new AbsolutePanel();
@@ -44,7 +44,7 @@ public class TankMovingAnimation extends Animation {
   protected void onUpdate(double progress) {
     int x = (int) (startX + (endX - startX) * progress);
     int y = (int) (startY + (endY - startY) * progress);
-
+    sound.play();
     panel.remove(moving);
     panel.add(moving, x, y);
   }
@@ -58,9 +58,6 @@ public class TankMovingAnimation extends Animation {
   @Override
   protected void onComplete() {
     if (!cancelled) {
-      if (soundAtEnd != null) {
-        soundAtEnd.play();
-      }
       panel.remove(moving);
     }
   }

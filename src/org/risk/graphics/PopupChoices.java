@@ -2,39 +2,31 @@ package org.risk.graphics;
 
 import java.util.List;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
+import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
+import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
+import com.googlecode.mgwt.ui.client.widget.Button;
+import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 
-/**
- * A popup widget showing the user a couple of options to select from. It is a modal popup, so the
- * user must select one of the options. The first choice can be selected by pressing ENTER. You can
- * call center() to show the popup.
- */
-public class PopupChoices extends DialogBox {
+public class PopupChoices extends PopinDialog {
   public interface OptionChosen {
     void optionChosen(String option);
   }
 
-  private Button firstChoice;
-
   public PopupChoices(String mainText, List<String> options, final OptionChosen optionChosen) {
-    super(false, true);
-    setText(mainText);
-    setAnimationEnabled(true);
+    super();
+    RoundPanel panel = new RoundPanel();
+    panel.add(new HTML("<b>" + mainText + "</b>"));
     HorizontalPanel buttons = new HorizontalPanel();
     for (String option : options) {
       final String optionF = option;
       Button btn = new Button(option);
-      if (firstChoice == null) {
-        firstChoice = btn;
-      }
-      btn.addClickHandler(new ClickHandler() {
+      btn.addTapHandler(new TapHandler() {
         @Override
-        public void onClick(ClickEvent event) {
+        public void onTap(TapEvent event) {
           hide();
           optionChosen.optionChosen(optionF);
         }
@@ -47,12 +39,12 @@ public class PopupChoices extends DialogBox {
         buttons.add(label);
       }
     }
-    setWidget(buttons);
+    panel.add(buttons);
+    add(panel);
   }
 
   @Override
   public void center() {
     super.center();
-    firstChoice.setFocus(true);
   }
 }

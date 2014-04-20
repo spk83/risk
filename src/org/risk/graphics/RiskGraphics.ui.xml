@@ -1,23 +1,17 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
-   xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui' >
+   xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui'
+   xmlns:mgwt="urn:import:com.googlecode.mgwt.ui.client.widget" xmlns:m="urn:import:com.googlecode.mgwt.ui.client">
+   
   <ui:with field='resources' type='org.risk.graphics.MapSVG' />
-  <g:VerticalPanel>
-    <g:HorizontalPanel height="380px">
-      <g:HorizontalPanel ui:field="playerArea">
-           <g:VerticalPanel ui:field="gameStatus" height="380px" width="180px" />
-           <g:HorizontalPanel width="800px">
-              <g:AbsolutePanel ui:field="mapWrapper">
-                <g:HTML ui:field="mapContainer"/> 
-                <g:AbsolutePanel ui:field="tankPanel"/>
-              </g:AbsolutePanel>
-           </g:HorizontalPanel>
-           <g:VerticalPanel>
-             <g:TabPanel ui:field="playersStatusPanel" width="300px"/>
-             <g:TabPanel ui:field="instructions" width="300 px" />
-           </g:VerticalPanel>
-      </g:HorizontalPanel>
-    </g:HorizontalPanel>
-  </g:VerticalPanel>
+  <mgwt:LayoutPanel>
+    <mgwt:HeaderPanel ui:field="headerPanel" />
+    <mgwt:ScrollPanel>
+      <g:VerticalPanel ui:field="mapWrapper">
+        <g:HTML ui:field="mapContainer"/>
+      </g:VerticalPanel>
+    </mgwt:ScrollPanel>
+    <mgwt:buttonbar.ButtonBar ui:field="footerBar" />
+  </mgwt:LayoutPanel>
 </ui:UiBinder> 

@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
@@ -24,19 +22,12 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DragEndEvent;
-import com.google.gwt.event.dom.client.DragEndHandler;
-import com.google.gwt.event.dom.client.DragOverEvent;
-import com.google.gwt.event.dom.client.DragOverHandler;
-import com.google.gwt.event.dom.client.DragStartEvent;
-import com.google.gwt.event.dom.client.DragStartHandler;
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.dom.client.DropHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -44,18 +35,22 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
+import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
+import com.googlecode.mgwt.ui.client.dialog.ConfirmDialog.ConfirmCallback;
+import com.googlecode.mgwt.ui.client.dialog.Dialogs;
+import com.googlecode.mgwt.ui.client.widget.HeaderButton;
+import com.googlecode.mgwt.ui.client.widget.HeaderPanel;
+import com.googlecode.mgwt.ui.client.widget.RoundPanel;
+import com.googlecode.mgwt.ui.client.widget.buttonbar.ButtonBar;
 
 public class RiskGraphics extends Composite implements RiskPresenter.View {
     public interface RiskGraphicsUiBinder extends UiBinder<Widget, RiskGraphics> {
@@ -69,27 +64,26 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private final SoundResource soundResource;
   private RiskPresenter riskPresenter;
   private OMSVGSVGElement boardElt;
-  
-  @UiField
-  HorizontalPanel playerArea;
-    
+
   @UiField
   HTML mapContainer;
   
   @UiField
-  VerticalPanel gameStatus;
+  HeaderPanel headerPanel;
   
   @UiField
-  TabPanel playersStatusPanel;
+  ButtonBar footerBar;
+  
+  //@UiField
+  TabPanel playersStatusPanel = new TabPanel();
+  
+  //@UiField
+  TabPanel instructions = new TabPanel();
   
   @UiField
-  TabPanel instructions;
+  VerticalPanel mapWrapper;
   
-  @UiField
-  AbsolutePanel mapWrapper;
-  
-  @UiField
-  AbsolutePanel tankPanel;
+  RoundPanel notification = new RoundPanel();
   
   private RiskState currentRiskState;
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
@@ -98,13 +92,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
-  private Button selectCardsButton = new Button("Finish Selecting");
-  private Button endAttack = new Button("End Attack Phase");
-  private Button endReinforce = new Button("End Reinforce Phase");
-  private Button endFortify = new Button("End Fortify");
+  private HeaderButton selectCardsButton = new HeaderButton();
+  private HeaderButton endAttack = new HeaderButton();
+  private HeaderButton endReinforce = new HeaderButton();
+  private HeaderButton endFortify = new HeaderButton();
   private VerticalPanel attackResultPanel = new VerticalPanel();
-  private Label errorLabel = new Label();
-  private Label reinforceLabel = new Label();
   private int unclaimedUnits;
   private String attackToTerritory;
   private String attackFromTerritory;
@@ -120,7 +112,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private PopupPanel dicePanel;
   private PopupChoices fortifyOpt;
   private ImageResource attackImageResource;
-  private List<Image> tankImages = new ArrayList<Image>();
  
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
@@ -134,7 +125,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
     attackImageResource = attackImages.tank();
-    playerArea.setSpacing(5);
     dicePanel = new PopupPanel();
     dicePanel.hide();
     createSelectCardsButtonHandler();
@@ -142,96 +132,26 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndReinforceButton();
     createEndFortifyButton();
     addMapHandlers();
-    createTankHandlers();
   }
   
-  private void createTankHandlers() {
-    for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
-      final Image img = new Image(attackImageResource);
-      tankImages.add(img);
-      final int territoryId = i;
-      final String territory = Territory.SVG_NAME_MAP.get(i);
-      img.getElement().setDraggable(Element.DRAGGABLE_TRUE);
-      img.setPixelSize(40, 40);
-      img.setVisible(false);
-      img.addDragStartHandler(new DragStartHandler() {
-        @Override
-        public void onDragStart(DragStartEvent event) {
-          displayOpponentTerritory(territoryId);
-          event.setData("text", territory);
-          attack(territory);
-        }
-      });
-     
-      img.addDragEndHandler(new DragEndHandler() {
-        @Override
-        public void onDragEnd(DragEndEvent event) {
-          attack();
-        }
-      });
-      
-      img.addDragOverHandler(new DragOverHandler() {
-        @Override
-        public void onDragOver(DragOverEvent event) {
-        }
-      });
-      img.addDropHandler(new DropHandler() {
-        @Override
-        public void onDrop(DropEvent event) {
-          event.preventDefault();
-          attack(territory);
-        }
-      });
-    }
-  }
-
-  private void addTankImages() {
-    for (int i = 0; i < GameResources.TOTAL_TERRITORIES; i++) {
-      Image img = tankImages.get(i);
-      final String territory = Territory.SVG_NAME_MAP.get(i);
-      OMElement unitsElement = boardElt.getElementById(territory + "_units");
-      int xCords = unitsElement.getElement().getAbsoluteLeft() 
-          - unitsElement.getElement().getParentElement().getAbsoluteLeft();
-      int yCords = unitsElement.getElement().getAbsoluteTop() 
-          - unitsElement.getElement().getParentElement().getAbsoluteTop();
-      tankPanel.add(img, xCords, yCords);
-      img.setVisible(false);
-    }
-  }
-  
-  private void displayOpponentTerritory(int territoryId) {
-    String playerKey = riskPresenter.getMyPlayerKey();
-    Player player = currentRiskState.getPlayersMap().get(playerKey);
-    List<Integer> connections = Territory.CONNECTIONS.get(territoryId);
-    Set<Entry<String, Integer>> territorySet = player.getTerritoryUnitMap().entrySet();
-    for (int i : connections) {
-      if (!territorySet.contains(i + "")) {
-          tankImages.get(i).setVisible(true);
-      }
-    }
-    for (Entry<String, Integer> t : territorySet) {
-      int id = Integer.parseInt(t.getKey());
-      if (id != territoryId) {
-        tankImages.get(id).setVisible(false);
-      }
-    }
-  }
-
   private void createSelectCardsButtonHandler() {
-    selectCardsButton.addClickHandler(new ClickHandler() {
+    selectCardsButton.setRoundButton(true);
+    selectCardsButton.setText("Done");
+    selectCardsButton.addTapHandler(new TapHandler() {
       
       private void cleanup() {
         selectedCards.clear();
         removeHandlers(cardHandlers);
         cardImagesOfCurrentPlayer.clear();
-        gameStatus.remove(selectCardsButton);
+        //gameStatus.remove(selectCardsButton);
       }
       
       @Override
-      public void onClick(ClickEvent event) {
+      public void onTap(TapEvent event) {
         int units = Card.getUnits(selectedCards, currentRiskState.getTradeNumber());
         if (mandatoryCardSelection && units == 0) {
-          Window.alert("Invalid selection: Card selection is mandatory, please select again !");
+          Dialogs.alert("Invalid selection", "Card selection is mandatory, please select again !", 
+              null);
           return;
         }
         if (selectedCards.size() == 0) {
@@ -242,21 +162,33 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           cleanup();
           riskPresenter.cardsTraded(selectedIntCards);
         } else {
-          if (Window.confirm("Invalid selection: press OK to continue or Cancel to select "
-              + "again")) {
-            cleanup();
-            riskPresenter.cardsTraded(null);
-          }
+          Dialogs.alert("Invalid selection", "Card selection is mandatory, please select again !", 
+              null);
+          ConfirmCallback callback = new ConfirmCallback() {
+            @Override
+            public void onOk() {
+              cleanup();
+              riskPresenter.cardsTraded(null);
+            }
+            @Override
+            public void onCancel() {
+              
+            }
+          };
+          Dialogs.confirm("Invalid selection", 
+              "Invalid selection: press OK to continue or Cancel to select " + "again", callback);
         }
       }
     });
   }
     
   private void createEndAttackButton() {
-    endAttack.addClickHandler(new ClickHandler() {
+    endAttack.setRoundButton(true);
+    endAttack.setText("End");
+    endAttack.addTapHandler(new TapHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        gameStatus.remove(endAttack);
+      public void onTap(TapEvent event) {
+        endAttack.removeFromParent();
         attack = false;
         riskPresenter.endAttack();
       }
@@ -264,10 +196,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void createEndReinforceButton() {
-    endReinforce.addClickHandler(new ClickHandler() {
+    endReinforce.setRoundButton(true);
+    endReinforce.setText("End");
+    endReinforce.addTapHandler(new TapHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        gameStatus.remove(endReinforce);
+      public void onTap(TapEvent event) {
+        endReinforce.removeFromParent();
         reinforce = false;
         riskPresenter.territoriesReinforced(territoryDelta);
       }
@@ -275,10 +209,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void createEndFortifyButton() {
-    endFortify.addClickHandler(new ClickHandler() {
+    endFortify.setRoundButton(true);
+    endFortify.setText("End");
+    endFortify.addTapHandler(new TapHandler() {
       @Override
-      public void onClick(ClickEvent event) {
-        gameStatus.remove(endFortify);
+      public void onTap(TapEvent event) {
+        endFortify.removeFromParent();
         fortify = false;
         riskPresenter.fortifyMove(null);
       }
@@ -312,8 +248,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         @Override
         public void onMouseDown(MouseDownEvent event) {
           String playerId = riskPresenter.getMyPlayerId();
-          gameStatus.remove(errorLabel);
-          
           if (currentRiskState.getTurn().equals(playerId)) {
             if (claimTerritory) {
               claimTerritory(territoryId);
@@ -327,11 +261,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify(territoryId);
             }
           } else if (playerId.equals(GameApi.VIEWER_ID)) {
-            errorLabel = new Label("You can only view the game");
-            gameStatus.add(errorLabel);
+            Dialogs.alert("Not Allowed", "You can only view the game", null);
           } else {
-            errorLabel = new Label("Please wait for your turn");
-            gameStatus.add(errorLabel);
+            Dialogs.alert("Not Allowed", "Please wait for your turn", null);
           }
         }
       };
@@ -361,9 +293,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
-    gameStatus.clear();
+    selectCardsButton.removeFromParent();
+    endAttack.removeFromParent();
+    endReinforce.removeFromParent();
+    endFortify.removeFromParent();
+    footerBar.clear();
     playersStatusPanel.clear();
-    tankPanel.clear();
+    notification.clear();
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -389,19 +325,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     playersStatusPanel.setWidth("300px");
     playersStatusPanel.selectTab(index);
-    gameStatus.add(PanelHandler.getGameStatusPanel(riskState));
+    HTML phase = new HTML("<b>" + GameResources.UI_PHASE_MAPPING.get(riskState.getPhase()) 
+        + "</b>");
+    phase.getElement().getStyle().setTop(10, Unit.PX);
+    headerPanel.setLeftWidget(phase);
+    headerPanel.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
     if (riskState.getDiceResult() != null && !riskState.getDiceResult().isEmpty()) {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
+      soundResource.playDiceAudio();
+      dicePanel.addPanel(new HTML("<b>Turn Order</b>"));
       for (String dice: diceList) {
         FlowPanel diceFlowPanel = new FlowPanel();
         DiceAnimation diceAnimation = new DiceAnimation(
             diceImages, diceFlowPanel, 3, dice, riskState.getDiceResult().get(dice));
         dicePanel.addPanel(diceFlowPanel);
-        soundResource.playDiceAudio();
         diceAnimation.run(1000);
       }
-      dicePanel.setText("Turn Order");
       String playingPlayerId = riskPresenter.getMyPlayerId();
       String turnPlayerId = currentRiskState.getTurn();
       if (playingPlayerId.equals(turnPlayerId)) {
@@ -418,13 +358,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     attack = false;
     fortify = false;
     mandatoryCardSelection = false;
-    tankPanel.getElement().getStyle().setOverflow(Overflow.VISIBLE);
-    tankPanel.getElement().getStyle().setPosition(Position.ABSOLUTE);
+    notification.getElement().getStyle().setOverflow(Overflow.VISIBLE);
+    notification.getElement().getStyle().setPosition(Position.ABSOLUTE);
     mapWrapper.getElement().getStyle().setPosition(Position.ABSOLUTE);
     mapWrapper.getElement().getStyle().setOverflow(Overflow.VISIBLE);
     mapContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
     mapContainer.getElement().getStyle().setOverflow(Overflow.VISIBLE);
-    tankPanel.setVisible(false);
+    mapWrapper.add(notification);
+    notification.setVisible(false);
   }
 
   private void claimTerritory(String territoryName) {
@@ -442,18 +383,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       territory.setAttribute("style", style);
       territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
       claimTerritory = false;
-      gameStatus.remove(errorLabel);
       riskPresenter.newTerritorySelected(territoryId);
       soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerKey)) {
-        gameStatus.remove(errorLabel);
-        errorLabel = new Label("You already own this territory");
-        gameStatus.add(errorLabel);
+        Dialogs.alert("Not Allowed", "You already own this territory", null);
       } else {
-        gameStatus.remove(errorLabel);
-        errorLabel = new Label("Select an empty territory");
-        gameStatus.add(errorLabel);
+        Dialogs.alert("Not Allowed", "Select an empty territory", null);
       }
     }
   }
@@ -468,13 +404,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
       territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
       deployment = false;
-      gameStatus.remove(errorLabel);
       riskPresenter.territoryForDeployment(territoryId);
       soundResource.playDeployAudio();
     } else {
-      gameStatus.remove(errorLabel);
-      errorLabel = new Label("Please select your territory");
-      gameStatus.add(errorLabel);
+      Dialogs.alert("Not Allowed", "Please select your territory", null);
     }
   }
   
@@ -494,19 +427,17 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         territoryDelta.put(territoryId, deltaUnits + 1);
       }
       unclaimedUnits--;
-      gameStatus.remove(reinforceLabel);
-      reinforceLabel = new Label("Unclaimed Units left : " + unclaimedUnits);
-      gameStatus.add(reinforceLabel);
+      notification.clear();
+      notification.setVisible(true);
+      notification.add(new HTML("<b>Unclaimed Units left : " + unclaimedUnits + "</b>"));
       if (unclaimedUnits == 0) {
         reinforce = false;
-        gameStatus.remove(errorLabel);
-        gameStatus.remove(reinforceLabel);
+        notification.clear();
+        notification.setVisible(false);
         riskPresenter.territoriesReinforced(territoryDelta);
       }
     } else {
-      gameStatus.remove(errorLabel);
-      errorLabel = new Label("Please select your territory");
-      gameStatus.add(errorLabel);
+      Dialogs.alert("Not Allowed", "Please select your territory", null);
     }
   }
   
@@ -524,22 +455,16 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          gameStatus.remove(errorLabel);
-          errorLabel = new Label("Not enough units to attack");
-          gameStatus.add(errorLabel);
+          Dialogs.alert("Not Allowed", "Not enough units to attack", null);
           return;
         }
         attackFromTerritory = territoryId;
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
-        gameStatus.remove(errorLabel);
       } else if (attackFromTerritory.equals(territoryId)) {
         attackFromTerritory = null;
         style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
-        gameStatus.remove(errorLabel);
       } else {
-        gameStatus.remove(errorLabel);
-        errorLabel = new Label("Select opponent's territory to attack");
-        gameStatus.add(errorLabel);
+        Dialogs.alert("Not Allowed", "Select opponent's territory to attack", null);
       }
       territory.setAttribute("style", style);
       
@@ -547,26 +472,20 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else {
       // Defending territory selected
       if (attackFromTerritory == null) {
-        gameStatus.remove(errorLabel);
-        errorLabel = new Label("Select own territory first to attack from");
-        gameStatus.add(errorLabel);
+        Dialogs.alert("Not Allowed", "Select own territory first to attack from", null);
         return;
       }
       attackToTerritory = territoryId;
       if (Territory.CONNECTIONS.get(Integer.parseInt(attackFromTerritory))
           .contains(Integer.parseInt(attackToTerritory))) {
-        soundResource.playAddUnitsAudio();
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:#000000", "stroke:red");
         territory.setAttribute("style", style);
         attack = false;
-        gameStatus.remove(errorLabel);
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
-        gameStatus.remove(errorLabel);
-        errorLabel = new Label(
-            "Select opponent's territory that is adjacent to your territory for attack");
-        gameStatus.add(errorLabel);
+        Dialogs.alert("Not Allowed",  
+            "Select opponent's territory that is adjacent to your territory for attack", null);
         return;
       }
     }
@@ -585,27 +504,21 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          gameStatus.remove(errorLabel);
-          errorLabel = new Label("Not enough units to fortify");
-          gameStatus.add(errorLabel);
+          Dialogs.alert("Not Allowed", "Not enough units to fortify", null);
           return;
         }
         fortifyFromTerritory = territoryId;
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         territory.setAttribute("style", style);
-        gameStatus.remove(errorLabel);
         return;
       } else if (fortifyFromTerritory.equals(territoryId)) {
         fortifyFromTerritory = null;
         style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
         territory.setAttribute("style", style);
-        gameStatus.remove(errorLabel);
         return;
       } else {
         if (fortifyFromTerritory == null) {
-          gameStatus.remove(errorLabel);
-          errorLabel = new Label("Select own territory first to fortify from");
-          gameStatus.add(errorLabel);
+          Dialogs.alert("Not Allowed", "Select own territory first to fortify from", null);
           return;
         }
         fortifyToTerritory = territoryId;
@@ -630,37 +543,28 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               territoryDelta.put(fortifyFromTerritory, -Integer.parseInt(option));
               territoryDelta.put(fortifyToTerritory, Integer.parseInt(option));
               fortify = false;
-              gameStatus.remove(errorLabel);
               riskPresenter.fortifyMove(territoryDelta);
             }
           });
           fortifyOpt.center();
         } else {
-          gameStatus.remove(errorLabel);
-          errorLabel = new Label(
-              "Select your own territory that is connected to your territory for fortify");
-          gameStatus.add(errorLabel);
+          Dialogs.alert("Not Allowed", 
+              "Select your own territory that is connected to your territory for fortify", null);
           return;
         }
       }
     } else {
-      gameStatus.remove(errorLabel);
-      errorLabel = new Label("Select own territory to fortify");
-      gameStatus.add(errorLabel);
-    }    
+      Dialogs.alert("Not Allowed", "Select own territory to fortify", null);
+    }
   }
   
   @Override
   public void chooseNewTerritory() {
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
     claimTerritory = true;
   }
   
   @Override
   public void chooseTerritoryForDeployment() {
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
     deployment = true;
   }
   
@@ -679,7 +583,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           for (Map.Entry<Image, Card> imageCard : cardImagesOfCurrentPlayer.entrySet()) { 
             cardHandlers.add(addCardHandlers(imageCard.getKey(), imageCard.getValue()));
           }
-          gameStatus.add(selectCardsButton);
+          headerPanel.setRightWidget(selectCardsButton);
         } else {
           riskPresenter.cardsTraded(null);
         }
@@ -708,9 +612,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void reinforceTerritories() {
-    gameStatus.remove(errorLabel);
-    //gameStatus.remove(reinforceLabel);
-    
     if (territoryDelta == null) {
       territoryDelta = new HashMap<String, Integer>();
     }
@@ -718,41 +619,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
         .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getUnclaimedUnits();
-    reinforceLabel = new Label("You got " + unclaimedUnits + " for reinforce!");
-    gameStatus.add(endReinforce);
+    Dialogs.alert("Info", "You got " + unclaimedUnits + " units for reinforcement!", null);
+    headerPanel.setRightWidget(endReinforce);
     reinforce = true;
     soundResource.playAddUnitsAudio();
   }
   
   @Override
   public void attack() {
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
     attackToTerritory = null;
     attackFromTerritory = null;
-    gameStatus.add(endAttack);
-    tankPanel.clear();
-    addTankImages();
-    tankPanel.setVisible(true);
-    String playerKey = riskPresenter.getMyPlayerKey();
-    Player player = currentRiskState.getPlayersMap().get(playerKey);
-    Set<Entry<String, Integer>> entrySet = player.getTerritoryUnitMap().entrySet();
-    for (Entry<String, Integer> key : entrySet) {
-      if (key.getValue() > 1) {
-         tankImages.get(Integer.parseInt(key.getKey())).setVisible(true);
-      } else {
-         tankPanel.remove(tankImages.get(Integer.parseInt(key.getKey())));
-      }
-    }
+    headerPanel.setRightWidget(endAttack);
     attack = true;
   }
   
   @Override
   public void attackResult() {
     attackResultPanel.clear();
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
-   
     String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
     String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
     String attackingTerritory = Territory.TERRITORY_NAME.get(
@@ -798,7 +681,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     final DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
         defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
     dicePanel.clearPanel();
-    dicePanel.setText("Attack Result");
+    dicePanel.addPanel(new HTML("<b>Attack Result</b>"));
     dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
       dicePanel.setOkBtnHandler(riskPresenter, 2);
@@ -814,19 +697,18 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         + " units</b>"));
     
     if (attackResult.isAttackerATerritoryWinner()) {
-      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " captures " + defendingTerritory
-          + " </b>"));
+      attackResultPanel.add(new HTML("Player " + attackerKey + " captures " + defendingTerritory));
     }
     if (attackResult.isDefenderOutOfGame()) {
-      attackResultPanel.add(new HTML("<b>Player " + defenderKey + " out of the game. "
+      attackResultPanel.add(new HTML("Player " + defenderKey + " out of the game. "
           + "Player " + attackerKey + " will get cards owned by Player " + defenderKey 
-          + ", if any.</b>"));
+          + ", if any."));
     }
     if (attackResult.isAttackerAWinnerOfGame()) {
-      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " wins the game !</b>"));
+      attackResultPanel.add(new HTML("Player " + attackerKey + " wins the game !"));
       
     } else if (attackResult.isTradeRequired()) {
-      attackResultPanel.add(new HTML("<b>Player " + attackerKey + " will have to trade cards</b>"));
+      attackResultPanel.add(new HTML("Player " + attackerKey + " will have to trade cards"));
     }
     
     final Timer diceAnimationTimer = new Timer() {
@@ -853,8 +735,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         soundResource.playDiceAudio();
       }
     };
-    animation.run(3000);
-    attackAnimationTimer.schedule(3000);
+    animation.run(2000);
+    attackAnimationTimer.schedule(2100);
   }
    
   @Override
@@ -882,12 +764,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void fortify() {
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {
-      gameStatus.add(endFortify);
+      headerPanel.setRightWidget(endFortify);
     }
     fortifyFromTerritory = null;
     fortifyToTerritory = null;
@@ -896,16 +776,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void endGame() {
-    gameStatus.remove(errorLabel);
-    gameStatus.remove(reinforceLabel);
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
-    gameStatus.add(new Label("Game Ended"));
     if (playingPlayerId.equals(turnPlayerId)) {
-      Window.alert("You won the game!");
+      Dialogs.alert("Game Ended", "You won the game!", null);
       riskPresenter.endGame();
     } else {
-      Window.alert("Player-" + GameResources.playerIdToKey(turnPlayerId) + " won the game!");
+      Dialogs.alert("Game Ended", "Player-" + GameResources.playerIdToKey(turnPlayerId) 
+          + " won the game!", null);
     }
   }
   
