@@ -12,6 +12,9 @@
         <g:HTML ui:field="mapContainer"/>
       </g:VerticalPanel>
     </mgwt:ScrollPanel>
-    <mgwt:buttonbar.ButtonBar ui:field="footerBar" />
+    <mgwt:buttonbar.ButtonBar ui:field="footerBar">
+      <mgwt:buttonbar.InfoButton ui:field="instructions" />
+      <mgwt:buttonbar.ActionButton ui:field="playersInfo" />
+    </mgwt:buttonbar.ButtonBar>
   </mgwt:LayoutPanel>
 </ui:UiBinder> 

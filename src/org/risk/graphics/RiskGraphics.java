@@ -34,12 +34,12 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,6 +51,7 @@ import com.googlecode.mgwt.ui.client.widget.HeaderButton;
 import com.googlecode.mgwt.ui.client.widget.HeaderPanel;
 import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 import com.googlecode.mgwt.ui.client.widget.buttonbar.ButtonBar;
+import com.googlecode.mgwt.ui.client.widget.buttonbar.InfoButton;
 
 public class RiskGraphics extends Composite implements RiskPresenter.View {
     public interface RiskGraphicsUiBinder extends UiBinder<Widget, RiskGraphics> {
@@ -77,8 +78,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   //@UiField
   TabPanel playersStatusPanel = new TabPanel();
   
-  //@UiField
-  TabPanel instructions = new TabPanel();
+  @UiField
+  InfoButton instructions = new InfoButton();
   
   @UiField
   VerticalPanel mapWrapper;
@@ -143,7 +144,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         selectedCards.clear();
         removeHandlers(cardHandlers);
         cardImagesOfCurrentPlayer.clear();
-        //gameStatus.remove(selectCardsButton);
+        selectCardsButton.removeFromParent();
       }
       
       @Override
@@ -297,7 +298,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     endAttack.removeFromParent();
     endReinforce.removeFromParent();
     endFortify.removeFromParent();
-    footerBar.clear();
     playersStatusPanel.clear();
     notification.clear();
     currentRiskState = riskState;
@@ -351,13 +351,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       }
       dicePanel.center();
    }
-    setInstructionPanel();
     claimTerritory = false;
     deployment = false;
     reinforce = false;
     attack = false;
     fortify = false;
     mandatoryCardSelection = false;
+    notification.getElement().getStyle().setFontSize(12, Unit.PX);
     notification.getElement().getStyle().setOverflow(Overflow.VISIBLE);
     notification.getElement().getStyle().setPosition(Position.ABSOLUTE);
     mapWrapper.getElement().getStyle().setPosition(Position.ABSOLUTE);
@@ -787,8 +787,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
   }
   
-  private void setInstructionPanel() {
-    instructions.clear();
+  @UiHandler("instructions")
+  public void onTapInfoButton(TapEvent e) {
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     String phase = (String) currentRiskState.getPhase();
@@ -799,88 +799,82 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     
     if (playingPlayerId.equals(turnPlayerId)) {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        instructions.add(new HTML("Turn Order will be decided by rolling dice for all players."
-            + "<br><br>Press OK."), 
-            "Instructions");
+        Dialogs.alert("Instructions", "Turn Order will be decided by rolling dice for all players."
+            + "\n\nPress OK.", null);
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
-        instructions.add(new HTML("Select a empty territory to claim. One territory at a time."
-            + "<br><br>Phase will end when all the territories are claimed."), 
-            "Instructions");
+        Dialogs.alert("Instructions", "Select a empty territory to claim. One territory at a time."
+            + "\n\nPhase will end when all the territories are claimed.", null);
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
-        instructions.add(new HTML("Deploy your remaining army units to territory you own. "
-            + "One unit at a time.<br><br>Phase will end when you have placed your "
-            + "all unclaimed units"), "Instructions");
+        Dialogs.alert("Instructions", "Deploy your remaining army units to territory you own. "
+            + "One unit at a time.\n\nPhase will end when you have placed your "
+            + "all unclaimed units", null);
       } else if (phase.equals(GameResources.CARD_TRADE) 
           || phase.equals(GameResources.ATTACK_TRADE)) {
-        instructions.add(new HTML("Select cards to trade. You must trade if you have more than "
+        Dialogs.alert("Instructions", "Select cards to trade. You must trade if you have more than "
             + "4 cards or you are in attack phase and you have more than 5 cards. "
-            + "<br><br>You'll get units for this card trade. "
+            + "\n\nYou'll get units for this card trade. "
             + "Number of units you get for trading cards will"
-            + " increase as number of trades performed in the game increases."), "Instructions");
+            + " increase as number of trades performed in the game increases.", null);
       } else if (phase.equals(GameResources.REINFORCE)) {
-        instructions.add(new HTML("Reinforce your territories by putting units on territories "
+        Dialogs.alert("Instructions", "Reinforce your territories by putting units on territories "
             + "you own. You got these unclaimed units based on territories and continents you own "
-            + "and cards traded, if any.<br><br> Phase will end when you have 0 unclaimed units or "
-            + "if you choose to end phase"), "Instructions");
+            + "and cards traded, if any.\n\n Phase will end when you have 0 unclaimed units or "
+            + "if you choose to end phase", null);
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
-        instructions.add(new HTML("Attack on opponent's territory by selecting your territory "
+        Dialogs.alert("Instructions", "Attack on opponent's territory by selecting your territory "
             + "first and then opponent's territory. Make sure opponent's territory is adjacent "
             + "to your attacking territory and you have at least 2 units on your "
-            + "attacking territory.<br><br>You can also attack by dragging your tank on to "
+            + "attacking territory.\n\nYou can also attack by dragging your tank on to "
             + "opponent's tank. Opponent's tank will be visible once you start dragging."
-            + "<br><br> You can end this phase by clicking End Attack.")
-        , "Instructions");
+            + "\n\n You can end this phase by clicking End Attack.", null);
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
-        instructions.add(new HTML("Check the result of your attack. "
+        Dialogs.alert("Instructions", "Check the result of your attack. "
             + "Compare the highest die of attacker and defender. If attacker's is higher, "
             + "the defender loses one army from the territory under attack. But if "
             + "the defender's die is higher than yours, you lose one army from the territory you "
             + "attacked from. If each of you rolled more than one die, now compare the two "
             + "next-highest dice and repeat the process. In case of a tie, the defender always "
-            + "wins.<br><br>Press OK to go back to attack phase."), "Instructions");
+            + "wins.\n\nPress OK to go back to attack phase.", null);
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
-        instructions.add(new HTML("Reinforce your territories by putting units on territories "
+        Dialogs.alert("Instructions", "Reinforce your territories by putting units on territories "
             + "you own. You got these units based on cards you traded. "
             + "Phase will end when you have 0 unclaimed units or "
-            + "if you choose to end phase"), "Instructions");
+            + "if you choose to end phase", null);
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
         String instruction = "";
         if (currentRiskState.getTerritoryWinner().equals(riskPresenter.getMyPlayerKey())) {
-          instruction += "<br><br>And now you'll get a risk card at end of attack phase, "
+          instruction += "\n\nAnd now you'll get a risk card at end of attack phase, "
               + "because you won a territory in attack phase. "
               + "You'll get only one risk card even if you won more than one territory.";
         }
-        instructions.add(new HTML("Move units to new territory you just won from your attacking "
-            + "territory. You must leave at least one unit behind on your attacking territory. "
-            + "Also, you have to move units at least equal to the number of dice rolled in "
-            + "last attack." + instruction), "Instructions");
+        Dialogs.alert("Instructions", "Move units to new territory you just won from your"
+            + " attacking territory. You must leave at least one unit behind on your attacking "
+            + "territory. Also, you have to move units at least equal to the number of dice rolled "
+            + "in last attack." + instruction, null);
       } else if (phase.equals(GameResources.FORTIFY)) {
-        instructions.add(new HTML("Move units from one territory you own to other territory "
+        Dialogs.alert("Instructions", "Move units from one territory you own to other territory "
             + "you own. You must leave at least one unit on territory. "
-            + "<br><br>You can skip this phase by clicking End Fortify."), "Instructions");
+            + "\n\nYou can skip this phase by clicking End Fortify.", null);
    
       } else if (phase.equals(GameResources.END_GAME) || phase.equals(GameResources.GAME_ENDED)) {
-        instructions.add(new Label("You won all the territories. "
-            + "Congratulations, you are the winner!"), 
-            "Instructions");
+        Dialogs.alert("Instructions", "You won all the territories. "
+            + "Congratulations, you are the winner!", null);
       } else {
-        instructions.add(new Label(phase), "Instructions");
+        Dialogs.alert("Instructions", phase, null);
       }
     } else {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        instructions.add(new Label("Turn Order will be decided by rolling dice for all players"), 
-            "Instructions");
+        Dialogs.alert("Instructions", "Turn Order will be decided by rolling dice for all players",
+            null);
       } else if (playingPlayerId.equals(GameApi.VIEWER_ID)) {
-        instructions.add(new Label("Watch the game! Hope you enjoy!"), "Instructions");
+        Dialogs.alert("Instructions", "Watch the game! Hope you enjoy!", null);
       } else if (playerLost || phase.equals(GameResources.END_GAME)) {
-        instructions.add(new Label("You lost. Better luck next time."), "Instructions");
+        Dialogs.alert("Instructions", "You lost. Better luck next time.", null);
       }  else {
-        instructions.add(new Label("Wait for your turn! Watch what your enemy is doing!"), 
-            "Instructions");
+        Dialogs.alert("Instructions", "Wait for your turn! Watch what your enemy is doing!", 
+            null);
       }
     }
-    instructions.setWidth("300px");
-    instructions.selectTab(0);
   }
   
   private void changeSVGMap(RiskState riskState) {
