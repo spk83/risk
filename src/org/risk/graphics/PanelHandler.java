@@ -15,18 +15,19 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 
 public final class PanelHandler {
   
   private PanelHandler() {
   }
   
-  public static Panel getPlayerPanel(CardImages cardImages, RiskState state, 
+  public static RoundPanel getPlayerPanel(CardImages cardImages, RiskState state, 
       Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages) {
     String myPlayerKey = player.getPlayerId();
     String myPlayerId = GameResources.playerKeyToId(myPlayerKey);
-    VerticalPanel panel = new VerticalPanel();
-    panel.setSpacing(5);
+    RoundPanel panel = new RoundPanel();
+    //panel.setSpacing(5);
     HorizontalPanel colorPanel = new HorizontalPanel();
     colorPanel.setSpacing(5);
     colorPanel.add(new Label("Color: "));

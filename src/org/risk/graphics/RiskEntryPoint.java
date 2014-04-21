@@ -21,6 +21,7 @@ public class RiskEntryPoint implements EntryPoint {
   RiskPresenter riskPresenter;
   final RiskLogic riskLogic = new RiskLogic();
   
+  
   @Override
   public void onModuleLoad() {
     // set viewport and other settings for mobile
@@ -46,6 +47,7 @@ public class RiskEntryPoint implements EntryPoint {
     RiskLogic riskLogic = new RiskLogic();
     riskPresenter = new RiskPresenter(riskGraphics, container, riskLogic);
     container.sendGameReady();
+    
     // animate
     animationHelper.goTo(riskGraphics, Animation.SLIDE);
   }

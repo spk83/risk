@@ -33,7 +33,6 @@ public class PopupPanel extends PopinDialog {
     panel.setWidth("200px");
     rpanel.add(panel);
     add(rpanel);
-    
   }
 
   public void setOkBtnHandler(final RiskPresenter riskPresenter, final int i) {

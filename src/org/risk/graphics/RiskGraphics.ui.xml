@@ -5,15 +5,18 @@
    xmlns:mgwt="urn:import:com.googlecode.mgwt.ui.client.widget" xmlns:m="urn:import:com.googlecode.mgwt.ui.client">
    
   <ui:with field='resources' type='org.risk.graphics.MapSVG' />
-  <mgwt:LayoutPanel>
+  <mgwt:LayoutPanel ui:field="main">
     <mgwt:HeaderPanel ui:field="headerPanel" />
-    <mgwt:ScrollPanel>
+    <mgwt:ScrollPanel ui:field="display">
       <g:VerticalPanel ui:field="mapWrapper">
         <g:HTML ui:field="mapContainer"/>
       </g:VerticalPanel>
     </mgwt:ScrollPanel>
     <mgwt:buttonbar.ButtonBar ui:field="footerBar">
       <mgwt:buttonbar.InfoButton ui:field="instructions" />
+      <mgwt:buttonbar.ButtonBarSpacer />
+      <mgwt:RoundPanel ui:field="notification" visible="false" />
+      <mgwt:buttonbar.ButtonBarSpacer />
       <mgwt:buttonbar.ActionButton ui:field="playersInfo" />
     </mgwt:buttonbar.ButtonBar>
   </mgwt:LayoutPanel>
