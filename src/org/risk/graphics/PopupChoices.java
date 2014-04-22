@@ -2,44 +2,56 @@ package org.risk.graphics;
 
 import java.util.List;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
 import com.googlecode.mgwt.ui.client.widget.Button;
 import com.googlecode.mgwt.ui.client.widget.RoundPanel;
+import com.googlecode.mgwt.ui.client.widget.slider.Slider;
 
 public class PopupChoices extends PopinDialog {
   public interface OptionChosen {
     void optionChosen(String option);
   }
 
-  public PopupChoices(String mainText, List<String> options, final OptionChosen optionChosen) {
+  public PopupChoices(String mainText, final List<String> options, 
+      final OptionChosen optionChosen) {
     super();
     RoundPanel panel = new RoundPanel();
-    panel.add(new HTML("<b>" + mainText + "</b>"));
-    HorizontalPanel buttons = new HorizontalPanel();
-    for (String option : options) {
-      final String optionF = option;
-      Button btn = new Button(option);
-      btn.addTapHandler(new TapHandler() {
-        @Override
-        public void onTap(TapEvent event) {
-          hide();
-          optionChosen.optionChosen(optionF);
-        }
-      });
-      buttons.add(btn);
-      // adding separator space
-      if (option != options.get(options.size() - 1)) {
-        Label label = new Label();
-        label.setStyleName("withMargin");
-        buttons.add(label);
+    HTML label = new HTML("<b>" + mainText + "</b>");
+    label.getElement().setAttribute("style", "text-align: center;");
+    panel.add(label);
+    Slider slider = new Slider();
+    Button okBtn = new Button("OK");
+    final HTML valueField;
+    panel.add(slider);
+    slider.setMax(options.size());
+    slider.getElement().setAttribute("style", "width: 200px; position:relative; left: 50%; "
+        + "margin-left: -100px");
+    
+    valueField = new HTML(options.get(0));
+    valueField.getElement().setAttribute("style", "text-align: center;");
+    panel.add(valueField);
+    
+    slider.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Integer> event) {
+        valueField.setHTML(options.get(event.getValue()));
       }
-    }
-    panel.add(buttons);
+    });
+    
+    panel.add(okBtn);
+    
+    okBtn.addTapHandler(new TapHandler() {
+      @Override
+      public void onTap(TapEvent event) {
+        hide();
+        optionChosen.optionChosen(valueField.getHTML());
+      }
+    });
     add(panel);
   }
 
