@@ -140,7 +140,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     soundResource = new SoundResource(gameSounds);
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
-    mapWrapper.setStyleName("map");
+    mapContainer.setStyleName("map");
     attackImageResource = attackImages.tank();
     createSelectCardsButton();
     createEndAttackButton();
