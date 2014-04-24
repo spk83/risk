@@ -1,5 +1,7 @@
 package org.risk.graphics;
 
+import java.util.List;
+
 import org.risk.client.RiskPresenter;
 
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -13,19 +15,23 @@ import com.googlecode.mgwt.ui.client.widget.Button;
 import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 
 public class PopupPanel extends PopinDialog {
+  
+  private final List<Widget> widgetsToHide;
 
   private Button okBtn = new Button("OK");
   private VerticalPanel panel;
   private HandlerRegistration regHandler;
 
-  public PopupPanel() {
+  public PopupPanel(final List<Widget> widgetsToHide) {
     super();
+    this.widgetsToHide = widgetsToHide;
     RoundPanel rpanel = new RoundPanel();
     panel = new VerticalPanel();
     regHandler = okBtn.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
         hide();
+        RiskGraphics.setVisible(widgetsToHide, true);
       }
     });
     panel.add(okBtn);
@@ -48,6 +54,7 @@ public class PopupPanel extends PopinDialog {
           riskPresenter.attackResultMove();
         }
         hide();
+        RiskGraphics.setVisible(widgetsToHide, true);
       }
     });
   }
@@ -68,5 +75,6 @@ public class PopupPanel extends PopinDialog {
   public void center() {
     super.center();
     okBtn.setImportant(false);
+    RiskGraphics.setVisible(widgetsToHide, false);
   }
 }

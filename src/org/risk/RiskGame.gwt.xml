@@ -7,7 +7,6 @@
   <inherits name='com.google.common.collect.Collect'/>
   <inherits name='org.vectomatic.libgwtsvg'/>
   <inherits name="com.googlecode.mgwt.linker.Linker" />
-  <inherits name='com.allen_sauer.gwt.voices.gwt-voices'/>
   
   <!-- <inherits name='com.google.gwt.user.theme.clean.Clean'/> -->
   <!-- <set-property name="user.agent" value="safari" /> --> 
@@ -18,7 +17,7 @@
   
   <extend-configuration-property name="html5manifestlinker_files" value="./" />
   <extend-configuration-property name="html5manifestlinker_files" value="RiskGame.html" />
-  
+  <!-- <set-property name="mgwt.os" value="android" /> -->
   <set-configuration-property name="CssResource.obfuscationPrefix" value="emtpy"/>
   <set-property name="compiler.stackMode" value="strip"/>
   <set-configuration-property name="compiler.enum.obfuscate.names" value="true"/>

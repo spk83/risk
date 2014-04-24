@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
@@ -13,13 +14,17 @@ import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 import com.googlecode.mgwt.ui.client.widget.slider.Slider;
 
 public class PopupChoices extends PopinDialog {
+  
+  private final List<Widget> widgetsToHide;
+  
   public interface OptionChosen {
     void optionChosen(String option);
   }
-
+  
   public PopupChoices(String mainText, final List<String> options, 
-      final OptionChosen optionChosen) {
+      final OptionChosen optionChosen, final List<Widget> widgetsToHide) {
     super();
+    this.widgetsToHide = widgetsToHide;
     RoundPanel panel = new RoundPanel();
     HTML label = new HTML("<b>" + mainText + "</b>");
     label.getElement().setAttribute("style", "text-align: center;");
@@ -50,6 +55,7 @@ public class PopupChoices extends PopinDialog {
       public void onTap(TapEvent event) {
         hide();
         optionChosen.optionChosen(valueField.getHTML());
+        RiskGraphics.setVisible(widgetsToHide, true);
       }
     });
     add(panel);
@@ -58,5 +64,6 @@ public class PopupChoices extends PopinDialog {
   @Override
   public void center() {
     super.center();
+    RiskGraphics.setVisible(widgetsToHide, false);
   }
 }

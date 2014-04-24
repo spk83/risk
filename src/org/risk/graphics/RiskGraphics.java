@@ -124,9 +124,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private boolean mandatoryCardSelection = false;
   private boolean cardTrade = false;
   
-  private PopupPanel dicePanel = new PopupPanel();
   private PopupChoices fortifyOpt;
   private ImageResource attackImageResource;
+  private List<Widget> widgetsToHide = new ArrayList<Widget>();
+  private PopupPanel dicePanel = new PopupPanel(widgetsToHide);
   
   public RiskGraphics() {
     diceImages = GWT.create(DiceImages.class);
@@ -146,6 +147,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndFortifyButton();
     createBackButton();
     addMapHandlers();
+    widgetsToHide.add(display);
+    widgetsToHide.add(footerBar);
   }
   
   private void createBackButton() {
@@ -165,6 +168,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         main.add(footerBar);
       }
     });
+  }
+  
+  public static void setVisible(List<Widget> widgetsToHide, boolean isVisible) {
+    for (Widget widget : widgetsToHide) {
+      widget.setVisible(isVisible);
+    }
   }
   
   private void createSelectCardsButton() {
@@ -563,7 +572,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify = false;
               riskPresenter.fortifyMove(territoryDelta);
             }
-          });
+          }, widgetsToHide);
           fortifyOpt.center();
         } else {
           Dialogs.alert("Not Allowed", 
@@ -784,7 +793,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         public void optionChosen(String option) {
           riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
         }
-      }).center();
+      }, widgetsToHide).center();
     }
   }
 
