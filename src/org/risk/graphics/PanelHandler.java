@@ -7,6 +7,7 @@ import org.risk.client.Card;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
+import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -60,14 +61,15 @@ public final class PanelHandler {
     return panel;
   }
   
-  public static Panel getGameStatusPanel(RiskState state) {
+  public static Panel getGameStatusPanel(RiskState state, ConstantMessages constantMessages) {
     VerticalPanel panel = new VerticalPanel();
     panel.setSpacing(5);
     panel.add(new HTML("Turn: " + "<b>" + state.getTurn() + "</b>"));
     if (state.getTurnOrder() != null) {
-      panel.add(new HTML("Turn Order: " + "<b>" + state.getTurnOrder() + "</b>"));
+      panel.add(new HTML(constantMessages.turnOrder() + ": " + "<b>" + state.getTurnOrder()
+          + "</b>"));
     }
-    panel.add(new HTML("Phase: " + "<b>" + GameResources.UI_PHASE_MAPPING.get(state.getPhase()) 
+    panel.add(new HTML("Phase: " + "<b>" + constantMessages.uiPhaseMap().get(state.getPhase()) 
         + "</b>"));
     return panel;
   }

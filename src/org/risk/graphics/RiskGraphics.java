@@ -1,6 +1,7 @@
 package org.risk.graphics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +16,18 @@ import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
+import org.risk.graphics.i18n.messages.ConstantMessages;
+import org.risk.graphics.i18n.names.TerritoryNames;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
+import org.vectomatic.dom.svg.OMNodeList;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
@@ -29,11 +35,13 @@ import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -67,6 +75,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private final SoundResource soundResource;
   private RiskPresenter riskPresenter;
   private OMSVGSVGElement boardElt;
+  private ConstantMessages constantMessages;
+  private TerritoryNames territoryNames;
 
   @UiField
   LayoutPanel main;
@@ -130,6 +140,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private PopupPanel dicePanel = new PopupPanel(widgetsToHide);
   
   public RiskGraphics() {
+    territoryNames = (TerritoryNames) GWT.create(TerritoryNames.class);
+    constantMessages = (ConstantMessages) GWT.create(ConstantMessages.class);
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -295,6 +307,25 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       final OMElement territory = boardElt.getElementById(territoryId);
       final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
       final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
+      
+      if (!(LocaleInfo.getCurrentLocale().getLocaleName().equals("default") 
+          || LocaleInfo.getCurrentLocale().getLocaleName().indexOf("en") != -1)) {
+        OMNodeList<OMNode> territoryTextChildNodes = territoryText.getChildNodes();
+        int newTextPointer = 0;
+        List<String> newTerritoryNameList = GameResources.getNewTerritoryNameList(
+            territoryNames.countries().get(territoryId), territoryTextChildNodes.getLength());
+        
+        for (OMNode territoryTextNode : territoryTextChildNodes) {
+          if (newTextPointer < newTerritoryNameList.size()) {
+            territoryTextNode.getFirstChild().setNodeValue(
+                newTerritoryNameList.get(newTextPointer));
+          } else {
+            territoryText.removeChild(territoryTextNode);
+          }
+          newTextPointer++;
+        }
+      }
+      
       MouseDownHandler handler = new MouseDownHandler() {
         @Override
         public void onMouseDown(MouseDownEvent event) {
@@ -351,7 +382,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     if (fortifyOpt != null) {
       fortifyOpt.hide();
     }
-    HTML phase = new HTML("<b>" + GameResources.UI_PHASE_MAPPING.get(riskState.getPhase()) 
+    HTML phase = new HTML("<b>" + constantMessages.uiPhaseMap().get(riskState.getPhase()) 
         + "</b>");
     phase.getElement().getStyle().setTop(10, Unit.PX);
     headerPanel.setLeftWidget(phase);
@@ -359,7 +390,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
       soundResource.playDiceAudio();
-      dicePanel.addPanel(new HTML("<b>Turn Order</b>"));
+      dicePanel.addPanel(new HTML("<b>" + constantMessages.turnOrder() + "</b>"));
       for (String dice: diceList) {
         FlowPanel diceFlowPanel = new FlowPanel();
         DiceAnimation diceAnimation = new DiceAnimation(

@@ -3,12 +3,15 @@ package org.risk.client;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.risk.client.GameApi.Operation;
+import org.vectomatic.dom.svg.OMNode;
+import org.vectomatic.dom.svg.OMNodeList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -19,6 +22,67 @@ public final class GameResources {
   
   private GameResources() {
   }
+  
+  public static List<String> getNewTerritoryNameList(String newTerritoryName, 
+      int totalLinesAvailable) {
+     String [] newTerritoryNameSplit = newTerritoryName.split(" ");
+     List<String> newTerritoryNameList = Arrays.asList(newTerritoryNameSplit);
+     if (newTerritoryNameList.size() > totalLinesAvailable) {
+       List<String> tempTerritoryNameList = new ArrayList<String>();
+       int oneSlotSize = newTerritoryNameList.size() / totalLinesAvailable;
+       int extras = newTerritoryNameList.size() % totalLinesAvailable;
+       int newTerritoryPointer = 0;
+       for (int j = 0; j < totalLinesAvailable; ++j) {
+         StringBuilder singleSlotTerritoryName = new StringBuilder();
+         for (int i = 0; i < oneSlotSize && newTerritoryPointer < newTerritoryNameList.size();
+             ++i) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+         }
+         if (extras > 0) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+           extras--;
+         }
+         singleSlotTerritoryName.deleteCharAt(singleSlotTerritoryName.length() - 1);
+         tempTerritoryNameList.add(singleSlotTerritoryName.toString());
+       }
+       newTerritoryNameList = tempTerritoryNameList;
+     }
+     return newTerritoryNameList;
+  }
+  
+  /*public static void main(String args[]) {
+    String [] bw = {"normal, goo, bakwas"};
+    List<String> nList = Arrays.asList(bw);
+     int svgPointer = 0;
+     int newTextPointer = 0;
+     String newTerritoryName = "thisis";
+     String [] newTerritoryNameSplit = newTerritoryName.split(" ");
+     List<String> newTerritoryNameList = Arrays.asList(newTerritoryNameSplit);
+     if (newTerritoryNameList.size() > nList.size()) {
+       List<String> tempTerritoryNameList = new ArrayList<String>();
+       int oneSlotSize = newTerritoryNameList.size() / nList.size();
+       int extras = newTerritoryNameList.size() % nList.size();
+       int newTerritoryPointer = 0;
+       for (int j = 0; j < nList.size(); ++j) {
+         StringBuilder singleSlotTerritoryName = new StringBuilder();
+         for (int i = 0; i < oneSlotSize && newTerritoryPointer < newTerritoryNameList.size(); ++i) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+         }
+         if (extras > 0) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+           extras--;
+         }
+         singleSlotTerritoryName.deleteCharAt(singleSlotTerritoryName.length() - 1);
+         tempTerritoryNameList.add(singleSlotTerritoryName.toString());
+       }
+       newTerritoryNameList = tempTerritoryNameList;
+     }
+     System.out.println(newTerritoryNameList);
+  }*/
   
   public static final Map<Integer, Integer> PLAYERS_UNIT_MAP = ImmutableMap.<Integer, Integer>of(
       2, 40,

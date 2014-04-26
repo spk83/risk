@@ -6,9 +6,19 @@
   <inherits name='com.google.gwt.json.JSON'/>
   <inherits name='com.google.common.collect.Collect'/>
   <inherits name='org.vectomatic.libgwtsvg'/>
+  <inherits name="com.google.gwt.i18n.I18N"/>
   
+  <!-- French language, independent of country -->
+  <extend-property name="locale" values="es"/>
+  
+  <!-- English language, independent of country -->
+  <extend-property name="locale" values="en"/>
+  
+  <!-- Default language (English) -->
+  <set-property-fallback name="locale" value="en"/>
+
   <!-- <inherits name='com.google.gwt.user.theme.clean.Clean'/> -->
-  <!-- <set-property name="user.agent" value="safari" /> --> 
+  <!-- <set-property name="user.agent" value="safari" />  -->
   
   <!-- here you can turn off css obfuscation -->
   <!--<set-configuration-property name="mgwt.css" value="pretty" />-->
