@@ -52,38 +52,6 @@ public final class GameResources {
      return newTerritoryNameList;
   }
   
-  /*public static void main(String args[]) {
-    String [] bw = {"normal, goo, bakwas"};
-    List<String> nList = Arrays.asList(bw);
-     int svgPointer = 0;
-     int newTextPointer = 0;
-     String newTerritoryName = "thisis";
-     String [] newTerritoryNameSplit = newTerritoryName.split(" ");
-     List<String> newTerritoryNameList = Arrays.asList(newTerritoryNameSplit);
-     if (newTerritoryNameList.size() > nList.size()) {
-       List<String> tempTerritoryNameList = new ArrayList<String>();
-       int oneSlotSize = newTerritoryNameList.size() / nList.size();
-       int extras = newTerritoryNameList.size() % nList.size();
-       int newTerritoryPointer = 0;
-       for (int j = 0; j < nList.size(); ++j) {
-         StringBuilder singleSlotTerritoryName = new StringBuilder();
-         for (int i = 0; i < oneSlotSize && newTerritoryPointer < newTerritoryNameList.size(); ++i) {
-           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
-           singleSlotTerritoryName.append(" ");
-         }
-         if (extras > 0) {
-           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
-           singleSlotTerritoryName.append(" ");
-           extras--;
-         }
-         singleSlotTerritoryName.deleteCharAt(singleSlotTerritoryName.length() - 1);
-         tempTerritoryNameList.add(singleSlotTerritoryName.toString());
-       }
-       newTerritoryNameList = tempTerritoryNameList;
-     }
-     System.out.println(newTerritoryNameList);
-  }*/
-  
   public static final Map<Integer, Integer> PLAYERS_UNIT_MAP = ImmutableMap.<Integer, Integer>of(
       2, 40,
       3, 35,

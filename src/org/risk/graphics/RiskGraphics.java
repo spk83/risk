@@ -20,6 +20,7 @@ import org.risk.graphics.i18n.messages.ConstantMessages;
 import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.DialogInstructions;
 import org.risk.graphics.i18n.messages.VariableMessages;
+import org.risk.graphics.i18n.names.ContinentNames;
 import org.risk.graphics.i18n.names.TerritoryNames;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
@@ -79,6 +80,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private VariableMessages variableMessages;
   private DialogInstructions dialogInstructions;
   private ConstantMessages constantMessages;
+  private ContinentNames continentNames;
 
   @UiField
   LayoutPanel main;
@@ -147,6 +149,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     variableMessages = (VariableMessages) GWT.create(VariableMessages.class);
     dialogInstructions = (DialogInstructions) GWT.create(DialogInstructions.class);
     constantMessages = (ConstantMessages) GWT.create(ConstantMessages.class);
+    continentNames = (ContinentNames) GWT.create(ContinentNames.class);
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -187,7 +190,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         final OMElement continentText = boardElt.getElementById(continentId);
         OMNodeList<OMNode> continentTextChildNodes = continentText.getChildNodes();
         List<String> newContinentNameList = GameResources.getNewTerritoryNameList(
-            territoryNames.continents().get(continentId), continentTextChildNodes.getLength() - 1);
+            continentNames.continents().get(continentId), continentTextChildNodes.getLength() - 1);
         int i = 0;
         for (i = 0; i < newContinentNameList.size(); ++i) {
           OMNode continentTextNode = continentTextChildNodes.getItem(i);
