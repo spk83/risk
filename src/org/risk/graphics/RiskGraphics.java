@@ -224,7 +224,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createSelectCardsButton() {
     selectCardsButton.setRoundButton(true);
-    selectCardsButton.setText("Done");
+    selectCardsButton.setText(constantMessages.done());
     selectCardsButton.addTapHandler(new TapHandler() {
       
       private void cleanup() {
