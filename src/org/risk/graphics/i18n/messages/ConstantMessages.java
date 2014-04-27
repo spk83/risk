@@ -99,4 +99,7 @@ public interface ConstantMessages extends Constants {
   
   @DefaultStringValue("Color")
   String color();
+  
+  @DefaultStringValue("Done")
+  String done();
 }
