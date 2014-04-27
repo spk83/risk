@@ -16,6 +16,7 @@ import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
+import org.risk.graphics.i18n.messages.ConstantMessages;
 import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.DialogInstructions;
 import org.risk.graphics.i18n.messages.VariableMessages;
@@ -77,6 +78,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private TerritoryNames territoryNames;
   private VariableMessages variableMessages;
   private DialogInstructions dialogInstructions;
+  private ConstantMessages constantMessages;
 
   @UiField
   LayoutPanel main;
@@ -144,12 +146,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     phaseMessages = (PhaseMessages) GWT.create(PhaseMessages.class);
     variableMessages = (VariableMessages) GWT.create(VariableMessages.class);
     dialogInstructions = (DialogInstructions) GWT.create(DialogInstructions.class);
+    constantMessages = (ConstantMessages) GWT.create(ConstantMessages.class);
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
     attackImages = GWT.create(AttackImages.class);
     gameSounds = GWT.create(GameSounds.class);
-    dicePanel = new PopupPanel(widgetsToHide, dialogInstructions);
+    dicePanel = new PopupPanel(widgetsToHide, constantMessages);
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     soundResource = new SoundResource(gameSounds);
@@ -196,7 +199,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createBackButton() {
     backButton.setBackButton(true);
-    backButton.setText(dialogInstructions.back());
+    backButton.setText(constantMessages.back());
     backButton.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -243,8 +246,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       public void onTap(TapEvent event) {
         int units = Card.getUnits(selectedCards, currentRiskState.getTradeNumber());
         if (mandatoryCardSelection && units == 0) {
-          CustomDialogPanel.alert(dialogInstructions.invalidSelection(), 
-              dialogInstructions.mandatoryCardSelection(), null, dialogInstructions.ok());
+          CustomDialogPanel.alert(constantMessages.invalidSelection(), 
+              constantMessages.mandatoryCardSelection(), null, constantMessages.ok());
           return;
         }
         if (selectedCards.size() == 0) {
@@ -266,9 +269,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             }
           };
           
-          CustomDialogPanel.confirm(dialogInstructions.invalidSelection(), 
-              dialogInstructions.confirmDialog(), callback, dialogInstructions.ok(), 
-              dialogInstructions.cancel());
+          CustomDialogPanel.confirm(constantMessages.invalidSelection(), 
+              constantMessages.confirmDialog(), callback, constantMessages.ok(), 
+              constantMessages.cancel());
         }
       }
     });
@@ -276,7 +279,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     
   private void createEndAttackButton() {
     endAttack.setRoundButton(true);
-    endAttack.setText(dialogInstructions.end());
+    endAttack.setText(constantMessages.end());
     endAttack.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -289,7 +292,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createEndReinforceButton() {
     endReinforce.setRoundButton(true);
-    endReinforce.setText(dialogInstructions.end());
+    endReinforce.setText(constantMessages.end());
     endReinforce.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -304,7 +307,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createEndFortifyButton() {
     endFortify.setRoundButton(true);
-    endFortify.setText(dialogInstructions.end());
+    endFortify.setText(constantMessages.end());
     endFortify.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -374,11 +377,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify(territoryId);
             }
           } else if (playerId.equals(GameApi.VIEWER_ID)) {
-            CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-                dialogInstructions.viewerNotAllowed(), null, dialogInstructions.ok());
+            CustomDialogPanel.alert(constantMessages.notAllowed(), 
+                constantMessages.viewerNotAllowed(), null, constantMessages.ok());
           } else {
-            CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-                dialogInstructions.playerNotAllowed(), null, dialogInstructions.ok());
+            CustomDialogPanel.alert(constantMessages.notAllowed(), 
+                constantMessages.playerNotAllowed(), null, constantMessages.ok());
           }
         }
       };
@@ -478,11 +481,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerKey)) {
-        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-            dialogInstructions.alreadyOwnTerritory(), null, dialogInstructions.ok());
+        CustomDialogPanel.alert(constantMessages.notAllowed(), 
+            constantMessages.alreadyOwnTerritory(), null, constantMessages.ok());
       } else {
-        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-            dialogInstructions.emptyTerritory(), null, dialogInstructions.ok());
+        CustomDialogPanel.alert(constantMessages.notAllowed(), 
+            constantMessages.emptyTerritory(), null, constantMessages.ok());
       }
     }
   }
@@ -500,8 +503,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       riskPresenter.territoryForDeployment(territoryId);
       soundResource.playDeployAudio();
     } else {
-      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-          dialogInstructions.selectYourTerritory(), null, dialogInstructions.ok());
+      CustomDialogPanel.alert(constantMessages.notAllowed(), 
+          constantMessages.selectYourTerritory(), null, constantMessages.ok());
     }
   }
   
@@ -534,8 +537,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         riskPresenter.territoriesReinforced(territoryDelta);
       }
     } else {
-      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-          dialogInstructions.selectYourTerritory(), null, dialogInstructions.ok());
+      CustomDialogPanel.alert(constantMessages.notAllowed(), 
+          constantMessages.selectYourTerritory(), null, constantMessages.ok());
     }
   }
   
@@ -553,8 +556,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-              dialogInstructions.notEnoughUnits(), null, dialogInstructions.ok());
+          CustomDialogPanel.alert(constantMessages.notAllowed(), 
+              constantMessages.notEnoughUnits(), null, constantMessages.ok());
           return;
         }
         attackFromTerritory = territoryId;
@@ -563,8 +566,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         attackFromTerritory = null;
         style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
       } else {
-        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-            dialogInstructions.selectOpponentTerritory(), null, dialogInstructions.ok());
+        CustomDialogPanel.alert(constantMessages.notAllowed(), 
+            constantMessages.selectOpponentTerritory(), null, constantMessages.ok());
       }
       territory.setAttribute("style", style);
       
@@ -572,8 +575,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else {
       // Defending territory selected
       if (attackFromTerritory == null) {
-        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-            dialogInstructions.selectOwnTerritoryAttack(), null, dialogInstructions.ok());
+        CustomDialogPanel.alert(constantMessages.notAllowed(), 
+            constantMessages.selectOwnTerritoryAttack(), null, constantMessages.ok());
         return;
       }
       attackToTerritory = territoryId;
@@ -585,8 +588,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         attack = false;
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
-        CustomDialogPanel.alert(dialogInstructions.notAllowed(),  
-            dialogInstructions.selectAdjacentTerritory(), null, dialogInstructions.ok());
+        CustomDialogPanel.alert(constantMessages.notAllowed(),  
+            constantMessages.selectAdjacentTerritory(), null, constantMessages.ok());
         return;
       }
     }
@@ -605,8 +608,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-              dialogInstructions.fortifyNotPossible(), null, dialogInstructions.ok());
+          CustomDialogPanel.alert(constantMessages.notAllowed(), 
+              constantMessages.fortifyNotPossible(), null, constantMessages.ok());
           return;
         }
         fortifyFromTerritory = territoryId;
@@ -620,8 +623,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         return;
       } else {
         if (fortifyFromTerritory == null) {
-          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-              dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
+          CustomDialogPanel.alert(constantMessages.notAllowed(), 
+              constantMessages.selectOwnTerritoryFortify(), null, constantMessages.ok());
           return;
         }
         fortifyToTerritory = territoryId;
@@ -638,7 +641,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           for (int i = 1; i <= unitsOnFromTerritory - 1; i++) {
             options.add(i + "");
           }
-          fortifyOpt = new PopupChoices(dialogInstructions.chooseUnitsToMove(),
+          fortifyOpt = new PopupChoices(constantMessages.chooseUnitsToMove(),
               options, new PopupChoices.OptionChosen() {
             @Override
             public void optionChosen(String option) {
@@ -648,17 +651,17 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify = false;
               riskPresenter.fortifyMove(territoryDelta);
             }
-          }, widgetsToHide, dialogInstructions);
+          }, widgetsToHide, constantMessages);
           fortifyOpt.center();
         } else {
-          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-              dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
+          CustomDialogPanel.alert(constantMessages.notAllowed(), 
+              constantMessages.selectOwnTerritoryFortify(), null, constantMessages.ok());
           return;
         }
       }
     } else {
-      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
-          dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
+      CustomDialogPanel.alert(constantMessages.notAllowed(), 
+          constantMessages.selectOwnTerritoryFortify(), null, constantMessages.ok());
     }
   }
   
@@ -731,8 +734,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
         .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getUnclaimedUnits();
-    CustomDialogPanel.alert(dialogInstructions.info(), 
-        variableMessages.unclaminedUnits(unclaimedUnits), null, dialogInstructions.ok());
+    CustomDialogPanel.alert(constantMessages.info(), 
+        variableMessages.unclaminedUnits(unclaimedUnits), null, constantMessages.ok());
     headerPanel.setRightWidget(endReinforce);
     reinforce = true;
     soundResource.playAddUnitsAudio();
@@ -866,13 +869,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       for (int i = minUnitsToNewTerritory; i <= unitsOnAttackingTerritory - 1; i++) {
         options.add(i + "");
       }
-      new PopupChoices(dialogInstructions.chooseUnitsToMove(),
+      new PopupChoices(constantMessages.chooseUnitsToMove(),
           options, new PopupChoices.OptionChosen() {
         @Override
         public void optionChosen(String option) {
           riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
         }
-      }, widgetsToHide, dialogInstructions).center();
+      }, widgetsToHide, constantMessages).center();
     }
   }
 
@@ -893,13 +896,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {
-      CustomDialogPanel.alert(phaseMessages.gameEnded(), dialogInstructions.gameWon(), null, 
-          dialogInstructions.ok());
+      CustomDialogPanel.alert(phaseMessages.gameEnded(), constantMessages.gameWon(), null, 
+          constantMessages.ok());
       riskPresenter.endGame();
     } else {
       CustomDialogPanel.alert(phaseMessages.gameEnded(), variableMessages.playerWon(
-          dialogInstructions.player() + GameResources.playerIdToKey(turnPlayerId)), null,
-          dialogInstructions.ok());
+          constantMessages.player() + GameResources.playerIdToKey(turnPlayerId)), null,
+          constantMessages.ok());
     }
   }
   
@@ -916,61 +919,61 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     if (playingPlayerId.equals(turnPlayerId)) {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), 
-            dialogInstructions.setTurnOrder(), null, dialogInstructions.ok());
+            dialogInstructions.setTurnOrder(), null, constantMessages.ok());
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), 
-            dialogInstructions.claimTerritory(), null, dialogInstructions.ok());
+            dialogInstructions.claimTerritory(), null, constantMessages.ok());
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.deployment(), 
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.CARD_TRADE)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), variableMessages.cardTrade(4),
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_TRADE)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), variableMessages.cardTrade(5),
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.REINFORCE)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.reinforce(),
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.attack(),
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(),
-            dialogInstructions.attackResult(), null, dialogInstructions.ok());
+            dialogInstructions.attackResult(), null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(),
-            dialogInstructions.attackReinforce(), null, dialogInstructions.ok());
+            dialogInstructions.attackReinforce(), null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
         String instruction = "";
         if (currentRiskState.getTerritoryWinner().equals(riskPresenter.getMyPlayerKey())) {
           instruction += dialogInstructions.territoryWinner();
         }
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.attackOccupy()
-            + instruction, null, dialogInstructions.ok());
+            + instruction, null, constantMessages.ok());
       } else if (phase.equals(GameResources.FORTIFY)) {
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.fortify(), 
-            null, dialogInstructions.ok());
+            null, constantMessages.ok());
       } else if (phase.equals(GameResources.END_GAME) || phase.equals(GameResources.GAME_ENDED)) {
-        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.endGame(),
-            null, dialogInstructions.ok());
+        CustomDialogPanel.alert(dialogInstructions.instructions(), constantMessages.endGame(),
+            null, constantMessages.ok());
       } else {
         CustomDialogPanel.alert(dialogInstructions.instructions(), phase, null,
-            dialogInstructions.ok());
+            constantMessages.ok());
       }
     } else if (playingPlayerId.equals(GameApi.VIEWER_ID)) {
-      CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.viewer(),
-          null, dialogInstructions.ok());
+      CustomDialogPanel.alert(dialogInstructions.instructions(), constantMessages.viewer(),
+          null, constantMessages.ok());
     } else {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.turnOrder(),
-            null, dialogInstructions.ok());
+        CustomDialogPanel.alert(dialogInstructions.instructions(), constantMessages.turnOrder(),
+            null, constantMessages.ok());
       } else if (playerLost || phase.equals(GameResources.END_GAME)) {
-        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.playerLost(),
-            null, dialogInstructions.ok());
+        CustomDialogPanel.alert(dialogInstructions.instructions(), constantMessages.playerLost(),
+            null, constantMessages.ok());
       }  else {
-        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.notYourTurn(),
-            null, dialogInstructions.ok());
+        CustomDialogPanel.alert(dialogInstructions.instructions(), constantMessages.notYourTurn(),
+            null, constantMessages.ok());
       }
     }
   }
@@ -988,7 +991,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     main.add(playersStatusPanel);
     main.add(footerBar);
     otherHeaderPanel.setLeftWidget(backButton);
-    otherHeaderPanel.setCenterWidget(new HTML("<b>" + dialogInstructions.playersInfo() + "</b>"));
+    otherHeaderPanel.setCenterWidget(new HTML("<b>" + constantMessages.playersInfo() + "</b>"));
     
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
@@ -1003,7 +1006,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       Player player = playersMap.get(id);
       scrollPanel2.setWidget(PanelHandler.getPlayerPanel(
           cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
-          cardImagesOfCurrentPlayer, variableMessages, dialogInstructions));
+          cardImagesOfCurrentPlayer, variableMessages, constantMessages));
       if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
         index = count;
       }

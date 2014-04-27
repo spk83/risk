@@ -7,8 +7,8 @@ import org.risk.client.Card;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
+import org.risk.graphics.i18n.messages.ConstantMessages;
 import org.risk.graphics.i18n.messages.PhaseMessages;
-import org.risk.graphics.i18n.messages.DialogInstructions;
 import org.risk.graphics.i18n.messages.VariableMessages;
 
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -26,13 +26,13 @@ public final class PanelHandler {
   
   public static RoundPanel getPlayerPanel(CardImages cardImages, RiskState state, 
       Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages,
-      VariableMessages variableMessages, DialogInstructions dialogInstructions) {
+      VariableMessages variableMessages, ConstantMessages constantMessages) {
     String myPlayerKey = player.getPlayerId();
     String myPlayerId = GameResources.playerKeyToId(myPlayerKey);
     RoundPanel panel = new RoundPanel();
     HorizontalPanel colorPanel = new HorizontalPanel();
     colorPanel.setSpacing(5);
-    String color = dialogInstructions.color();
+    String color = constantMessages.color();
     String colorHtml = "<div style='background-color: "
         + Player.getPlayerColor(myPlayerId) + "; height: 25px; width: 25px;'>" + "</div>";
     String [] order = variableMessages.colorOrder(color, colorHtml).split(">>>>");

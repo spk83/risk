@@ -2,7 +2,7 @@ package org.risk.graphics;
 
 import java.util.List;
 
-import org.risk.graphics.i18n.messages.DialogInstructions;
+import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -25,7 +25,7 @@ public class PopupChoices extends PopinDialog {
   
   public PopupChoices(String mainText, final List<String> options, 
       final OptionChosen optionChosen, final List<Widget> widgetsToHide,
-      final DialogInstructions dialogInstructions) {
+      final ConstantMessages constantMessages) {
     super();
     this.widgetsToHide = widgetsToHide;
     RoundPanel panel = new RoundPanel();
@@ -33,7 +33,7 @@ public class PopupChoices extends PopinDialog {
     label.getElement().setAttribute("style", "text-align: center;");
     panel.add(label);
     Slider slider = new Slider();
-    Button okBtn = new Button(dialogInstructions.ok());
+    Button okBtn = new Button(constantMessages.ok());
     final HTML valueField;
     panel.add(slider);
     slider.setMax(options.size());

@@ -3,7 +3,7 @@ package org.risk.graphics;
 import java.util.List;
 
 import org.risk.client.RiskPresenter;
-import org.risk.graphics.i18n.messages.DialogInstructions;
+import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -23,9 +23,9 @@ public class PopupPanel extends PopinDialog {
   private VerticalPanel panel;
   private HandlerRegistration regHandler;
 
-  public PopupPanel(final List<Widget> widgetsToHide, DialogInstructions dialogInstructions) {
+  public PopupPanel(final List<Widget> widgetsToHide, ConstantMessages constantMessages) {
     super();
-    okBtn = new Button(dialogInstructions.ok());
+    okBtn = new Button(constantMessages.ok());
     this.widgetsToHide = widgetsToHide;
     RoundPanel rpanel = new RoundPanel();
     panel = new VerticalPanel();
