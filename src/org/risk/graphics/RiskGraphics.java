@@ -166,14 +166,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndFortifyButton();
     createBackButton();
     addMapHandlers();
-    renameContinents();
+    changeSVGLanguage();
     widgetsToHide.add(display);
     widgetsToHide.add(footerBar);
   }
   
-  private void renameContinents() {
-    if (!(LocaleInfo.getCurrentLocale().getLocaleName().equals("default") 
-        || LocaleInfo.getCurrentLocale().getLocaleName().indexOf("en") != -1)) {
+  private static boolean isSVGLanguageChangeRequired() {
+    return !(LocaleInfo.getCurrentLocale().getLocaleName().equals("default") 
+        || LocaleInfo.getCurrentLocale().getLocaleName().indexOf("en") != -1);
+  }
+  
+  private void changeSVGLanguage() {
+    changeSVGContinentsAndItsUnitsByLocale();
+    changeSVGTerritoriesByLocale();
+  }
+  
+  private void changeSVGContinentsAndItsUnitsByLocale() {
+    if (isSVGLanguageChangeRequired()) {
       for (String continentId : Continent.CONTINENT_SVG_ID.keySet()) {
         final OMElement continentText = boardElt.getElementById(continentId);
         OMNodeList<OMNode> continentTextChildNodes = continentText.getChildNodes();
@@ -193,6 +202,28 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .getLength() - 1);
         unitTextNode.getFirstChild().setNodeValue(variableMessages.nUnits(Continent.UNITS_VALUE.get(
             Continent.CONTINENT_SVG_ID.get(continentId))));
+      }
+    }
+  }
+  
+  private void changeSVGTerritoriesByLocale() {
+    if (isSVGLanguageChangeRequired()) {
+      for (String territoryId : Territory.SVG_ID_MAP.keySet()) {
+        final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
+        OMNodeList<OMNode> territoryTextChildNodes = territoryText.getChildNodes();
+        int newTextPointer = 0;
+        List<String> newTerritoryNameList = GameResources.getNewTerritoryNameList(
+            territoryNames.countries().get(territoryId), territoryTextChildNodes.getLength());
+        
+        for (OMNode territoryTextNode : territoryTextChildNodes) {
+          if (newTextPointer < newTerritoryNameList.size()) {
+            territoryTextNode.getFirstChild().setNodeValue(
+                newTerritoryNameList.get(newTextPointer));
+          } else {
+            territoryText.removeChild(territoryTextNode);
+          }
+          newTextPointer++;
+        }
       }
     }
   }
@@ -341,24 +372,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       final OMElement territory = boardElt.getElementById(territoryId);
       final OMElement territoryText = boardElt.getElementById(territoryId + "_text");
       final OMElement territoryUnits = boardElt.getElementById(territoryId + "_units");
-      
-      if (!(LocaleInfo.getCurrentLocale().getLocaleName().equals("default") 
-          || LocaleInfo.getCurrentLocale().getLocaleName().indexOf("en") != -1)) {
-        OMNodeList<OMNode> territoryTextChildNodes = territoryText.getChildNodes();
-        int newTextPointer = 0;
-        List<String> newTerritoryNameList = GameResources.getNewTerritoryNameList(
-            territoryNames.countries().get(territoryId), territoryTextChildNodes.getLength());
-        
-        for (OMNode territoryTextNode : territoryTextChildNodes) {
-          if (newTextPointer < newTerritoryNameList.size()) {
-            territoryTextNode.getFirstChild().setNodeValue(
-                newTerritoryNameList.get(newTextPointer));
-          } else {
-            territoryText.removeChild(territoryTextNode);
-          }
-          newTextPointer++;
-        }
-      }
       
       MouseDownHandler handler = new MouseDownHandler() {
         @Override
