@@ -8,12 +8,12 @@ import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
 import org.risk.graphics.i18n.messages.ConstantMessages;
+import org.risk.graphics.i18n.messages.VariableMessages;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.googlecode.mgwt.ui.client.widget.RoundPanel;
@@ -24,24 +24,24 @@ public final class PanelHandler {
   }
   
   public static RoundPanel getPlayerPanel(CardImages cardImages, RiskState state, 
-      Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages) {
+      Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages,
+      VariableMessages variableMessages) {
     String myPlayerKey = player.getPlayerId();
     String myPlayerId = GameResources.playerKeyToId(myPlayerKey);
     RoundPanel panel = new RoundPanel();
-    //panel.setSpacing(5);
     HorizontalPanel colorPanel = new HorizontalPanel();
     colorPanel.setSpacing(5);
-    colorPanel.add(new Label("Color: "));
-    colorPanel.add(new HTML("<div style='background-color: " + Player.getPlayerColor(myPlayerId) 
-        + "; height: 25px; width: 25px;'>" + "</div>"));
-    panel.add(new HTML("Player: <b>" + myPlayerKey + "</b>"));
+    colorPanel.add(new HTML(variableMessages.colorInfo("<div style='background-color: "
+        + Player.getPlayerColor(myPlayerId) + "; height: 25px; width: 25px;'>" + "</div>")));
+    //panel.setSpacing(5);
+    panel.add(new HTML(variableMessages.playerNameInfo(myPlayerKey)));
     panel.add(colorPanel);
     List<Integer> cards = player.getCards();
     int totalCards = 0;
     if (cards != null && !cards.isEmpty()) {
       totalCards = cards.size();
     }
-    panel.add(new HTML("Total cards: <b>" + totalCards + "</b>"));
+    panel.add(new HTML(variableMessages.totalCardsInfo(totalCards)));
     if (myPlayerId.equals(currentPlayerId)) {
       if (totalCards > 0) { 
         FlowPanel cardsPanel = new FlowPanel();
@@ -57,7 +57,7 @@ public final class PanelHandler {
         panel.add(cardsPanel);
       }
     }
-    panel.add(new HTML("Unclaimed Units:<b>" + player.getUnclaimedUnits() + "</b>"));
+    panel.add(new HTML(variableMessages.unclaimedUnitsInfo(player.getUnclaimedUnits())));
     return panel;
   }
   

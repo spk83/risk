@@ -48,5 +48,12 @@ public interface TerritoryNames extends Constants {
   String new_guinea();
   String western_australia();
   String eastern_australia();
+  String north_america();
+  String south_america();
+  String europe();
+  String africa();
+  String asia();
+  String australia();
   Map<String, String> countries();
+  Map<String, String> continents();
 }

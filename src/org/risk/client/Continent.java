@@ -30,6 +30,15 @@ public final class Continent {
       .put("5", "Australia")
       .build();
   
+  public static final Map<String, String> CONTINENT_SVG_ID = ImmutableMap.<String, String>builder()
+      .put("north_america", "0")
+      .put("south_america", "1")
+      .put("europe", "2")
+      .put("africa", "3")
+      .put("asia", "4")
+      .put("australia", "5")
+      .build();
+  
   public static final Map<String, Set<String>> TERRITORY_SET = 
       ImmutableMap.<String, Set<String>>builder()
       .put("0", ImmutableSet.<String>of("0", "1", "2", "3", "4", "5", "6", "7", "8"))

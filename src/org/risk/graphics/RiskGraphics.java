@@ -9,6 +9,7 @@ import java.util.Map;
 import org.risk.client.Attack;
 import org.risk.client.Attack.AttackResult;
 import org.risk.client.Card;
+import org.risk.client.Continent;
 import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
@@ -40,6 +41,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -161,8 +163,35 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndFortifyButton();
     createBackButton();
     addMapHandlers();
+    renameContinents();
     widgetsToHide.add(display);
     widgetsToHide.add(footerBar);
+  }
+  
+  private void renameContinents() {
+    if (!(LocaleInfo.getCurrentLocale().getLocaleName().equals("default") 
+        || LocaleInfo.getCurrentLocale().getLocaleName().indexOf("en") != -1)) {
+      for (String continentId : Continent.CONTINENT_SVG_ID.keySet()) {
+        final OMElement continentText = boardElt.getElementById(continentId);
+        OMNodeList<OMNode> continentTextChildNodes = continentText.getChildNodes();
+        List<String> newContinentNameList = GameResources.getNewTerritoryNameList(
+            territoryNames.continents().get(continentId), continentTextChildNodes.getLength() - 1);
+        int i = 0;
+        for (i = 0; i < newContinentNameList.size(); ++i) {
+          OMNode continentTextNode = continentTextChildNodes.getItem(i);
+          continentTextNode.getFirstChild().setNodeValue(
+              newContinentNameList.get(i));
+        }
+        for (; i < continentTextChildNodes.getLength() - 1; ++i) {
+          OMNode continentTextNode = continentTextChildNodes.getItem(i);
+          continentTextNode.getFirstChild().setNodeValue("");
+        }
+        OMNode unitTextNode = continentTextChildNodes.getItem(continentTextChildNodes
+            .getLength() - 1);
+        unitTextNode.getFirstChild().setNodeValue(variableMessages.nUnits(Continent.UNITS_VALUE.get(
+            Continent.CONTINENT_SVG_ID.get(continentId))));
+      }
+    }
   }
   
   private void createBackButton() {
@@ -608,7 +637,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           for (int i = 1; i <= unitsOnFromTerritory - 1; i++) {
             options.add(i + "");
           }
-          fortifyOpt = new PopupChoices("Choose number of units to move on the new territory",
+          fortifyOpt = new PopupChoices(dialogInstructions.chooseUnitsToMove(),
               options, new PopupChoices.OptionChosen() {
             @Override
             public void optionChosen(String option) {
@@ -730,8 +759,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String defendingTerritorySVG = Territory.SVG_NAME_MAP.get(
         currentRiskState.getAttack().getDefenderTerritoryId());
     
-    String attackerText = attackerKey + " (" + attackingTerritory + ")";
-    String defenderText = defenderKey + " (" + defendingTerritory + ")";
+    String attackSVG = 
+        Territory.SVG_NAME_MAP.get(currentRiskState.getAttack().getAttackerTerritoryId());
+    String defendSVG = 
+        Territory.SVG_NAME_MAP.get(currentRiskState.getAttack().getDefenderTerritoryId());
+    String attackerText = variableMessages.playerTextAttackResult(attackerKey, 
+        territoryNames.countries().get(attackSVG));
+    String defenderText = variableMessages.playerTextAttackResult(defenderKey, 
+        territoryNames.countries().get(defendSVG));
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     int attackUnits = currentRiskState.getAttack().getAttackUnits();
@@ -764,7 +799,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     final DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
         defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
     dicePanel.clearPanel();
-    dicePanel.addPanel(new HTML("<b>Attack Result</b>"));
+    dicePanel.addPanel(new HTML("<b>" + constantMessages.attackResult() + "</b>"));
     dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
       dicePanel.setOkBtnHandler(riskPresenter, 2);
@@ -774,24 +809,23 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     dicePanel.addPanel(attackerDicePanel);
     dicePanel.addPanel(defenderDicePanel);
   
-    attackResultPanel.add(new HTML("Attacker lost <b>" + (-1 * attackResult.getDeltaAttack()) 
-        + " units</b>"));
-    attackResultPanel.add(new HTML("Defender lost <b>" + (-1 * attackResult.getDeltaDefend()) 
-        + " units</b>"));
+    attackResultPanel.add(new HTML(variableMessages.attackerLost(-1 * attackResult.getDeltaAttack()
+        )));
+    attackResultPanel.add(new HTML(variableMessages.defenderLost(-1 * attackResult.getDeltaDefend()
+        )));
     
     if (attackResult.isAttackerATerritoryWinner()) {
-      attackResultPanel.add(new HTML("Player " + attackerKey + " captures " + defendingTerritory));
+      attackResultPanel.add(new HTML(variableMessages.playerCaptures(attackerKey, 
+          territoryNames.countries().get(defendSVG))));
     }
     if (attackResult.isDefenderOutOfGame()) {
-      attackResultPanel.add(new HTML("Player " + defenderKey + " out of the game. "
-          + "Player " + attackerKey + " will get cards owned by Player " + defenderKey 
-          + ", if any."));
+      attackResultPanel.add(new HTML(variableMessages.defenderOut(defenderKey, attackerKey)));
     }
     if (attackResult.isAttackerAWinnerOfGame()) {
-      attackResultPanel.add(new HTML("Player " + attackerKey + " wins the game !"));
+      attackResultPanel.add(new HTML(variableMessages.attackerWinner(attackerKey)));
       
     } else if (attackResult.isTradeRequired()) {
-      attackResultPanel.add(new HTML("Player " + attackerKey + " will have to trade cards"));
+      attackResultPanel.add(new HTML(variableMessages.attackerTradeCards(attackerKey)));
     }
     
     final Timer diceAnimationTimer = new Timer() {
@@ -835,7 +869,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       for (int i = minUnitsToNewTerritory; i <= unitsOnAttackingTerritory - 1; i++) {
         options.add(i + "");
       }
-      new PopupChoices("Choose number of units to move on the new territory",
+      new PopupChoices(dialogInstructions.chooseUnitsToMove(),
           options, new PopupChoices.OptionChosen() {
         @Override
         public void optionChosen(String option) {
@@ -972,7 +1006,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       Player player = playersMap.get(id);
       scrollPanel2.setWidget(PanelHandler.getPlayerPanel(
           cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
-          cardImagesOfCurrentPlayer));
+          cardImagesOfCurrentPlayer, variableMessages));
       if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
         index = count;
       }

@@ -1,7 +1,6 @@
 package org.risk.graphics.i18n.messages;
 
 import com.google.gwt.i18n.client.Constants;
-import com.google.gwt.i18n.client.Constants.DefaultStringValue;
 
 public interface DialogInstructions extends Constants {
   
@@ -153,4 +152,9 @@ public interface DialogInstructions extends Constants {
   @DefaultStringValue("Player")
   String player();
   
+  @DefaultStringValue("Choose number of units to move on the new territory")
+  String chooseUnitsToMove();
+  
+  @DefaultStringValue("Units")
+  String units();
 }
