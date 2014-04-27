@@ -6,6 +6,7 @@ import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
@@ -47,7 +48,8 @@ public class PopupChoices extends PopinDialog {
     slider.addValueChangeHandler(new ValueChangeHandler<Integer>() {
       @Override
       public void onValueChange(ValueChangeEvent<Integer> event) {
-        valueField.setHTML(options.get(event.getValue()));
+        valueField.setHTML(
+            new SafeHtmlBuilder().appendEscaped(options.get(event.getValue())).toSafeHtml());
       }
     });
     
