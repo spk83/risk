@@ -52,4 +52,10 @@ public interface VariableMessages extends Messages {
   
   @DefaultMessage("{0} UNITS")
   String nUnits(int n);
+  
+  @DefaultMessage("{0}>>>>{1}")
+  String colorOrder(String colorText, String colorHtml);
+  
+  @DefaultMessage("Unclaimed Units Left: {0}")
+  String unclaimedUnitsLeft(int unclaimedUnits);
 }

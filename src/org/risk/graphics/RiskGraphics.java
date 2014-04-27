@@ -41,7 +41,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -138,7 +137,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private PopupChoices fortifyOpt;
   private ImageResource attackImageResource;
   private List<Widget> widgetsToHide = new ArrayList<Widget>();
-  private PopupPanel dicePanel = new PopupPanel(widgetsToHide);
+  private PopupPanel dicePanel;
   
   public RiskGraphics() {
     territoryNames = (TerritoryNames) GWT.create(TerritoryNames.class);
@@ -150,6 +149,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     riskMapSVG = GWT.create(MapSVG.class);
     attackImages = GWT.create(AttackImages.class);
     gameSounds = GWT.create(GameSounds.class);
+    dicePanel = new PopupPanel(widgetsToHide, dialogInstructions);
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     soundResource = new SoundResource(gameSounds);
@@ -276,7 +276,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     
   private void createEndAttackButton() {
     endAttack.setRoundButton(true);
-    endAttack.setText("End");
+    endAttack.setText(dialogInstructions.end());
     endAttack.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -289,7 +289,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createEndReinforceButton() {
     endReinforce.setRoundButton(true);
-    endReinforce.setText("End");
+    endReinforce.setText(dialogInstructions.end());
     endReinforce.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -304,7 +304,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createEndFortifyButton() {
     endFortify.setRoundButton(true);
-    endFortify.setText("End");
+    endFortify.setText(dialogInstructions.end());
     endFortify.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -523,7 +523,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       unclaimedUnits--;
       notification.clear();
       notification.setVisible(true);
-      notification.add(new HTML("<b>Unclaimed Units left : " + unclaimedUnits + "</b>"));
+      notification.add(new HTML("<b>" + variableMessages.unclaimedUnitsLeft(unclaimedUnits)
+          + "</b>"));
       notification.getElement().getStyle().setFontSize(12, Unit.PX);
       notification.getElement().getStyle().setPadding(7, Unit.PX);
       if (unclaimedUnits == 0) {
@@ -647,7 +648,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify = false;
               riskPresenter.fortifyMove(territoryDelta);
             }
-          }, widgetsToHide);
+          }, widgetsToHide, dialogInstructions);
           fortifyOpt.center();
         } else {
           CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
@@ -750,10 +751,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     attackResultPanel.clear();
     String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
     String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
-    String attackingTerritory = Territory.TERRITORY_NAME.get(
-        currentRiskState.getAttack().getAttackerTerritoryId());
-    String defendingTerritory = Territory.TERRITORY_NAME.get(
-        currentRiskState.getAttack().getDefenderTerritoryId());
     String attackingTerritorySVG = Territory.SVG_NAME_MAP.get(
         currentRiskState.getAttack().getAttackerTerritoryId());
     String defendingTerritorySVG = Territory.SVG_NAME_MAP.get(
@@ -875,7 +872,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         public void optionChosen(String option) {
           riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
         }
-      }, widgetsToHide).center();
+      }, widgetsToHide, dialogInstructions).center();
     }
   }
 
@@ -1006,7 +1003,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       Player player = playersMap.get(id);
       scrollPanel2.setWidget(PanelHandler.getPlayerPanel(
           cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
-          cardImagesOfCurrentPlayer, variableMessages));
+          cardImagesOfCurrentPlayer, variableMessages, dialogInstructions));
       if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
         index = count;
       }

@@ -157,4 +157,7 @@ public interface DialogInstructions extends Constants {
   
   @DefaultStringValue("Units")
   String units();
+  
+  @DefaultStringValue("Color")
+  String color();
 }
