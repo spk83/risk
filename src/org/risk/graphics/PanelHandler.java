@@ -7,7 +7,7 @@ import org.risk.client.Card;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
-import org.risk.graphics.i18n.messages.ConstantMessages;
+import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.DialogInstructions;
 import org.risk.graphics.i18n.messages.VariableMessages;
 
@@ -66,15 +66,15 @@ public final class PanelHandler {
     return panel;
   }
   
-  public static Panel getGameStatusPanel(RiskState state, ConstantMessages constantMessages) {
+  public static Panel getGameStatusPanel(RiskState state, PhaseMessages phaseMessages) {
     VerticalPanel panel = new VerticalPanel();
     panel.setSpacing(5);
     panel.add(new HTML("Turn: " + "<b>" + state.getTurn() + "</b>"));
     if (state.getTurnOrder() != null) {
-      panel.add(new HTML(constantMessages.turnOrder() + ": " + "<b>" + state.getTurnOrder()
+      panel.add(new HTML(phaseMessages.turnOrder() + ": " + "<b>" + state.getTurnOrder()
           + "</b>"));
     }
-    panel.add(new HTML("Phase: " + "<b>" + constantMessages.uiPhaseMap().get(state.getPhase()) 
+    panel.add(new HTML("Phase: " + "<b>" + phaseMessages.uiPhaseMap().get(state.getPhase()) 
         + "</b>"));
     return panel;
   }

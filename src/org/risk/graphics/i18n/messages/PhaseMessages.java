@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.gwt.i18n.client.Constants;
 
-public interface ConstantMessages extends Constants {
+public interface PhaseMessages extends Constants {
   
   @DefaultStringValue("TURN ORDER")
   String turnOrder();

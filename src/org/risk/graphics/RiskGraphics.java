@@ -16,7 +16,7 @@ import org.risk.client.Player;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
-import org.risk.graphics.i18n.messages.ConstantMessages;
+import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.DialogInstructions;
 import org.risk.graphics.i18n.messages.VariableMessages;
 import org.risk.graphics.i18n.names.TerritoryNames;
@@ -73,7 +73,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private final SoundResource soundResource;
   private RiskPresenter riskPresenter;
   private OMSVGSVGElement boardElt;
-  private ConstantMessages constantMessages;
+  private PhaseMessages phaseMessages;
   private TerritoryNames territoryNames;
   private VariableMessages variableMessages;
   private DialogInstructions dialogInstructions;
@@ -141,7 +141,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   public RiskGraphics() {
     territoryNames = (TerritoryNames) GWT.create(TerritoryNames.class);
-    constantMessages = (ConstantMessages) GWT.create(ConstantMessages.class);
+    phaseMessages = (PhaseMessages) GWT.create(PhaseMessages.class);
     variableMessages = (VariableMessages) GWT.create(VariableMessages.class);
     dialogInstructions = (DialogInstructions) GWT.create(DialogInstructions.class);
     diceImages = GWT.create(DiceImages.class);
@@ -416,7 +416,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     if (fortifyOpt != null) {
       fortifyOpt.hide();
     }
-    HTML phase = new HTML("<b>" + constantMessages.uiPhaseMap().get(riskState.getPhase()) 
+    HTML phase = new HTML("<b>" + phaseMessages.uiPhaseMap().get(riskState.getPhase()) 
         + "</b>");
     phase.getElement().getStyle().setTop(10, Unit.PX);
     headerPanel.setLeftWidget(phase);
@@ -424,7 +424,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
       soundResource.playDiceAudio();
-      dicePanel.addPanel(new HTML("<b>" + constantMessages.turnOrder() + "</b>"));
+      dicePanel.addPanel(new HTML("<b>" + phaseMessages.turnOrder() + "</b>"));
       for (String dice: diceList) {
         FlowPanel diceFlowPanel = new FlowPanel();
         DiceAnimation diceAnimation = new DiceAnimation(
@@ -796,7 +796,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     final DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
         defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
     dicePanel.clearPanel();
-    dicePanel.addPanel(new HTML("<b>" + constantMessages.attackResult() + "</b>"));
+    dicePanel.addPanel(new HTML("<b>" + phaseMessages.attackResult() + "</b>"));
     dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
       dicePanel.setOkBtnHandler(riskPresenter, 2);
@@ -893,11 +893,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {
-      CustomDialogPanel.alert(constantMessages.gameEnded(), dialogInstructions.gameWon(), null, 
+      CustomDialogPanel.alert(phaseMessages.gameEnded(), dialogInstructions.gameWon(), null, 
           dialogInstructions.ok());
       riskPresenter.endGame();
     } else {
-      CustomDialogPanel.alert(constantMessages.gameEnded(), variableMessages.playerWon(
+      CustomDialogPanel.alert(phaseMessages.gameEnded(), variableMessages.playerWon(
           dialogInstructions.player() + GameResources.playerIdToKey(turnPlayerId)), null,
           dialogInstructions.ok());
     }
