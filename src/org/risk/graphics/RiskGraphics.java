@@ -1,7 +1,6 @@
 package org.risk.graphics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +16,8 @@ import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
 import org.risk.graphics.i18n.messages.ConstantMessages;
+import org.risk.graphics.i18n.messages.DialogInstructions;
+import org.risk.graphics.i18n.messages.VariableMessages;
 import org.risk.graphics.i18n.names.TerritoryNames;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
@@ -26,8 +27,6 @@ import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
@@ -41,7 +40,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -51,7 +49,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.ConfirmDialog.ConfirmCallback;
-import com.googlecode.mgwt.ui.client.dialog.Dialogs;
 import com.googlecode.mgwt.ui.client.widget.Carousel;
 import com.googlecode.mgwt.ui.client.widget.HeaderButton;
 import com.googlecode.mgwt.ui.client.widget.HeaderPanel;
@@ -77,6 +74,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private OMSVGSVGElement boardElt;
   private ConstantMessages constantMessages;
   private TerritoryNames territoryNames;
+  private VariableMessages variableMessages;
+  private DialogInstructions dialogInstructions;
 
   @UiField
   LayoutPanel main;
@@ -142,6 +141,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   public RiskGraphics() {
     territoryNames = (TerritoryNames) GWT.create(TerritoryNames.class);
     constantMessages = (ConstantMessages) GWT.create(ConstantMessages.class);
+    variableMessages = (VariableMessages) GWT.create(VariableMessages.class);
+    dialogInstructions = (DialogInstructions) GWT.create(DialogInstructions.class);
     diceImages = GWT.create(DiceImages.class);
     cardImages = GWT.create(CardImages.class);
     riskMapSVG = GWT.create(MapSVG.class);
@@ -166,7 +167,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private void createBackButton() {
     backButton.setBackButton(true);
-    backButton.setText("Back");
+    backButton.setText(dialogInstructions.back());
     backButton.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -213,8 +214,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       public void onTap(TapEvent event) {
         int units = Card.getUnits(selectedCards, currentRiskState.getTradeNumber());
         if (mandatoryCardSelection && units == 0) {
-          Dialogs.alert("Invalid selection", "Card selection is mandatory, please select again !", 
-              null);
+          CustomDialogPanel.alert(dialogInstructions.invalidSelection(), 
+              dialogInstructions.mandatoryCardSelection(), null, dialogInstructions.ok());
           return;
         }
         if (selectedCards.size() == 0) {
@@ -236,8 +237,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             }
           };
           
-          Dialogs.confirm("Invalid selection", 
-              "Invalid selection: Press OK to continue or Cancel to select again", callback);
+          CustomDialogPanel.confirm(dialogInstructions.invalidSelection(), 
+              dialogInstructions.confirmDialog(), callback, dialogInstructions.ok(), 
+              dialogInstructions.cancel());
         }
       }
     });
@@ -343,9 +345,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               fortify(territoryId);
             }
           } else if (playerId.equals(GameApi.VIEWER_ID)) {
-            Dialogs.alert("Not Allowed", "You can only view the game", null);
+            CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+                dialogInstructions.viewerNotAllowed(), null, dialogInstructions.ok());
           } else {
-            Dialogs.alert("Not Allowed", "Please wait for your turn", null);
+            CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+                dialogInstructions.playerNotAllowed(), null, dialogInstructions.ok());
           }
         }
       };
@@ -375,6 +379,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
+    setVisible(widgetsToHide, true);
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -444,9 +449,11 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerKey)) {
-        Dialogs.alert("Not Allowed", "You already own this territory", null);
+        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+            dialogInstructions.alreadyOwnTerritory(), null, dialogInstructions.ok());
       } else {
-        Dialogs.alert("Not Allowed", "Select an empty territory", null);
+        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+            dialogInstructions.emptyTerritory(), null, dialogInstructions.ok());
       }
     }
   }
@@ -464,7 +471,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       riskPresenter.territoryForDeployment(territoryId);
       soundResource.playDeployAudio();
     } else {
-      Dialogs.alert("Not Allowed", "Please select your territory", null);
+      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+          dialogInstructions.selectYourTerritory(), null, dialogInstructions.ok());
     }
   }
   
@@ -496,7 +504,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         riskPresenter.territoriesReinforced(territoryDelta);
       }
     } else {
-      Dialogs.alert("Not Allowed", "Please select your territory", null);
+      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+          dialogInstructions.selectYourTerritory(), null, dialogInstructions.ok());
     }
   }
   
@@ -514,7 +523,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          Dialogs.alert("Not Allowed", "Not enough units to attack", null);
+          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+              dialogInstructions.notEnoughUnits(), null, dialogInstructions.ok());
           return;
         }
         attackFromTerritory = territoryId;
@@ -523,7 +533,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         attackFromTerritory = null;
         style = style.replaceFirst("stroke-width:5", "stroke-width:1.20000005");
       } else {
-        Dialogs.alert("Not Allowed", "Select opponent's territory to attack", null);
+        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+            dialogInstructions.selectOpponentTerritory(), null, dialogInstructions.ok());
       }
       territory.setAttribute("style", style);
       
@@ -531,7 +542,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else {
       // Defending territory selected
       if (attackFromTerritory == null) {
-        Dialogs.alert("Not Allowed", "Select own territory first to attack from", null);
+        CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+            dialogInstructions.selectOwnTerritoryAttack(), null, dialogInstructions.ok());
         return;
       }
       attackToTerritory = territoryId;
@@ -543,8 +555,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         attack = false;
         riskPresenter.performAttack(attackFromTerritory, attackToTerritory);
       } else {
-        Dialogs.alert("Not Allowed",  
-            "Select opponent's territory that is adjacent to your territory for attack", null);
+        CustomDialogPanel.alert(dialogInstructions.notAllowed(),  
+            dialogInstructions.selectAdjacentTerritory(), null, dialogInstructions.ok());
         return;
       }
     }
@@ -563,7 +575,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
-          Dialogs.alert("Not Allowed", "Not enough units to fortify", null);
+          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+              dialogInstructions.fortifyNotPossible(), null, dialogInstructions.ok());
           return;
         }
         fortifyFromTerritory = territoryId;
@@ -577,7 +590,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         return;
       } else {
         if (fortifyFromTerritory == null) {
-          Dialogs.alert("Not Allowed", "Select own territory first to fortify from", null);
+          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+              dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
           return;
         }
         fortifyToTerritory = territoryId;
@@ -607,13 +621,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           }, widgetsToHide);
           fortifyOpt.center();
         } else {
-          Dialogs.alert("Not Allowed", 
-              "Select your own territory that is connected to your territory for fortify", null);
+          CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+              dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
           return;
         }
       }
     } else {
-      Dialogs.alert("Not Allowed", "Select own territory to fortify", null);
+      CustomDialogPanel.alert(dialogInstructions.notAllowed(), 
+          dialogInstructions.selectOwnTerritoryFortify(), null, dialogInstructions.ok());
     }
   }
   
@@ -686,7 +701,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
         .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
             .getUnclaimedUnits();
-    Dialogs.alert("Info", "You got " + unclaimedUnits + " units for reinforcement!", null);
+    CustomDialogPanel.alert(dialogInstructions.info(), 
+        variableMessages.unclaminedUnits(unclaimedUnits), null, dialogInstructions.ok());
     headerPanel.setRightWidget(endReinforce);
     reinforce = true;
     soundResource.playAddUnitsAudio();
@@ -846,11 +862,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {
-      Dialogs.alert("Game Ended", "You won the game!", null);
+      CustomDialogPanel.alert(constantMessages.gameEnded(), dialogInstructions.gameWon(), null, 
+          dialogInstructions.ok());
       riskPresenter.endGame();
     } else {
-      Dialogs.alert("Game Ended", "Player-" + GameResources.playerIdToKey(turnPlayerId) 
-          + " won the game!", null);
+      CustomDialogPanel.alert(constantMessages.gameEnded(), variableMessages.playerWon(
+          dialogInstructions.player() + GameResources.playerIdToKey(turnPlayerId)), null,
+          dialogInstructions.ok());
     }
   }
   
@@ -866,80 +884,62 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     
     if (playingPlayerId.equals(turnPlayerId)) {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        Dialogs.alert("Instructions", "Turn Order will be decided by rolling dice for all players."
-            + "\n\nPress OK.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), 
+            dialogInstructions.setTurnOrder(), null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.CLAIM_TERRITORY)) {
-        Dialogs.alert("Instructions", "Select a empty territory to claim. One territory at a time."
-            + "\n\nPhase will end when all the territories are claimed.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), 
+            dialogInstructions.claimTerritory(), null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.DEPLOYMENT)) {
-        Dialogs.alert("Instructions", "Deploy your remaining army units to territory you own. "
-            + "One unit at a time.\n\nPhase will end when you have placed your "
-            + "all unclaimed units", null);
-      } else if (phase.equals(GameResources.CARD_TRADE) 
-          || phase.equals(GameResources.ATTACK_TRADE)) {
-        Dialogs.alert("Instructions", "Select cards to trade. You must trade if you have more than "
-            + "4 cards or you are in attack phase and you have more than 5 cards. "
-            + "\n\nYou'll get units for this card trade. "
-            + "Number of units you get for trading cards will"
-            + " increase as number of trades performed in the game increases.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.deployment(), 
+            null, dialogInstructions.ok());
+      } else if (phase.equals(GameResources.CARD_TRADE)) {
+        CustomDialogPanel.alert(dialogInstructions.instructions(), variableMessages.cardTrade(4),
+            null, dialogInstructions.ok());
+      } else if (phase.equals(GameResources.ATTACK_TRADE)) {
+        CustomDialogPanel.alert(dialogInstructions.instructions(), variableMessages.cardTrade(5),
+            null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.REINFORCE)) {
-        Dialogs.alert("Instructions", "Reinforce your territories by putting units on territories "
-            + "you own. You got these unclaimed units based on territories and continents you own "
-            + "and cards traded, if any.\n\n Phase will end when you have 0 unclaimed units or "
-            + "if you choose to end phase", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.reinforce(),
+            null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.ATTACK_PHASE)) {
-        Dialogs.alert("Instructions", "Attack on opponent's territory by selecting your territory "
-            + "first and then opponent's territory. Make sure opponent's territory is adjacent "
-            + "to your attacking territory and you have at least 2 units on your "
-            + "attacking territory.\n\nYou can also attack by dragging your tank on to "
-            + "opponent's tank. Opponent's tank will be visible once you start dragging."
-            + "\n\n You can end this phase by clicking End Attack.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.attack(),
+            null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.ATTACK_RESULT)) {
-        Dialogs.alert("Instructions", "Check the result of your attack. "
-            + "Compare the highest die of attacker and defender. If attacker's is higher, "
-            + "the defender loses one army from the territory under attack. But if "
-            + "the defender's die is higher than yours, you lose one army from the territory you "
-            + "attacked from. If each of you rolled more than one die, now compare the two "
-            + "next-highest dice and repeat the process. In case of a tie, the defender always "
-            + "wins.\n\nPress OK to go back to attack phase.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(),
+            dialogInstructions.attackResult(), null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.ATTACK_REINFORCE)) {
-        Dialogs.alert("Instructions", "Reinforce your territories by putting units on territories "
-            + "you own. You got these units based on cards you traded. "
-            + "Phase will end when you have 0 unclaimed units or "
-            + "if you choose to end phase", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(),
+            dialogInstructions.attackReinforce(), null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
         String instruction = "";
         if (currentRiskState.getTerritoryWinner().equals(riskPresenter.getMyPlayerKey())) {
-          instruction += "\n\nAnd now you'll get a risk card at end of attack phase, "
-              + "because you won a territory in attack phase. "
-              + "You'll get only one risk card even if you won more than one territory.";
+          instruction += dialogInstructions.territoryWinner();
         }
-        Dialogs.alert("Instructions", "Move units to new territory you just won from your"
-            + " attacking territory. You must leave at least one unit behind on your attacking "
-            + "territory. Also, you have to move units at least equal to the number of dice rolled "
-            + "in last attack." + instruction, null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.attackOccupy()
+            + instruction, null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.FORTIFY)) {
-        Dialogs.alert("Instructions", "Move units from one territory you own to other territory "
-            + "you own. You must leave at least one unit on territory. "
-            + "\n\nYou can skip this phase by clicking End Fortify.", null);
-   
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.fortify(), 
+            null, dialogInstructions.ok());
       } else if (phase.equals(GameResources.END_GAME) || phase.equals(GameResources.GAME_ENDED)) {
-        Dialogs.alert("Instructions", "You won all the territories. "
-            + "Congratulations, you are the winner!", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.endGame(),
+            null, dialogInstructions.ok());
       } else {
-        Dialogs.alert("Instructions", phase, null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), phase, null,
+            dialogInstructions.ok());
       }
+    } else if (playingPlayerId.equals(GameApi.VIEWER_ID)) {
+      CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.viewer(),
+          null, dialogInstructions.ok());
     } else {
       if (phase.equals(GameResources.SET_TURN_ORDER)) {
-        Dialogs.alert("Instructions", "Turn Order will be decided by rolling dice for all players",
-            null);
-      } else if (playingPlayerId.equals(GameApi.VIEWER_ID)) {
-        Dialogs.alert("Instructions", "Watch the game! Hope you enjoy!", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.turnOrder(),
+            null, dialogInstructions.ok());
       } else if (playerLost || phase.equals(GameResources.END_GAME)) {
-        Dialogs.alert("Instructions", "You lost. Better luck next time.", null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.playerLost(),
+            null, dialogInstructions.ok());
       }  else {
-        Dialogs.alert("Instructions", "Wait for your turn! Watch what your enemy is doing!", 
-            null);
+        CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.notYourTurn(),
+            null, dialogInstructions.ok());
       }
     }
   }
@@ -956,9 +956,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     main.add(otherHeaderPanel);
     main.add(playersStatusPanel);
     main.add(footerBar);
-    
     otherHeaderPanel.setLeftWidget(backButton);
-    otherHeaderPanel.setCenterWidget(new HTML("<b>Players Info</b>"));
+    otherHeaderPanel.setCenterWidget(new HTML("<b>" + dialogInstructions.playersInfo() + "</b>"));
     
     Map<String, Player> playersMap = currentRiskState.getPlayersMap();
     int count = 0;
