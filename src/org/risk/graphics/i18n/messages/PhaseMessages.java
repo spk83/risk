@@ -6,7 +6,7 @@ import com.google.gwt.i18n.client.Constants;
 
 public interface PhaseMessages extends Constants {
   
-  @DefaultStringValue("TURN ORDER")
+  @DefaultStringValue("Turn Order")
   String turnOrder();
   
   @DefaultStringValue("Decide Turn Order")

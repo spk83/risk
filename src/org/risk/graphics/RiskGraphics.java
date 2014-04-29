@@ -36,6 +36,8 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.resources.client.ImageResource;
@@ -43,6 +45,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -90,9 +93,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @UiField
   ScrollPanel display;
-  
-  @UiField
-  VerticalPanel mapWrapper;
 
   @UiField
   HTML mapContainer;
@@ -140,7 +140,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private PopupChoices fortifyOpt;
   private ImageResource attackImageResource;
-  private List<Widget> widgetsToHide = new ArrayList<Widget>();
   private PopupPanel dicePanel;
   
   public RiskGraphics() {
@@ -155,7 +154,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     riskMapSVG = GWT.create(MapSVG.class);
     attackImages = GWT.create(AttackImages.class);
     gameSounds = GWT.create(GameSounds.class);
-    dicePanel = new PopupPanel(widgetsToHide, constantMessages);
+    dicePanel = new PopupPanel(constantMessages);
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     soundResource = new SoundResource(gameSounds);
@@ -170,8 +169,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createBackButton();
     addMapHandlers();
     changeSVGLanguage();
-    widgetsToHide.add(display);
-    widgetsToHide.add(footerBar);
+    Window.addResizeHandler(new ResizeHandler() {
+      @Override
+      public void onResize(ResizeEvent event) {
+        display.refresh();
+      }
+    });
   }
   
   private static boolean isSVGLanguageChangeRequired() {
@@ -240,7 +243,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         playersStatusPanel.removeFromParent();
         backButton.removeFromParent();
         otherHeaderPanel.removeFromParent();
-        footerBar.add(playersInfo);
+        playersInfo.setVisible(true);
         footerBar.removeFromParent();
         
         headerPanel.setVisible(true);
@@ -248,12 +251,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         main.add(footerBar);
       }
     });
-  }
-  
-  public static void setVisible(List<Widget> widgetsToHide, boolean isVisible) {
-    for (Widget widget : widgetsToHide) {
-      widget.setVisible(isVisible);
-    }
   }
   
   private void createSelectCardsButton() {
@@ -268,7 +265,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         selectCardsButton.removeFromParent();
         playersStatusPanel.removeFromParent();
         otherHeaderPanel.removeFromParent();
-        footerBar.add(playersInfo);
+        playersInfo.setVisible(true);
         footerBar.removeFromParent();
         
         headerPanel.setVisible(true);
@@ -427,7 +424,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
-    setVisible(widgetsToHide, true);
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -443,7 +439,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       List<String> diceList = Lists.newArrayList(riskState.getDiceResult().keySet());
       Collections.sort(diceList);
       soundResource.playDiceAudio();
-      dicePanel.addPanel(new HTML("<b>" + phaseMessages.turnOrder() + "</b>"));
+      dicePanel.getDialogPanel().getDialogTitle().setText(phaseMessages.turnOrder());
       for (String dice: diceList) {
         FlowPanel diceFlowPanel = new FlowPanel();
         DiceAnimation diceAnimation = new DiceAnimation(
@@ -472,8 +468,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   private void setStyle() {
     headerPanel.getElement().getStyle().setVerticalAlign(VerticalAlign.MIDDLE);
-    mapWrapper.getElement().getStyle().setPosition(Position.ABSOLUTE);
-    mapWrapper.getElement().getStyle().setOverflow(Overflow.VISIBLE);
     mapContainer.getElement().getStyle().setPosition(Position.ABSOLUTE);
     mapContainer.getElement().getStyle().setOverflow(Overflow.VISIBLE);
   }
@@ -665,9 +659,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               territoryDelta.put(fortifyFromTerritory, -Integer.parseInt(option));
               territoryDelta.put(fortifyToTerritory, Integer.parseInt(option));
               fortify = false;
+              endFortify.removeFromParent();
               riskPresenter.fortifyMove(territoryDelta);
             }
-          }, widgetsToHide, constantMessages);
+          }, constantMessages);
           fortifyOpt.center();
         } else {
           CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -815,7 +810,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     final DiceAnimation diceAnimationDefender = new DiceAnimation(diceImages, defenderDicePanel, 3, 
         defenderText, currentRiskState.getAttack().getDefenderDiceRolls());
     dicePanel.clearPanel();
-    dicePanel.addPanel(new HTML("<b>" + phaseMessages.attackResult() + "</b>"));
+    dicePanel.getDialogPanel().getDialogTitle().setText(phaseMessages.attackResult());
     dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
       dicePanel.setOkBtnHandler(riskPresenter, 2);
@@ -891,7 +886,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         public void optionChosen(String option) {
           riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
         }
-      }, widgetsToHide, constantMessages).center();
+      }, constantMessages).center();
     }
   }
 
@@ -997,9 +992,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @UiHandler("playersInfo")
   public void onTapPlayersInfoButton(TapEvent e) {
-    playersStatusPanel.clear();
+    playersStatusPanel = new Carousel();
     display.setVisible(false);
-    playersInfo.removeFromParent();
+    playersInfo.setVisible(false);
     headerPanel.setVisible(false);
     footerBar.removeFromParent();
     

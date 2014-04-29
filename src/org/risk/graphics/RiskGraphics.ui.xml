@@ -8,9 +8,7 @@
   <mgwt:LayoutPanel ui:field="main">
     <mgwt:HeaderPanel ui:field="headerPanel" />
     <mgwt:ScrollPanel ui:field="display">
-      <g:VerticalPanel ui:field="mapWrapper">
         <g:HTML ui:field="mapContainer"/>
-      </g:VerticalPanel>
     </mgwt:ScrollPanel>
     <mgwt:buttonbar.ButtonBar ui:field="footerBar">
       <mgwt:buttonbar.InfoButton ui:field="instructions" />

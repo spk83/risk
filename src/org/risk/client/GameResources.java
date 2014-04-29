@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.risk.client.GameApi.Operation;
-import org.vectomatic.dom.svg.OMNode;
-import org.vectomatic.dom.svg.OMNodeList;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;

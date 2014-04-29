@@ -8,7 +8,6 @@ import com.googlecode.mgwt.ui.client.dialog.ConfirmDialog;
 import com.googlecode.mgwt.ui.client.dialog.ConfirmDialog.ConfirmCallback;
 import com.googlecode.mgwt.ui.client.dialog.Dialogs.AlertCallback;
 import com.googlecode.mgwt.ui.client.dialog.Dialog;
-import com.googlecode.mgwt.ui.client.dialog.Dialogs;
 
 public final class CustomDialogPanel {
   

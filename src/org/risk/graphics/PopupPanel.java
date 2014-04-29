@@ -1,7 +1,5 @@
 package org.risk.graphics;
 
-import java.util.List;
-
 import org.risk.client.RiskPresenter;
 import org.risk.graphics.i18n.messages.ConstantMessages;
 
@@ -11,43 +9,45 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
+import com.googlecode.mgwt.ui.client.dialog.DialogPanel;
 import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
-import com.googlecode.mgwt.ui.client.widget.Button;
 import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 
 public class PopupPanel extends PopinDialog {
   
-  private final List<Widget> widgetsToHide;
-
-  private Button okBtn;
   private VerticalPanel panel;
   private HandlerRegistration regHandler;
+  private DialogPanel dialogPanel;
+  
+  public DialogPanel getDialogPanel() {
+    return dialogPanel;
+  }
 
-  public PopupPanel(final List<Widget> widgetsToHide, ConstantMessages constantMessages) {
+  public PopupPanel(ConstantMessages constantMessages) {
     super();
-    okBtn = new Button(constantMessages.ok());
-    this.widgetsToHide = widgetsToHide;
+    dialogPanel = new DialogPanel();
+    dialogPanel.setOkButtonText(constantMessages.ok());
+    dialogPanel.showCancelButton(false);
     RoundPanel rpanel = new RoundPanel();
     panel = new VerticalPanel();
-    regHandler = okBtn.addTapHandler(new TapHandler() {
+    regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
         hide();
-        RiskGraphics.setVisible(widgetsToHide, true);
       }
     });
-    panel.add(okBtn);
     panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     panel.setWidth("200px");
     rpanel.add(panel);
-    add(rpanel);
+    dialogPanel.getContent().add(rpanel);
+    add(dialogPanel);
   }
 
   public void setOkBtnHandler(final RiskPresenter riskPresenter, final int i) {
     // i = 0 -> riskPresenter.setTurnOrderMove();
     // i = 1 -> riskPresenter.attackResultMove();
     regHandler.removeHandler();
-    regHandler = okBtn.addTapHandler(new TapHandler() {
+    regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
         if (i == 1) {
@@ -56,27 +56,20 @@ public class PopupPanel extends PopinDialog {
           riskPresenter.attackResultMove();
         }
         hide();
-        RiskGraphics.setVisible(widgetsToHide, true);
       }
     });
   }
   public void addPanel(Widget w) {
-    panel.remove(okBtn);
     panel.add(w);
-    panel.add(okBtn);
   }
   
   public void clearPanel() {
     panel.clear();
+    dialogPanel.getDialogTitle().setText("");
   }
   
   public void setPanelSize(String width, String height) {
     panel.setSize(width, height);
   }
-  @Override
-  public void center() {
-    super.center();
-    okBtn.setImportant(false);
-    RiskGraphics.setVisible(widgetsToHide, false);
-  }
+  
 }
