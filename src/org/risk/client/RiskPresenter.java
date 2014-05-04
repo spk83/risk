@@ -101,7 +101,6 @@ public class RiskPresenter {
   private final View view;
   private final Container container;
   private RiskState riskState;
-  private String myPlayerKey;
   private List<String> playerIds;
   private String myPlayerId;
   private String currentPhase;
@@ -118,7 +117,6 @@ public class RiskPresenter {
   public void updateUI(UpdateUI updateUI) {
     playerIds = updateUI.getPlayerIds();
     myPlayerId = updateUI.getYourPlayerId();
-    myPlayerKey = GameResources.playerIdToKey(myPlayerId);
     Map<String, Object> state = updateUI.getState();
     if (state.isEmpty()) {
       String startPlayerId = GameResources.getStartPlayerId(playerIds);
@@ -136,11 +134,11 @@ public class RiskPresenter {
       view.setViewerState(riskState);
       return;
     }
-    if (updateUI.isAiPlayer()) {
-      // TODO: implement AI in a later HW!
-      //container.sendMakeMove(..);
-      return;
-    }
+//    if (updateUI.isAiPlayer()) {
+//      // TODO: implement AI in a later HW!
+//      //container.sendMakeMove(..);
+//      return;
+//    }
     view.setPlayerState(riskState);
     
     // If it's your turn, call appropriate method for next move based on current phase in state
@@ -181,7 +179,7 @@ public class RiskPresenter {
     if (currentPhase.equals(GameResources.ATTACK_TRADE)) {
       return true;
     } 
-    Player myPlayer = riskState.getPlayersMap().get(myPlayerKey);
+    Player myPlayer = riskState.getPlayersMap().get(myPlayerId);
     if (myPlayer.getCards().size() >= GameResources.MAX_CARDS_IN_ATTACK_TRADE - 1) {
       return true;
     }
@@ -214,9 +212,7 @@ public class RiskPresenter {
    * @param playerIds
    */
   private void sendInitialMove(List<String> playerIds, String startPlayerId) {
-   container.sendMakeMove(riskLogic.getInitialOperations(GameResources.getPlayerKeys(playerIds),
-       startPlayerId));
-   //container.sendMakeMove(riskLogic.getInitialOperations());
+   container.sendMakeMove(riskLogic.getInitialOperations(playerIds, startPlayerId));
   }
   
   /**
@@ -224,7 +220,7 @@ public class RiskPresenter {
    */
   public void setTurnOrderMove() {
     container.sendMakeMove(riskLogic.setTurnOrderMove(
-        riskState, GameResources.getPlayerKeys(playerIds)));
+        riskState, playerIds));
   }
   
   /**
@@ -234,7 +230,7 @@ public class RiskPresenter {
    */
   public void newTerritorySelected(String territory) {
     container.sendMakeMove(riskLogic.performClaimTerritory(
-        riskState, territory, myPlayerKey));
+        riskState, territory, myPlayerId));
   }
   
   /**
@@ -247,7 +243,7 @@ public class RiskPresenter {
     Map<String, Integer> territoryUnitMap = Maps.newHashMap();
     territoryUnitMap.put(territory, 1);
     container.sendMakeMove(riskLogic.performDeployment(
-        riskState, territoryUnitMap, myPlayerKey));
+        riskState, territoryUnitMap, myPlayerId));
   }
   
   /**
@@ -256,10 +252,10 @@ public class RiskPresenter {
    */
   void addUnits() {
     if (riskState.getCardsTraded().isPresent()) {
-      container.sendMakeMove(riskLogic.performAddUnitsWithTrade(riskState, myPlayerKey));
+      container.sendMakeMove(riskLogic.performAddUnitsWithTrade(riskState, myPlayerId));
       return;
     } else {
-      container.sendMakeMove(riskLogic.performAddUnitsWithOutTrade(riskState, myPlayerKey));
+      container.sendMakeMove(riskLogic.performAddUnitsWithOutTrade(riskState, myPlayerId));
     }
   }
   
@@ -273,7 +269,7 @@ public class RiskPresenter {
       //for skipping the reinforcement phase
       territoryDelta = Maps.<String, Integer>newHashMap();
     }
-    container.sendMakeMove(riskLogic.performReinforce(riskState, 0, territoryDelta, myPlayerKey));
+    container.sendMakeMove(riskLogic.performReinforce(riskState, 0, territoryDelta, myPlayerId));
   }
   
   /**
@@ -285,9 +281,9 @@ public class RiskPresenter {
   public void cardsTraded(List<Integer> cards) {
     if (currentPhase.equals(GameResources.CARD_TRADE)) {
       if (cards == null || cards.isEmpty()) {
-        container.sendMakeMove(riskLogic.skipCardTrade(myPlayerKey));
+        container.sendMakeMove(riskLogic.skipCardTrade(myPlayerId));
       } else {
-        container.sendMakeMove(riskLogic.performTrade(riskState, cards, myPlayerKey, null));
+        container.sendMakeMove(riskLogic.performTrade(riskState, cards, myPlayerId, null));
       }
     } else if (currentPhase.equals(GameResources.ATTACK_TRADE)) {
       attackTradeMove(cards);
@@ -302,7 +298,7 @@ public class RiskPresenter {
    */
   public void performAttack(String attackingTerritory, String defendingTerritory) {
     container.sendMakeMove(riskLogic.performAttack(riskState, Integer.parseInt(attackingTerritory),
-        Integer.parseInt(defendingTerritory), myPlayerKey));
+        Integer.parseInt(defendingTerritory), myPlayerId));
   }
   
   /**
@@ -310,8 +306,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#attackResult()}.
    */
   public void attackResultMove() {
-    container.sendMakeMove(riskLogic.attackResultOperations(
-        riskState, GameResources.playerKeyToId(myPlayerKey)));
+    container.sendMakeMove(riskLogic.attackResultOperations(riskState, myPlayerId));
   }
   
   /**
@@ -321,7 +316,7 @@ public class RiskPresenter {
    */
   public void moveUnitsAfterAttack(int newUnitsAtUnclaimed) {
     container.sendMakeMove(riskLogic.performAttackOccupy(
-        riskState, newUnitsAtUnclaimed, myPlayerKey));
+        riskState, newUnitsAtUnclaimed, myPlayerId));
   }
 
   /**
@@ -332,7 +327,7 @@ public class RiskPresenter {
    */
   private void attackTradeMove(List<Integer> cardsToBeTraded) {
     container.sendMakeMove(riskLogic.performAttackTrade(
-        riskState, cardsToBeTraded, myPlayerKey, null));
+        riskState, cardsToBeTraded, myPlayerId, null));
   }
 
   /**
@@ -341,10 +336,9 @@ public class RiskPresenter {
    */
   public void endAttack() {
     if (riskState.getTerritoryWinner() != null) {
-      container.sendMakeMove(riskLogic.performEndAttack(riskState, myPlayerKey));
+      container.sendMakeMove(riskLogic.performEndAttack(riskState, myPlayerId));
     } else {
-      container.sendMakeMove(riskLogic.performEndAttackWithNoCard(
-          GameResources.playerKeyToId(myPlayerKey)));
+      container.sendMakeMove(riskLogic.performEndAttackWithNoCard(myPlayerId));
     }
   }
   
@@ -356,11 +350,11 @@ public class RiskPresenter {
   public void fortifyMove(Map<String, Integer> territoryDelta) {
     if (territoryDelta != null && !territoryDelta.isEmpty()) {
       container.sendMakeMove(riskLogic.performFortify(
-          riskState, territoryDelta, myPlayerKey));
+          riskState, territoryDelta, myPlayerId));
     } else {
       //pass null to end fortify
       container.sendMakeMove(riskLogic.performFortify(
-          riskState, null, myPlayerKey));
+          riskState, null, myPlayerId));
     }
   }
   
@@ -369,14 +363,10 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#endGame()}.
    */
   public void endGame() {
-    container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerKey));
+    container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerId));
   }
   
   public String getMyPlayerId() {
     return myPlayerId;
-  }
-  
-  public String getMyPlayerKey() {
-    return myPlayerKey;
   }
 }

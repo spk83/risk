@@ -26,9 +26,9 @@ public class AbstractTest {
   protected static final String AID = "1"; // Player A
   protected static final String BID = "2"; // Player B
   protected static final String CID = "3"; // Player C
-  protected static final String PLAYER_A = playerIdToString(AID);
-  protected static final String PLAYER_B = playerIdToString(BID);
-  protected static final String PLAYER_C = playerIdToString(CID);
+  protected static final String PLAYER_A = AID;
+  protected static final String PLAYER_B = BID;
+  protected static final String PLAYER_C = CID;
   protected static final Map<String, Object> AINFO = ImmutableMap.<String, Object>of(
       PLAYER_ID, AID);
   protected static final Map<String, Object> BINFO = ImmutableMap.<String, Object>of(
@@ -69,11 +69,7 @@ public class AbstractTest {
    * This is a helper method to get list of player IDs.
    */
   protected static List<String> getPlayerIds() {
-    List<String> playerIds = Lists.newArrayList();
-    playerIds.add("P" + AID);
-    playerIds.add("P" + BID);
-    playerIds.add("P" + CID);
-    return playerIds;
+    return Lists.newArrayList(AID, BID, CID);
   }
 
   /*
@@ -81,7 +77,7 @@ public class AbstractTest {
    */
   @Test
   public void testgetPlayersIds() {
-    assertEquals(Lists.newArrayList("P1", "P2", "P3"), getPlayerIds());
+    assertEquals(Lists.newArrayList(AID, BID, CID), getPlayerIds());
   }
   
   /*
@@ -108,39 +104,6 @@ public class AbstractTest {
   }
   
   /*
-   * This is a helper method to convert player's ID from int to String.
-   */
-  protected static String playerIdToString(String playerId) {
-    return "P" + playerId;
-  }
-  
-  /* 
-   * Test for playerIdToString.
-   */
-  @Test
-  public void testplayerIdToString() {
-    assertEquals("P1", playerIdToString(AID));
-    assertEquals("P2", playerIdToString(BID));
-    assertEquals("P3", playerIdToString(CID));
-  }
-
-  /*
-   * This is a helper method to convert player's ID from String to int.
-   */
-  protected static int playerIdStringToInt(String playerId) {
-    return Integer.parseInt(playerId.substring(1));
-  }
-  
-  /* 
-   * Test for playerIdToString.
-   */
-  @Test
-  public void testplayerIdStringToInt() {
-    assertEquals(1, playerIdStringToInt(PLAYER_A));
-    assertEquals(2, playerIdStringToInt(PLAYER_B));
-    assertEquals(3, playerIdStringToInt(PLAYER_C));
-  }
-  /*
    * This is a helper method which returns a list of RISK cards of given range.
    */
   public static List<String> getCardsInRange(int fromInclusive, int toInclusive) {
@@ -166,17 +129,17 @@ public class AbstractTest {
   public static Map<String, Integer> getTerritories(String playerID) {
     Map<String, Integer> territoryMap = new HashMap<String, Integer>();
     switch(playerID) {
-    case "P1":
+    case PLAYER_A:
       for (int i = 0; i < 14; i++) {
         territoryMap.put(i + "", 1);
       }
       break;
-    case "P2": 
+    case PLAYER_B: 
       for (int i = 14; i < 28; i++) {
         territoryMap.put(i + "", 1);
       }
       break;
-    case "P3": 
+    case PLAYER_C: 
       for (int i = 28; i < 42; i++) {
         territoryMap.put(i + "", 1);
       }
@@ -208,7 +171,7 @@ public class AbstractTest {
         .put("27", 1)
         .build();
     
-    assertEquals(equalMaps(playerATerritoryMap, getTerritories("P2")), true);
+    assertEquals(equalMaps(playerATerritoryMap, getTerritories(PLAYER_B)), true);
   }
   public static Map<String, Integer> getTerritoriesInRange(
       int lowestTerritoryIdInclusive, int highestTerritoryIdInclusive, int baseUnits) 

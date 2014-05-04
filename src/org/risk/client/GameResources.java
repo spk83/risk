@@ -12,7 +12,6 @@ import java.util.Set;
 import org.risk.client.GameApi.Operation;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -152,27 +151,6 @@ public final class GameResources {
     return categoryString + cardId;
   }
   
-  public static List<String> getPlayerKeys(List<String> playerIds) {
-   Builder<String> playerKeysBuilder = ImmutableList.<String>builder();
-   for (String playerId : playerIds) {
-     playerKeysBuilder.add(playerIdToKey(playerId));
-   }
-    return playerKeysBuilder.build();
-  }
-  /*
-   * This is a helper method to convert player's ID from player key.
-   */
-  public static String playerIdToKey(String playerId) {
-    return "P" + playerId;
-  }
-  
-  /*
-   * This is a helper method to convert player's key to player ID.
-   */
-  public static String playerKeyToId(String playerKey) {
-    return playerKey.substring(1);
-  }
-  
   /*
    * This is a helper method which returns a list of RISK cards of given range.
    */
@@ -248,8 +226,8 @@ public final class GameResources {
       Map<String, Object> currentPlayerState, RiskState lastPlayerState, String lastMovePlayerId) {
     Map<String, Integer> territoryUnitMap = 
         (Map<String, Integer>) currentPlayerState.get(GameResources.TERRITORY);
-    Map<String, Integer> oldTerritoryMap = lastPlayerState.getPlayersMap().get(
-        GameResources.playerIdToKey(lastMovePlayerId)).getTerritoryUnitMap();
+    Map<String, Integer> oldTerritoryMap = lastPlayerState.getPlayersMap().get(lastMovePlayerId)
+        .getTerritoryUnitMap();
     Map<String, Integer> differenceTerritoryMap = 
         GameResources.differenceTerritoryMap(oldTerritoryMap, territoryUnitMap);
     return differenceTerritoryMap;
@@ -312,7 +290,7 @@ public final class GameResources {
   
   public static String getStartPlayerId(List<String> playerIds) {
     String startPlayerId = playerIds.get(GameResources.START_PLAYER_ID_INDEX);
-    if (startPlayerId.equals(GameApi.AI_PLAYER_ID)) {
+    while (startPlayerId.equals(GameApi.AI_PLAYER_ID) || startPlayerId.equals(GameApi.VIEWER_ID)) {
       startPlayerId = playerIds.get((GameResources.START_PLAYER_ID_INDEX + 1) % playerIds.size());
     }
     return startPlayerId;

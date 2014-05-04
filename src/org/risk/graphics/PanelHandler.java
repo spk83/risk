@@ -27,8 +27,7 @@ public final class PanelHandler {
   public static RoundPanel getPlayerPanel(CardImages cardImages, RiskState state, 
       Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages,
       VariableMessages variableMessages, ConstantMessages constantMessages) {
-    String myPlayerKey = player.getPlayerId();
-    String myPlayerId = GameResources.playerKeyToId(myPlayerKey);
+    String myPlayerId = player.getPlayerId();
     RoundPanel panel = new RoundPanel();
     HorizontalPanel colorPanel = new HorizontalPanel();
     colorPanel.setSpacing(5);
@@ -39,7 +38,7 @@ public final class PanelHandler {
     colorPanel.add(new HTML(order[0]));
     colorPanel.add(new HTML(order[1]));
     //panel.setSpacing(5);
-    panel.add(new HTML(variableMessages.playerNameInfo(myPlayerKey)));
+    panel.add(new HTML(variableMessages.playerNameInfo(myPlayerId)));
     panel.add(colorPanel);
     List<Integer> cards = player.getCards();
     int totalCards = 0;

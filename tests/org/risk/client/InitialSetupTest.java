@@ -79,8 +79,8 @@ public class InitialSetupTest extends AbstractTest {
     
     List<Operation> setupTurnOrder = Lists.newArrayList();
     setupTurnOrder.add(new SetTurn(CID));
-    List<String> deleteKeys = GameResources.getDiceRollKeys(GameResources.getPlayerKeys(
-        ImmutableList.<String>of(AID, BID, CID)));
+    List<String> deleteKeys = GameResources.getDiceRollKeys(
+        ImmutableList.<String>of(AID, BID, CID));
     for (String deleteKey : deleteKeys) {
       setupTurnOrder.add(new Delete(deleteKey));
     }

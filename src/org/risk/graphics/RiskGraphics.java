@@ -474,7 +474,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   private void claimTerritory(String territoryName) {
 
-    String playerKey = riskPresenter.getMyPlayerKey();
     String playerId = riskPresenter.getMyPlayerId();
     OMElement territory = boardElt.getElementById(territoryName);
     OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
@@ -490,7 +489,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       riskPresenter.newTerritorySelected(territoryId);
       soundResource.playDeployAudio();
     } else {
-      if (territorySelected.getPlayerKey().equals(playerKey)) {
+      if (territorySelected.getPlayerKey().equals(playerId)) {
         CustomDialogPanel.alert(constantMessages.notAllowed(), 
             constantMessages.alreadyOwnTerritory(), null, constantMessages.ok());
       } else {
@@ -501,12 +500,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void deployment(String territoryName) {
-    String playerKey = riskPresenter.getMyPlayerKey();
+    String playerId = riskPresenter.getMyPlayerId();
     OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
 
-    if (territorySelected.getPlayerKey().equals(playerKey)) {
+    if (territorySelected.getPlayerKey().equals(playerId)) {
       int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
       territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
       deployment = false;
@@ -519,12 +518,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void reinforce(String territoryName) {
-    String playerKey = riskPresenter.getMyPlayerKey();
+    String playerId = riskPresenter.getMyPlayerId();
     OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
     
-    if (territorySelected.getPlayerKey().equals(playerKey)) {
+    if (territorySelected.getPlayerKey().equals(playerId)) {
       int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
       territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
       Integer deltaUnits = territoryDelta.get(territoryId);
@@ -553,17 +552,16 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void attack(String territoryName) {
-    String playerKey = riskPresenter.getMyPlayerKey();
+    String playerId = riskPresenter.getMyPlayerId();
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     OMElement territory = boardElt.getElementById(territoryName);
     Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
     String style = territory.getAttribute("style");
     
-    if (territorySelected.getPlayerKey().equals(playerKey)) {
+    if (territorySelected.getPlayerKey().equals(playerId)) {
       // Attacking territory selected
       if (attackFromTerritory == null) {
-        int units = ((Player) currentRiskState.getPlayersMap()
-            .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
+        int units = ((Player) currentRiskState.getPlayersMap().get(playerId))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
           CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -606,16 +604,15 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   } 
   
   private void fortify(String territoryName) {
-    String playerKey = riskPresenter.getMyPlayerKey();
+    String playerId = riskPresenter.getMyPlayerId();
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     OMElement territory = boardElt.getElementById(territoryName);
     Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
     String style = territory.getAttribute("style");
 
-    if (territorySelected.getPlayerKey().equals(playerKey)) {
+    if (territorySelected.getPlayerKey().equals(playerId)) {
       if (fortifyFromTerritory == null) {
-        int units = ((Player) currentRiskState.getPlayersMap()
-            .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
+        int units = ((Player) currentRiskState.getPlayersMap().get(playerId))
             .getTerritoryUnitMap().get(territoryId);
         if (units < 2) {
           CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -641,7 +638,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         int fromTerritory = Integer.parseInt(fortifyFromTerritory);
         int toTerritory = Integer.parseInt(fortifyToTerritory);
         List<String> territoryList = Lists.newArrayList(
-            currentRiskState.getPlayersMap().get(playerKey).getTerritoryUnitMap().keySet());
+            currentRiskState.getPlayersMap().get(playerId).getTerritoryUnitMap().keySet());
         if (Territory.isFortifyPossible(fromTerritory, toTerritory, territoryList)) {
           style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
           territory.setAttribute("style", style);
@@ -691,9 +688,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     this.mandatoryCardSelection = mandatoryCardSelection;
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
-    String turnPlayerKey = GameResources.playerIdToKey(turnPlayerId);
     if (playingPlayerId.equals(turnPlayerId)) {
-      Player currentPlayer = currentRiskState.getPlayersMap().get(turnPlayerKey);
+      Player currentPlayer = currentRiskState.getPlayersMap().get(turnPlayerId);
       List<Integer> playerCards = currentPlayer.getCards();
       if (playerCards != null && playerCards.size() >= 3) {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
@@ -743,8 +739,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
     territoryDelta.clear();
     unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
-        .get(GameResources.playerIdToKey(riskPresenter.getMyPlayerId())))
-            .getUnclaimedUnits();
+        .get(riskPresenter.getMyPlayerId())).getUnclaimedUnits();
     CustomDialogPanel.alert(constantMessages.info(), 
         variableMessages.unclaminedUnits(unclaimedUnits), null, constantMessages.ok());
     headerPanel.setRightWidget(endReinforce);
@@ -912,7 +907,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       riskPresenter.endGame();
     } else {
       CustomDialogPanel.alert(phaseMessages.gameEnded(), variableMessages.playerWon(
-          constantMessages.player() + GameResources.playerIdToKey(turnPlayerId)), null,
+          constantMessages.player() + turnPlayerId), null,
           constantMessages.ok());
     }
   }
@@ -957,7 +952,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             dialogInstructions.attackReinforce(), null, constantMessages.ok());
       } else if (phase.equals(GameResources.ATTACK_OCCUPY)) {
         String instruction = "";
-        if (currentRiskState.getTerritoryWinner().equals(riskPresenter.getMyPlayerKey())) {
+        if (currentRiskState.getTerritoryWinner().equals(playingPlayerId)) {
           instruction += dialogInstructions.territoryWinner();
         }
         CustomDialogPanel.alert(dialogInstructions.instructions(), dialogInstructions.attackOccupy()
@@ -1018,7 +1013,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       scrollPanel2.setWidget(PanelHandler.getPlayerPanel(
           cardImages, currentRiskState, player, riskPresenter.getMyPlayerId(),
           cardImagesOfCurrentPlayer, variableMessages, constantMessages));
-      if (riskPresenter.getMyPlayerKey().equals(player.getPlayerId())) {
+      if (riskPresenter.getMyPlayerId().equals(player.getPlayerId())) {
         index = count;
       }
       count++;
@@ -1060,7 +1055,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       if (territory != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.getPlayerColor(GameResources.playerKeyToId(territory.getPlayerKey())));
+          + Player.getPlayerColor(territory.getPlayerKey()));
         int units = territory.getCurrentUnits();
         if (territoryKey.equals(attackTerritoryId)) {
           style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
@@ -1078,7 +1073,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       } else if (riskState.getTerritoryWinner() != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.getPlayerColor(GameResources.playerKeyToId(riskState.getTerritoryWinner())));
+          + Player.getPlayerColor(riskState.getTerritoryWinner()));
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:red", "stroke:#000000");
         territoryElement.setAttribute("style", style);
