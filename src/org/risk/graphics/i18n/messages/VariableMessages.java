@@ -19,6 +19,9 @@ public interface VariableMessages extends Messages {
   @DefaultMessage("Player: {0}")
   String playerNameInfo(String playerName);
   
+  @DefaultMessage("Player {0}")
+  String playerName(String playerName);
+  
   @DefaultMessage("Unclaimed Units: {0}")
   String unclaimedUnitsInfo(int units);
   

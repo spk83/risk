@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.risk.client.Card;
+import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
 import org.risk.client.RiskState;
@@ -39,7 +40,15 @@ public final class PanelHandler {
     colorPanel.add(new HTML(order[0]));
     colorPanel.add(new HTML(order[1]));
     //panel.setSpacing(5);
-    panel.add(new HTML(variableMessages.playerNameInfo(myPlayerId)));
+    String playerName = player.getPlayerName();
+    if (playerName == null || playerName.isEmpty()) {
+      if (myPlayerId.equals(GameApi.AI_PLAYER_ID)) {
+        playerName = constantMessages.computer();
+      } else {
+        playerName = variableMessages.playerName(myPlayerId);
+      }
+    }
+    panel.add(new HTML(variableMessages.playerNameInfo(playerName)));
     panel.add(colorPanel);
     List<Integer> cards = player.getCards();
     int totalCards = 0;

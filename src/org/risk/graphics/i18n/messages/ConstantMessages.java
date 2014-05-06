@@ -102,4 +102,7 @@ public interface ConstantMessages extends Constants {
   
   @DefaultStringValue("Done")
   String done();
+  
+  @DefaultStringValue("Computer")
+  String computer();
 }

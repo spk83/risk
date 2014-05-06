@@ -446,8 +446,16 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       dicePanel.getDialogPanel().getDialogTitle().setText(phaseMessages.turnOrder());
       for (String dice: diceList) {
         FlowPanel diceFlowPanel = new FlowPanel();
+        String playerName = currentRiskState.getPlayersMap().get(dice).getPlayerName();
+        if (playerName == null || playerName.isEmpty()) {
+          if (dice.equals(GameApi.AI_PLAYER_ID)) {
+            playerName = constantMessages.computer();
+          } else {
+            playerName = variableMessages.playerName(dice);
+          }
+        }
         DiceAnimation diceAnimation = new DiceAnimation(
-            diceImages, diceFlowPanel, 3, dice, riskState.getDiceResult().get(dice));
+            diceImages, diceFlowPanel, 3, playerName, riskState.getDiceResult().get(dice));
         dicePanel.addPanel(diceFlowPanel);
         diceAnimation.run(1000);
       }
@@ -785,14 +793,20 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     attackToTerritory = null;
     attackFromTerritory = null;
     if (riskPresenter.isAIPresent()) {
-      List<String> attack = riskAI.performAttack(
+      final List<String> attack = riskAI.performAttack(
           currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap(),
           currentRiskState.getTerritoryMap());
       if (attack == null || attack.isEmpty()) {
         riskPresenter.endAttack();
       } else {
-        attack(attack.get(0));
-        attack(attack.get(1));
+        new Timer() {
+          
+          @Override
+          public void run() {
+            attack(attack.get(0));
+            attack(attack.get(1));
+          }
+        } .schedule(500);
       }
     } else {
       headerPanel.setRightWidget(endAttack);

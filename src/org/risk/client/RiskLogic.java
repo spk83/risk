@@ -1083,9 +1083,6 @@ public class RiskLogic {
     for (Map<String, Object> player : playersInfo) {
        String playerId = (String) player.get(GameApi.PLAYER_ID);
        String playerName = (String) player.get(GameApi.PLAYER_NAME);
-       if (playerName == null || playerName.isEmpty()) {
-         playerName = GameResources.PLAYER + playerId;
-       }
        playerIds.add(playerId);
        Map<String, Object> tempPlayersMap = (Map<String, Object>) lastApiState.get(playerId);
        if (tempPlayersMap != null) {

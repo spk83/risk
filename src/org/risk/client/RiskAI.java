@@ -10,10 +10,12 @@ import java.util.Set;
 
 import org.risk.client.Card.Type;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
-import com.google.gwt.user.client.Window;
 
 public class RiskAI {
 
@@ -197,57 +199,118 @@ public class RiskAI {
       return minUnits;
     } else {
       playerTerritories.add(destinationTerritory + "");
-      int territory = sourceTerritory;
+      int territory = destinationTerritory;
       int sourceUnits = maxUnits + 1; 
-      while (territory ==  sourceTerritory && maxUnits >= minUnits) {
-        territoryMap.get(sourceTerritory + "").setCurrentUnits(sourceUnits - maxUnits);
-        Territory dt = new Territory(destinationTerritory + "", GameApi.AI_PLAYER_ID, maxUnits); 
+      int destinationUnits = 0;
+      if (territoryMap.get(destinationTerritory + "") != null) {
+        destinationUnits = territoryMap.get(destinationTerritory + "").getCurrentUnits();
+      } else {
+        Territory dt = new Territory(destinationTerritory + "", GameApi.AI_PLAYER_ID, 
+            destinationUnits + minUnits); 
         territoryMap.put(destinationTerritory + "", dt);
-        territory = getTerritory(territoryMap, Sets.newHashSet(sourceTerritory + "", 
-            destinationTerritory + ""), playerTerritories);
-        maxUnits--;
       }
-      return ++maxUnits;
+      while (territory ==  destinationTerritory && minUnits <= maxUnits) {
+        territoryMap.get(sourceTerritory + "").setCurrentUnits(sourceUnits - minUnits);
+        territoryMap.get(destinationTerritory + "").setCurrentUnits(destinationUnits + minUnits);
+        territory = getTerritoryForMovingUnits(territoryMap, sourceTerritory, destinationTerritory, 
+            playerTerritories);
+        minUnits++;
+      }
+      return --minUnits;
+    }
+  }
+
+  private int getTerritoryForMovingUnits(Map<String, Territory> territoryMap,
+      int sourceTerritory, int destinationTerritory, Set<String> playerTerritories) {
+    Integer unitDifference = null;
+    for (int connection : Territory.CONNECTIONS.get(sourceTerritory)) {
+      if (!playerTerritories.contains(connection + "")) {
+        if (unitDifference == null) {
+          unitDifference = 0;
+        }
+        unitDifference += territoryMap.get(connection + "").getCurrentUnits()
+              - territoryMap.get(sourceTerritory + "").getCurrentUnits();
+      }
+    }
+    if (unitDifference == null || unitDifference < -2) {
+      return destinationTerritory;
+    } else {
+      return sourceTerritory;
     }
   }
 
   public Map<String, Integer> fortify(Map<String, Territory> territoryMap,
       Map<String, Integer> playerTerritoryMap) {
-    int maxRequirement = 0;
+    List<String> list = getTerritoriesForFortify(territoryMap, playerTerritoryMap);
+    Set<String> territoryList = Sets.newHashSet(playerTerritoryMap.keySet());
     Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
+    if (list != null && !list.isEmpty()) {
+      int sourceTerritory = Integer.parseInt(list.get(0));
+      int destinationTerritory = Integer.parseInt(list.get(1));
+      int maxUnits = territoryMap.get(list.get(0)).getCurrentUnits() - 1;
+      int delta = moveUnitsAfterAttack(0, maxUnits, territoryMap, sourceTerritory, 
+          destinationTerritory, territoryList);
+      territoryDelta.put(sourceTerritory + "", -delta);
+      territoryDelta.put(destinationTerritory + "", delta);
+      return territoryDelta;
+    } else {
+      return territoryDelta;
+    }
+  }
+  
+  public List<String> getTerritoriesForFortify(Map<String, Territory> territoryMap,
+      Map<String, Integer> playerTerritoryMap) {
     List<String> territoryList = Lists.newArrayList(playerTerritoryMap.keySet());
+    int maxDifference = 0;
+    List<String> fortifyTerritories = new ArrayList<String>();
+    List<String> weakestTerritories = topWeakestTerritories(playerTerritoryMap, territoryMap);
     for (Entry<String, Integer> source : playerTerritoryMap.entrySet()) {
       if (source.getValue() >= 2) {
-        for (Entry<String, Integer> destination : playerTerritoryMap.entrySet()) {
-          if (!destination.getKey().equals(source.getKey()) 
+        for (String destination : weakestTerritories) {
+          if (!destination.equals(source.getKey()) 
+              && source.getValue() - territoryMap.get(destination).getCurrentUnits() > maxDifference
               && Territory.isFortifyPossible(Integer.parseInt(source.getKey()), 
-                  Integer.parseInt(destination.getKey()), territoryList)) {
-            int sourceTerritory = Integer.parseInt(source.getKey());
-            int destinationTerritory = Integer.parseInt(destination.getKey());
-            int sourceUnits = source.getValue();
-            int destinationUnits = source.getValue();
-            int minUnits = 0;
-            int maxUnits = sourceUnits - 1;
-            int territory = destinationTerritory;
-            while (territory ==  destinationTerritory && minUnits <= maxUnits) {
-              territoryMap.get(sourceTerritory + "").setCurrentUnits(sourceUnits - minUnits);
-              territoryMap.get(destinationTerritory + "")
-                .setCurrentUnits(destinationUnits + minUnits);
-              territory = getTerritory(territoryMap, Sets.newHashSet(sourceTerritory + "", 
-                  destinationTerritory + ""), playerTerritoryMap.keySet());
-              minUnits++;
-            }
-            minUnits--;
-            if (minUnits > maxRequirement) {
-              maxRequirement = minUnits;
-              territoryDelta.clear();
-              territoryDelta.put(sourceTerritory + "", -minUnits);
-              territoryDelta.put(destinationTerritory + "", minUnits);
-            }
+                  Integer.parseInt(destination), territoryList)) {
+            fortifyTerritories.clear();
+            fortifyTerritories.add(source.getKey());
+            fortifyTerritories.add(destination);
+            maxDifference = source.getValue() - territoryMap.get(destination).getCurrentUnits();
           }
         }
       }
     }
-    return territoryDelta;
+    return fortifyTerritories;
+  }
+  
+  public List<String> topWeakestTerritories(Map<String, Integer> playerMap,
+      Map<String, Territory> territoryMap) {
+    Map<String, Integer> result = new HashMap<String, Integer>();
+    Ordering<String> valueComparator = Ordering.natural().onResultOf(
+        Functions.forMap(result)).compound(Ordering.natural());
+    Set<String> myTerritories = playerMap.keySet();
+    for (String myTerritory : myTerritories) {
+      int territory = Integer.parseInt(myTerritory);
+      int territoryUnits = territoryMap.get(territory + "").getCurrentUnits();
+      int minDifference = Integer.MAX_VALUE;
+      for (int connection : Territory.CONNECTIONS.get(territory)) {
+        if (!myTerritories.contains(connection + "")) {
+          int unitDifference = territoryUnits - territoryMap.get(connection + "")
+              .getCurrentUnits();
+          if (unitDifference <= minDifference) {
+            minDifference = unitDifference;
+          }
+        }
+      }
+      if (minDifference != Integer.MAX_VALUE) {
+        result.put(myTerritory, minDifference);
+      }
+    }
+    ImmutableSortedMap<String, Integer> resultMap = ImmutableSortedMap.copyOf(
+        result, valueComparator);
+    List<String> topWeakestTerritories = new ArrayList<String>(resultMap.keySet());
+    for (int i = 5; i < topWeakestTerritories.size(); ++i) {
+      topWeakestTerritories.remove(i);
+    }
+    return topWeakestTerritories;
   }
 }
