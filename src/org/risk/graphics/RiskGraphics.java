@@ -13,12 +13,13 @@ import org.risk.client.Continent;
 import org.risk.client.GameApi;
 import org.risk.client.GameResources;
 import org.risk.client.Player;
+import org.risk.client.RiskAI;
 import org.risk.client.RiskPresenter;
 import org.risk.client.RiskState;
 import org.risk.client.Territory;
 import org.risk.graphics.i18n.messages.ConstantMessages;
-import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.DialogInstructions;
+import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.VariableMessages;
 import org.risk.graphics.i18n.names.ContinentNames;
 import org.risk.graphics.i18n.names.TerritoryNames;
@@ -29,6 +30,8 @@ import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.utils.OMSVGParser;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Position;
@@ -55,6 +58,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.ConfirmDialog.ConfirmCallback;
+import com.googlecode.mgwt.ui.client.dialog.Dialog;
 import com.googlecode.mgwt.ui.client.widget.Carousel;
 import com.googlecode.mgwt.ui.client.widget.HeaderButton;
 import com.googlecode.mgwt.ui.client.widget.HeaderPanel;
@@ -124,7 +128,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private HeaderPanel otherHeaderPanel = new HeaderPanel();
   private VerticalPanel attackResultPanel = new VerticalPanel();
   private Carousel playersStatusPanel = new Carousel();
-  
+  private RiskAI riskAI = new RiskAI();
   private int unclaimedUnits;
   private String attackToTerritory;
   private String attackFromTerritory;
@@ -479,10 +483,10 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     OMElement territoryUnits = boardElt.getElementById(territoryName + "_units");
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     Territory territorySelected = currentRiskState.getTerritoryMap().get(territoryId);
-
     if (territorySelected == null) {
       String style = territory.getAttribute("style");
-      style = style.replaceFirst("fill:#ffffff", "fill:" + Player.getPlayerColor(playerId));
+      style = style.replaceFirst("fill:#ffffff", "fill:" 
+            + currentRiskState.getPlayersMap().get(playerId).getPlayerColor());
       territory.setAttribute("style", style);
       territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
       claimTerritory = false;
@@ -539,6 +543,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           + "</b>"));
       notification.getElement().getStyle().setFontSize(12, Unit.PX);
       notification.getElement().getStyle().setPadding(7, Unit.PX);
+      
+      territorySelected.setCurrentUnits(territorySelected.getCurrentUnits() + 1);
       if (unclaimedUnits == 0) {
         reinforce = false;
         notification.clear();
@@ -675,12 +681,24 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   @Override
   public void chooseNewTerritory() {
-    claimTerritory = true;
+    if (riskPresenter.isAIPresent()) {
+      claimTerritory(riskAI.getNewTerritory(
+          currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID), 
+          currentRiskState.getUnclaimedTerritory()));
+    } else {
+      claimTerritory = true;
+    }
   }
   
   @Override
   public void chooseTerritoryForDeployment() {
-    deployment = true;
+    if (riskPresenter.isAIPresent()) {
+      deployment(riskAI.getTerritoryForDeployment(
+          currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap(), 
+          currentRiskState.getTerritoryMap()));
+    } else {
+      deployment = true;
+    }
   }
   
   @Override
@@ -694,11 +712,18 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       if (playerCards != null && playerCards.size() >= 3) {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
         if (Card.isTradePossible(cardObjects)) {
+          if (riskPresenter.isAIPresent()) {
+            List<Integer> selectedIntCards = riskAI.chooseCardsForTrading(mandatoryCardSelection, 
+                cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
+                currentRiskState.getPlayersMap().size());
+            riskPresenter.cardsTraded(selectedIntCards);
+          } else {
             cardTrade  = true;
             playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
             return;
+          }
         } else {
-          riskPresenter.cardsTraded(null);
+            riskPresenter.cardsTraded(null);
         }
       } else {
         riskPresenter.cardsTraded(null);
@@ -738,21 +763,41 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       territoryDelta = new HashMap<String, Integer>();
     }
     territoryDelta.clear();
-    unclaimedUnits = ((Player) currentRiskState.getPlayersMap()
-        .get(riskPresenter.getMyPlayerId())).getUnclaimedUnits();
-    CustomDialogPanel.alert(constantMessages.info(), 
-        variableMessages.unclaminedUnits(unclaimedUnits), null, constantMessages.ok());
-    headerPanel.setRightWidget(endReinforce);
-    reinforce = true;
+    Player player = (Player) currentRiskState.getPlayersMap()
+        .get(riskPresenter.getMyPlayerId());
+    unclaimedUnits = player.getUnclaimedUnits();
     soundResource.playAddUnitsAudio();
+    if (riskPresenter.isAIPresent()) {
+      while (unclaimedUnits > 0) {
+        reinforce(riskAI.getTerritoryForDeployment(player.getTerritoryUnitMap(), 
+            currentRiskState.getTerritoryMap())); 
+      }
+    } else {
+      CustomDialogPanel.alert(constantMessages.info(), 
+          variableMessages.unclaminedUnits(unclaimedUnits), null, constantMessages.ok());
+      headerPanel.setRightWidget(endReinforce);
+      reinforce = true;
+    }
   }
   
   @Override
   public void attack() {
     attackToTerritory = null;
     attackFromTerritory = null;
-    headerPanel.setRightWidget(endAttack);
-    attack = true;
+    if (riskPresenter.isAIPresent()) {
+      List<String> attack = riskAI.performAttack(
+          currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap(),
+          currentRiskState.getTerritoryMap());
+      if (attack == null || attack.isEmpty()) {
+        riskPresenter.endAttack();
+      } else {
+        attack(attack.get(0));
+        attack(attack.get(1));
+      }
+    } else {
+      headerPanel.setRightWidget(endAttack);
+      attack = true;
+    }
   }
   
   @Override
@@ -833,32 +878,39 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     } else if (attackResult.isTradeRequired()) {
       attackResultPanel.add(new HTML(variableMessages.attackerTradeCards(attackerKey)));
     }
-    
-    final Timer diceAnimationTimer = new Timer() {
-      @Override
-      public void run() {
-        dicePanel.addPanel(attackResultPanel);
-        if (attackResult.isAttackerAWinnerOfGame()) {
-          soundResource.playGameWonAudio();
-        } else if (attackResult.getDeltaAttack() > attackResult.getDeltaDefend()) {
-          soundResource.playAttackWonAudio();
-        } else {
-          soundResource.playAttackLostAudio();
-        }
-      }
-    };
+    animation.run(2000);
     
     Timer attackAnimationTimer = new Timer() {
       @Override
       public void run() {
         diceAnimationAttacker.run(1000);
         diceAnimationDefender.run(1000);
-        dicePanel.center();
-        diceAnimationTimer.schedule(1200);
         soundResource.playDiceAudio();
+        dicePanel.center();
+        new Timer() {
+          @Override
+          public void run() {
+            dicePanel.addPanel(attackResultPanel);
+            if (attackResult.isAttackerAWinnerOfGame()) {
+              soundResource.playGameWonAudio();
+            } else if (attackResult.getDeltaAttack() > attackResult.getDeltaDefend()) {
+              soundResource.playAttackWonAudio();
+            } else {
+              soundResource.playAttackLostAudio();
+            }
+          }
+        } .schedule(1200);
+        if (riskPresenter.isAIPresent()) {
+          new Timer() {
+            @Override
+            public void run() {
+              dicePanel.hide();
+              riskPresenter.attackResultMove();
+            }
+          } .schedule(3500);
+        }
       }
     };
-    animation.run(2000);
     attackAnimationTimer.schedule(2100);
   }
    
@@ -875,26 +927,41 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       for (int i = minUnitsToNewTerritory; i <= unitsOnAttackingTerritory - 1; i++) {
         options.add(i + "");
       }
-      new PopupChoices(constantMessages.chooseUnitsToMove(),
-          options, new PopupChoices.OptionChosen() {
-        @Override
-        public void optionChosen(String option) {
-          riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
-        }
-      }, constantMessages).center();
+      if (riskPresenter.isAIPresent()) {
+        riskPresenter.moveUnitsAfterAttack(riskAI.moveUnitsAfterAttack(minUnitsToNewTerritory, 
+            unitsOnAttackingTerritory - 1, currentRiskState.getTerritoryMap(), 
+            currentRiskState.getLastAttackingTerritory().intValue(), 
+            currentRiskState.getUnclaimedTerritory().get(0).intValue(),
+            Sets.newHashSet(currentRiskState.getPlayersMap()
+                .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap().keySet())));
+      } else {
+        new PopupChoices(constantMessages.chooseUnitsToMove(),
+            options, new PopupChoices.OptionChosen() {
+          @Override
+          public void optionChosen(String option) {
+            riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
+          }
+        }, constantMessages).center();
+      }
     }
   }
 
   @Override
   public void fortify() {
-    String playingPlayerId = riskPresenter.getMyPlayerId();
-    String turnPlayerId = currentRiskState.getTurn();
-    if (playingPlayerId.equals(turnPlayerId)) {
-      headerPanel.setRightWidget(endFortify);
-    }
     fortifyFromTerritory = null;
     fortifyToTerritory = null;
-    fortify = true;
+    if (riskPresenter.isAIPresent()) {
+      riskPresenter.fortifyMove(riskAI.fortify(currentRiskState.getTerritoryMap(), 
+          Maps.newHashMap(currentRiskState.getPlayersMap()
+              .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap())));
+    } else {
+      String playingPlayerId = riskPresenter.getMyPlayerId();
+      String turnPlayerId = currentRiskState.getTurn();
+      if (playingPlayerId.equals(turnPlayerId)) {
+        headerPanel.setRightWidget(endFortify);
+      }
+      fortify = true;
+    }
   }
 
   @Override
@@ -902,13 +969,29 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     String playingPlayerId = riskPresenter.getMyPlayerId();
     String turnPlayerId = currentRiskState.getTurn();
     if (playingPlayerId.equals(turnPlayerId)) {
-      CustomDialogPanel.alert(phaseMessages.gameEnded(), constantMessages.gameWon(), null, 
-          constantMessages.ok());
+      final Dialog dialog = CustomDialogPanel.alert(phaseMessages.gameEnded(), 
+          constantMessages.gameWon(), null, constantMessages.ok());
+      if (riskPresenter.isAIPresent()) {
+        new Timer() {
+          @Override
+          public void run() {
+            dialog.hide();
+          }
+        } .schedule(1500);
+      }
       riskPresenter.endGame();
     } else {
-      CustomDialogPanel.alert(phaseMessages.gameEnded(), variableMessages.playerWon(
-          constantMessages.player() + turnPlayerId), null,
+      final Dialog dialog = CustomDialogPanel.alert(phaseMessages.gameEnded(), 
+          variableMessages.playerWon(constantMessages.player() + turnPlayerId), null,
           constantMessages.ok());
+      if (riskPresenter.isAIPresent()) {
+        new Timer() {
+          @Override
+          public void run() {
+            dialog.hide();
+          }
+        } .schedule(1500);
+      }
     }
   }
   
@@ -1055,7 +1138,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       if (territory != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.getPlayerColor(territory.getPlayerKey()));
+          + currentRiskState.getPlayersMap().get(territory.getPlayerKey()).getPlayerColor());
         int units = territory.getCurrentUnits();
         if (territoryKey.equals(attackTerritoryId)) {
           style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
@@ -1073,7 +1156,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       } else if (riskState.getTerritoryWinner() != null) {
         String style = territoryElement.getAttribute("style");
         style = style.replaceFirst("fill:[^;]+", "fill:"
-          + Player.getPlayerColor(riskState.getTerritoryWinner()));
+          + currentRiskState.getPlayersMap().get(riskState.getTerritoryWinner()).getPlayerColor()); 
         style = style.replaceFirst("stroke-width:1.20000005", "stroke-width:5");
         style = style.replaceFirst("stroke:red", "stroke:#000000");
         territoryElement.setAttribute("style", style);

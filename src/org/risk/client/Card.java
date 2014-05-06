@@ -54,7 +54,7 @@ public class Card {
     return true;
   }
   
-  private static Map<Type, Integer> getCardTypeCountMap(List<Card> cards) {
+  public static Map<Type, Integer> getCardTypeCountMap(List<Card> cards) {
     Map<Type, Integer> cardTypeCountMap = new HashMap<Type, Integer>();
     for (Card card : cards) {
       Integer count = cardTypeCountMap.get(card.getCardType());

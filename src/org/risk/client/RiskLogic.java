@@ -45,34 +45,39 @@ public class RiskLogic {
   void checkMoveIsLegal(VerifyMove verifyMove) {
     List<Operation> lastMove = verifyMove.getLastMove();
     Map<String, Object> lastState = verifyMove.getLastState();
+    List<String> playerIds = verifyMove.getPlayerIds();
+    List<Map<String, Object>> playersInfo = verifyMove.getPlayersInfo();
     // Checking the operations are as expected.
+    GameResources.removeViewer(playerIds, playersInfo);
     List<Operation> expectedOperations = getExpectedOperations(
-        lastState, lastMove, verifyMove.getPlayerIds(), verifyMove.getLastMovePlayerId(),
-        verifyMove.getState());
+        lastState, lastMove, playersInfo, playerIds, 
+        verifyMove.getLastMovePlayerId(), verifyMove.getState());
     check(expectedOperations.equals(lastMove), expectedOperations, lastMove);
     // We use SetTurn, so we don't need to check that the correct player did the move.
     // However, we do need to check the first move is done by the white player (and then in the
     // first MakeMove we'll send SetTurn which will guarantee the correct player send MakeMove).
     if (lastState.isEmpty() || lastState.get(GameResources.PHASE).toString()
         .equals(GameResources.SET_TURN_ORDER)) {
-      check(verifyMove.getLastMovePlayerId().equals(verifyMove.getPlayerIds().get(0)));
+      if (playerIds.get(0).equals(GameApi.AI_PLAYER_ID)) {
+        check(verifyMove.getLastMovePlayerId().equals(playerIds.get(1)));
+      } else {
+        check(verifyMove.getLastMovePlayerId().equals(playerIds.get(0)));
+      }
     }
   }
 
   @SuppressWarnings("unchecked")
-  List<Operation> getExpectedOperations(
-      Map<String, Object> lastApiState, List<Operation> lastMove, List<String> playerIds,
-      String lastMovePlayerId, Map<String, Object> newState) {
+  List<Operation> getExpectedOperations(Map<String, Object> lastApiState, List<Operation> lastMove, 
+      List<Map<String, Object>> playersInfo, List<String> playerIds, String lastMovePlayerId, 
+      Map<String, Object> newState) {
     
     // Initial Operations from empty state
     if (lastApiState.isEmpty()) {
-      return getInitialOperations(playerIds, 
-          GameResources.getStartPlayerId(playerIds));
+      return getInitialOperations(playerIds, GameResources.getStartPlayerId(playerIds));
       //return getInitialOperations();
     }
     //Converting the lastState from the API to RiskState
-    RiskState lastState = 
-        gameApiStateToRiskState(lastApiState, lastMovePlayerId, playerIds);
+    RiskState lastState = gameApiStateToRiskState(lastApiState, lastMovePlayerId, playersInfo);
     
     if (lastState.getPhase().equals(GameResources.SET_TURN_ORDER)) {
       
@@ -106,7 +111,7 @@ public class RiskLogic {
         if (isCardTrade) {
           List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
           return performTrade(lastState, cardsBeingTraded, lastMovePlayerId,
-              gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
+              gameApiStateToRiskState(newState, lastMovePlayerId, playersInfo));
         }
       } else {
         return skipCardTrade(lastMovePlayerId);
@@ -163,7 +168,7 @@ public class RiskLogic {
       //Operations performed when player has done the mandatory trade after getting >=6 cards
       List<Integer> cardsBeingTraded = GameResources.getTradedCards(lastMove);
       return performAttackTrade(lastState, cardsBeingTraded, lastMovePlayerId,
-          gameApiStateToRiskState(newState, lastMovePlayerId, playerIds));
+          gameApiStateToRiskState(newState, lastMovePlayerId, playersInfo));
     } else if (lastState.getPhase().equals(GameResources.ATTACK_REINFORCE)) {
       //Operations performed if the player has got extra units after the trading which require
       //immediate reinforcement
@@ -1066,18 +1071,26 @@ public class RiskLogic {
 
   @SuppressWarnings("unchecked")
   public RiskState gameApiStateToRiskState(Map<String, Object> lastApiState,
-      String lastMovePlayerId, List<String> playerIds) {
+      String lastMovePlayerId, List<Map<String, Object>> playersInfo) {
    
     RiskState riskState = new RiskState();
     riskState.setTurn(lastMovePlayerId);
     riskState.setPhase(lastApiState.get(GameResources.PHASE).toString());
     Map<String, Territory> territoryMap = Maps.newHashMap();
+    List<String> playerIds = new ArrayList<String>();
     riskState.setTerritoryMap(territoryMap);
     Map<String, Player> playersMap = new HashMap<String, Player>();
-    for (String playerId : playerIds) {
+    for (Map<String, Object> player : playersInfo) {
+       String playerId = (String) player.get(GameApi.PLAYER_ID);
+       String playerName = (String) player.get(GameApi.PLAYER_NAME);
+       if (playerName == null || playerName.isEmpty()) {
+         playerName = GameResources.PLAYER + playerId;
+       }
+       playerIds.add(playerId);
        Map<String, Object> tempPlayersMap = (Map<String, Object>) lastApiState.get(playerId);
        if (tempPlayersMap != null) {
-         Player newPlayer = new Player(playerId, tempPlayersMap);
+         Player newPlayer = new Player(playerId, playerName, tempPlayersMap, 
+             playersInfo.indexOf(player));
          playersMap.put(playerId, newPlayer);
          for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
            Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId(), 

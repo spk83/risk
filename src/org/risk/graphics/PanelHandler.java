@@ -33,7 +33,8 @@ public final class PanelHandler {
     colorPanel.setSpacing(5);
     String color = constantMessages.color();
     String colorHtml = "<div style='background-color: "
-        + Player.getPlayerColor(myPlayerId) + "; height: 25px; width: 25px;'>" + "</div>";
+        + state.getPlayersMap().get(myPlayerId).getPlayerColor() 
+        + "; height: 25px; width: 25px;'>" + "</div>";
     String [] order = variableMessages.colorOrder(color, colorHtml).split(">>>>");
     colorPanel.add(new HTML(order[0]));
     colorPanel.add(new HTML(order[1]));

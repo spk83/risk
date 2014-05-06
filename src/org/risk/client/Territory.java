@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class Territory {
   
@@ -246,7 +247,8 @@ public class Territory {
   }
   
   public static boolean isFortifyPossible(int fromTerritory, int toTerritory, 
-      List<String> territoryList) {
+      List<String> list) {
+    List<String> territoryList = Lists.newArrayList(list);
     if (territoryList.contains(fromTerritory + "") && territoryList.contains(toTerritory + "")) {
       if (CONNECTIONS.get(fromTerritory).contains(toTerritory)) {
         return true;

@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -290,9 +291,20 @@ public final class GameResources {
   
   public static String getStartPlayerId(List<String> playerIds) {
     String startPlayerId = playerIds.get(GameResources.START_PLAYER_ID_INDEX);
-    while (startPlayerId.equals(GameApi.AI_PLAYER_ID) || startPlayerId.equals(GameApi.VIEWER_ID)) {
+    if (startPlayerId.equals(GameApi.AI_PLAYER_ID)) {
       startPlayerId = playerIds.get((GameResources.START_PLAYER_ID_INDEX + 1) % playerIds.size());
     }
     return startPlayerId;
+  }
+
+  public static void removeViewer(List<String> playerIds, List<Map<String, Object>> playersInfo) {
+    playerIds.remove(GameApi.VIEWER_ID);
+    Iterator<Map<String, Object>> iterator = playersInfo.iterator();
+    while (iterator.hasNext()) {
+      if (((String) iterator.next().get(GameApi.PLAYER_ID)).equals(GameApi.VIEWER_ID)) {
+        iterator.remove();
+        break;
+      }
+    }
   }
 }

@@ -4,7 +4,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,11 @@ public class RiskPresenterTest {
   private List<Operation> operations = ImmutableList.<Operation>of();
   private final String viewerId = GameApi.VIEWER_ID;
   private final ImmutableMap<String, Object> emptyState = ImmutableMap.<String, Object>of();
-  private final ImmutableList<String> playerIds = ImmutableList.<String>of("1", "2", "3");
+  private final ImmutableList<Map<String, Object>> playerInfo = 
+      ImmutableList.<Map<String, Object>>of(
+          ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "1"),
+          ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "2"),
+          ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "3"));
   
   @Before
   public void runBefore() {
@@ -153,7 +156,7 @@ public class RiskPresenterTest {
   @Test
   public void testClaimTerritoryByCForC() {
     Map<String, Object> state = getClaimTerritoryState(); 
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performClaimTerritory(mockRiskState, "30", AbstractTest.PLAYER_C))
         .thenReturn(operations);
@@ -194,7 +197,7 @@ public class RiskPresenterTest {
     Map<String, Integer> differenceTerritoryUnitMap = Maps.newHashMap();
     differenceTerritoryUnitMap.put("19", 1);
   
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.BID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.BID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performDeployment(
         mockRiskState, differenceTerritoryUnitMap, AbstractTest.PLAYER_B)).thenReturn(operations);
@@ -240,7 +243,7 @@ public class RiskPresenterTest {
 
     when(mockRiskState.getPlayersMap()).thenReturn(playerMap);
     when(mockPlayer.getCards()).thenReturn(cardsBeingTraded);
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performTrade(mockRiskState, cardsBeingTraded, AbstractTest.PLAYER_A, null))
         .thenReturn(operations);
@@ -287,7 +290,7 @@ public class RiskPresenterTest {
 
     when(mockRiskState.getPlayersMap()).thenReturn(playerMap);
     when(mockPlayer.getCards()).thenReturn(cardsBeingTraded);
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.skipCardTrade(AbstractTest.PLAYER_A)).thenReturn(operations);
     
@@ -328,7 +331,7 @@ public class RiskPresenterTest {
     Optional<List<Integer>> cardsBeingTraded = Optional.fromNullable(
         (List<Integer>) ImmutableList.of(1, 2, 3));
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskState.getCardsTraded()).thenReturn(cardsBeingTraded);
     when(mockRiskLogic.performAddUnitsWithTrade(mockRiskState, AbstractTest.PLAYER_C))
@@ -367,7 +370,7 @@ public class RiskPresenterTest {
     Map<String, Object> state = getAddUnitsWithoutCardTradeState(); 
     Optional<List<Integer>> cardsBeingTraded = Optional.fromNullable(null);
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskState.getCardsTraded()).thenReturn(cardsBeingTraded);
     when(mockRiskLogic.performAddUnitsWithOutTrade(mockRiskState, AbstractTest.PLAYER_C))
@@ -410,7 +413,7 @@ public class RiskPresenterTest {
         "38", 3,
         "41", 2);
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performReinforce(mockRiskState, 0, territoryDelta, AbstractTest.PLAYER_C))
         .thenReturn(operations);
@@ -446,7 +449,7 @@ public class RiskPresenterTest {
   public void testSkipReinforceTerritoriesByCForC() {
     Map<String, Object> state = getReinforceState(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performReinforce(mockRiskState, 0, null, AbstractTest.PLAYER_C))
         .thenReturn(operations);
@@ -483,7 +486,7 @@ public class RiskPresenterTest {
   public void testAttackPhaseByAForA() throws Exception {
     Map<String, Object> state = getAttackPhaseStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performAttack(mockRiskState, 5, 13, AbstractTest.PLAYER_A))
         .thenReturn(operations);
@@ -522,7 +525,7 @@ public class RiskPresenterTest {
   public void testEndAttackByAForA() throws Exception {
     Map<String, Object> state = getEndAttackStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performEndAttack(mockRiskState, AbstractTest.PLAYER_A))
         .thenReturn(operations);
@@ -561,7 +564,7 @@ public class RiskPresenterTest {
   public void testEndAttackWithNoCardByAForA() throws Exception {
     Map<String, Object> state = getEndAttackWithNoCardStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performEndAttackWithNoCard(AbstractTest.AID))
         .thenReturn(operations);
@@ -601,7 +604,7 @@ public class RiskPresenterTest {
   public void testAttackResultByAForA() throws Exception {
     Map<String, Object> state = getAttackResultStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.attackResultOperations(mockRiskState, AbstractTest.AID))
         .thenReturn(operations);
@@ -616,7 +619,7 @@ public class RiskPresenterTest {
   public void testAttackResultByAForB() throws Exception {
     Map<String, Object> state = getAttackResultStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.attackResultOperations(mockRiskState, AbstractTest.AID))
         .thenReturn(operations);
@@ -630,7 +633,7 @@ public class RiskPresenterTest {
   public void testAttackResultByAForC() throws Exception {
     Map<String, Object> state = getAttackResultStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.attackResultOperations(mockRiskState, AbstractTest.AID))
         .thenReturn(operations);
@@ -651,7 +654,7 @@ public class RiskPresenterTest {
   public void testAttackOccupyByAForA() throws Exception {
     Map<String, Object> state = getAttackOccupyStateByA(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performAttackOccupy(mockRiskState, 3, AbstractTest.PLAYER_A))
         .thenReturn(operations);
@@ -690,7 +693,7 @@ public class RiskPresenterTest {
   public void testAttackTradeCardsByAForA() throws Exception {
     Map<String, Object> state = getAttackTradeCardsByAState();
     List<Integer> cards = ImmutableList.<Integer>of(0, 1, 2);
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performAttackTrade(mockRiskState, cards, AbstractTest.PLAYER_A, null))
         .thenReturn(operations);
@@ -732,7 +735,7 @@ public class RiskPresenterTest {
         "0", 6,
         "1", 4);
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.AID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performReinforce(mockRiskState, 0, territoryDelta, AbstractTest.PLAYER_A))
         .thenReturn(operations);
@@ -774,7 +777,7 @@ public class RiskPresenterTest {
         "30", -2,
         "38", 2);
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performFortify(mockRiskState, territoryDelta, AbstractTest.PLAYER_C))
         .thenReturn(operations);
@@ -813,7 +816,7 @@ public class RiskPresenterTest {
   public void testSkipFortifyByCForC() throws Exception {
     Map<String, Object> state = getFortifyStateByC(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performFortify(mockRiskState, null, AbstractTest.PLAYER_C))
         .thenReturn(operations);
@@ -852,7 +855,7 @@ public class RiskPresenterTest {
   public void testEndGameByCForC() throws Exception {
     Map<String, Object> state = getEndState(); 
     
-    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerIds))
+    when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performEndGame(mockRiskState, AbstractTest.PLAYER_C))
         .thenReturn(operations);

@@ -105,6 +105,8 @@ public class RiskPresenter {
   private String myPlayerId;
   private String currentPhase;
   private String turnPlayerId;
+  private List<Map<String, Object>> playersInfo;
+  private boolean isAIPresent;
   
   public RiskPresenter(View view, Container container, RiskLogic riskLogic) {
     this.view = view;
@@ -115,9 +117,12 @@ public class RiskPresenter {
   
   /** Updates the presenter and the view with the state in updateUI. */
   public void updateUI(UpdateUI updateUI) {
+    isAIPresent = false;
     playerIds = updateUI.getPlayerIds();
+    playersInfo = updateUI.getPlayersInfo();
     myPlayerId = updateUI.getYourPlayerId();
     Map<String, Object> state = updateUI.getState();
+    GameResources.removeViewer(playerIds, playersInfo);
     if (state.isEmpty()) {
       String startPlayerId = GameResources.getStartPlayerId(playerIds);
       if (myPlayerId.equals(startPlayerId)) {
@@ -128,17 +133,17 @@ public class RiskPresenter {
     }
     List<Operation> operations = updateUI.getLastMove();
     turnPlayerId = getTurnPlayer(operations);
-    riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playerIds);
+    riskState = riskLogic.gameApiStateToRiskState(updateUI.getState(), turnPlayerId, playersInfo);
 
     if (updateUI.isViewer()) {
       view.setViewerState(riskState);
       return;
     }
-//    if (updateUI.isAiPlayer()) {
-//      // TODO: implement AI in a later HW!
-//      //container.sendMakeMove(..);
-//      return;
-//    }
+
+    if (updateUI.isAiPlayer()) {
+      isAIPresent = true;
+    }
+    
     view.setPlayerState(riskState);
     
     // If it's your turn, call appropriate method for next move based on current phase in state
@@ -368,5 +373,9 @@ public class RiskPresenter {
   
   public String getMyPlayerId() {
     return myPlayerId;
+  }
+
+  public boolean isAIPresent() {
+    return isAIPresent;
   }
 }

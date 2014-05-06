@@ -10,24 +10,28 @@ import com.google.common.collect.Lists;
 
 public class Player {
 
-  public static final Map<String, String> PLAYER_COLOR = ImmutableMap.<String, String>builder()
-    .put("0", "lightskyblue")
-    .put("1", "lightgreen")
-    .put("2", "orange")
-    .put("3", "lightcoral")
-    .put("4", "lightsalmon")
-    .put("5", "khaki")
+  private final Map<Integer, String> playerColorMap = ImmutableMap.<Integer, String>builder()
+    .put(0, "lightskyblue")
+    .put(1, "lightgreen")
+    .put(2, "orange")
+    .put(3, "lightcoral")
+    .put(4, "lightsalmon")
+    .put(5, "khaki")
     .build();
       
   private String playerId;
+  private String playerName;
   private List<Integer> cards;
   private int unclaimedUnits;
   private Map<String, Integer> territoryUnitMap;
   private List<String> continent;
+  private String playerColor;
  
   @SuppressWarnings("unchecked")
-  public Player(String playerId, Map<String, Object> playerMap) {
+  public Player(String playerId, String playerName, Map<String, Object> playerMap, int i) {
     this.playerId = playerId;
+    this.playerName = playerName;
+    this.playerColor = playerColorMap.get(i);
     this.cards = new ArrayList<Integer>((List<Integer>) playerMap.get(GameResources.CARDS));
     this.unclaimedUnits = (Integer) playerMap.get(GameResources.UNCLAIMED_UNITS);
     Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(
@@ -36,6 +40,10 @@ public class Player {
     this.continent = Lists.newArrayList((List<String>) playerMap.get(GameResources.CONTINENT));
   }
   
+  public String getPlayerName() {
+    return playerName;
+  }
+
   public int getUnclaimedUnits() {
     return unclaimedUnits;
   }
@@ -66,9 +74,8 @@ public class Player {
   public void setContinent(List<String> continent) {
     this.continent = continent;
   }
- 
-  public static String getPlayerColor(String playerId) {
-    String playerIdModulous = String.valueOf((Integer.parseInt(playerId) % 6));
-    return PLAYER_COLOR.get(playerIdModulous);
+
+  public String getPlayerColor() {
+    return playerColor;
   }
 }
