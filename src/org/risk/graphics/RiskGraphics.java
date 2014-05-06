@@ -817,8 +817,27 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   @Override
   public void attackResult() {
     attackResultPanel.clear();
-    String attackerKey = currentRiskState.getAttack().getAttackerPlayerId();
-    String defenderKey = currentRiskState.getAttack().getDefenderPlayerId();
+    String attackerId =  currentRiskState.getAttack().getAttackerPlayerId();
+    String attackerKey = currentRiskState.getPlayersMap().get(attackerId).getPlayerName();
+    String defenderId = currentRiskState.getAttack().getDefenderPlayerId();
+    String defenderKey = currentRiskState.getPlayersMap().get(defenderId).getPlayerName();
+    
+    if (attackerKey == null || attackerKey.isEmpty()) {
+      if (attackerId.equals(GameApi.AI_PLAYER_ID)) {
+        attackerKey = constantMessages.computer();
+      } else {
+        attackerKey = variableMessages.playerName(attackerId);
+      }
+    }
+    
+    if (defenderKey == null || defenderKey.isEmpty()) {
+      if (defenderId.equals(GameApi.AI_PLAYER_ID)) {
+        defenderKey = constantMessages.computer();
+      } else {
+        defenderKey = variableMessages.playerName(defenderId);
+      }
+    }
+    
     String attackingTerritorySVG = Territory.SVG_NAME_MAP.get(
         currentRiskState.getAttack().getAttackerTerritoryId());
     String defendingTerritorySVG = Territory.SVG_NAME_MAP.get(
@@ -995,8 +1014,16 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       }
       riskPresenter.endGame();
     } else {
+      String playerName = currentRiskState.getPlayersMap().get(turnPlayerId).getPlayerName();
+      if (playerName == null || playerName.isEmpty()) {
+        if (turnPlayerId.equals(GameApi.AI_PLAYER_ID)) {
+          playerName = constantMessages.computer();
+        } else {
+          playerName = variableMessages.playerName(turnPlayerId);
+        }
+      }
       final Dialog dialog = CustomDialogPanel.alert(phaseMessages.gameEnded(), 
-          variableMessages.playerWon(constantMessages.player() + turnPlayerId), null,
+          variableMessages.playerWon(playerName), null,
           constantMessages.ok());
       if (riskPresenter.isAIPresent()) {
         new Timer() {

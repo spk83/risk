@@ -37,17 +37,16 @@ public interface VariableMessages extends Messages {
   @DefaultMessage("Defender lost <b>{0} units</b>")
   String defenderLost(int deltaUnits);
   
-  @DefaultMessage("Player {0} captures {1}")
+  @DefaultMessage("{0} captures {1}")
   String playerCaptures(String player, String territory);
   
-  @DefaultMessage("Player {0} out of the game. Player {1} will get cards owned by Player {0}, if "
-      + "any.")
+  @DefaultMessage("{0} out of the game. {1} will get cards owned by {0}, if any.")
   String defenderOut(String defender, String attacker);
   
-  @DefaultMessage("Player {0} wins the game !")
+  @DefaultMessage("{0} wins the game !")
   String attackerWinner(String player);
   
-  @DefaultMessage("Player {0} will have to trade cards")
+  @DefaultMessage("{0} will have to trade cards")
   String attackerTradeCards(String player);
   
   @DefaultMessage("{0} ({1})")
