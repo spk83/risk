@@ -26,7 +26,7 @@ public final class PanelHandler {
   }
   
   public static RoundPanel getPlayerPanel(CardImages cardImages, RiskState state, 
-      Player player, String currentPlayerId, Map<Image, Card> currentPlayerCardImages,
+      Player player, String currentPlayerId, Map<Card, Image> currentPlayerCardImages,
       VariableMessages variableMessages, ConstantMessages constantMessages) {
     String myPlayerId = player.getPlayerId();
     RoundPanel panel = new RoundPanel();
@@ -65,7 +65,7 @@ public final class PanelHandler {
           image.setSize("60px", "90px");
           image.setAltText(card.getCardType().name());
           image.setStyleName("risk-cards");
-          currentPlayerCardImages.put(image, card);
+          currentPlayerCardImages.put(card, image);
           cardsPanel.add(image);
         }
         panel.add(cardsPanel);

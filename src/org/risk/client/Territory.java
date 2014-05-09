@@ -43,6 +43,12 @@ public class Territory {
     this.currentUnits = currentUnits;
   }
   
+  public Territory(Territory territory) {
+    this.territoryId = territory.territoryId;
+    this.playerKey = territory.playerKey;
+    this.currentUnits = territory.currentUnits;
+  }
+  
   public static final Map<Integer, String> TERRITORY_NAME = ImmutableMap.<Integer, String>builder()
       .put(0, "Alaska")
       .put(1, "North West Territory")

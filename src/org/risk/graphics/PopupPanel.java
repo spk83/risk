@@ -26,10 +26,10 @@ public class PopupPanel extends PopinDialog {
   public PopupPanel(ConstantMessages constantMessages) {
     super();
     dialogPanel = new DialogPanel();
-    dialogPanel.setOkButtonText(constantMessages.ok());
     dialogPanel.showCancelButton(false);
     RoundPanel rpanel = new RoundPanel();
     panel = new VerticalPanel();
+    dialogPanel.setOkButtonText(constantMessages.ok());
     regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
@@ -43,21 +43,30 @@ public class PopupPanel extends PopinDialog {
     add(dialogPanel);
   }
 
-  public void setOkBtnHandler(final RiskPresenter riskPresenter, final int i) {
+  public void setOkBtnHandler(final RiskPresenter riskPresenter, final int i, 
+      boolean isAIPresent) {
     // i = 0 -> riskPresenter.setTurnOrderMove();
     // i = 1 -> riskPresenter.attackResultMove();
-    regHandler.removeHandler();
-    regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
-      @Override
-      public void onTap(TapEvent event) {
-        if (i == 1) {
-          riskPresenter.setTurnOrderMove();
-        } else if (i == 2) {
-          riskPresenter.attackResultMove();
+    if (regHandler != null) {
+      regHandler.removeHandler();
+    }
+    if (!isAIPresent) {
+      dialogPanel.showOkButton(true);
+      regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
+        @Override
+        public void onTap(TapEvent event) {
+          if (i == 1) {
+            riskPresenter.setTurnOrderMove();
+          } else if (i == 2) {
+            riskPresenter.attackResultMove();
+          }
+          hide();
         }
-        hide();
-      }
-    });
+      });
+    } else {
+      dialogPanel.showOkButton(false);
+      hide();
+    }
   }
   public void addPanel(Widget w) {
     panel.add(w);

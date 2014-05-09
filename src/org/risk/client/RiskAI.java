@@ -148,7 +148,7 @@ public class RiskAI {
     return selectedTerritory;
   }
 
-  public List<Integer> chooseCardsForTrading(boolean mandatoryCardSelection, 
+  public List<Card> chooseCardsForTrading(boolean mandatoryCardSelection, 
       List<Card> cardObjects, int territoryCount, int playerCount) {
     if (mandatoryCardSelection || territoryCount < GameResources.TOTAL_TERRITORIES / playerCount) {
       List<Card> selectedCards = new ArrayList<Card>();
@@ -161,13 +161,13 @@ public class RiskAI {
           if (card.getCardType() == entry.getKey()) {
             selectedCards.add(card);
             if (selectedCards.size() == 3) {
-              return Card.getCardIdsFromCardObjects(selectedCards);
+              return selectedCards;
             }
           }
         }
       }
     } 
-    return ImmutableList.<Integer>of();
+    return ImmutableList.<Card>of();
   }
 
   public List<String> performAttack(Map<String, Integer> playerMap,
@@ -248,7 +248,7 @@ public class RiskAI {
       int sourceTerritory = Integer.parseInt(list.get(0));
       int destinationTerritory = Integer.parseInt(list.get(1));
       int maxUnits = territoryMap.get(list.get(0)).getCurrentUnits() - 1;
-      int delta = moveUnitsAfterAttack(0, maxUnits, territoryMap, sourceTerritory, 
+      int delta = moveUnitsAfterAttack(1, maxUnits, territoryMap, sourceTerritory, 
           destinationTerritory, territoryList);
       territoryDelta.put(sourceTerritory + "", -delta);
       territoryDelta.put(destinationTerritory + "", delta);
@@ -312,5 +312,31 @@ public class RiskAI {
       topWeakestTerritories.remove(i);
     }
     return topWeakestTerritories;
+  }
+  
+  public String getWeakestTerritory(Map<String, Integer> playerMap,
+      Map<String, Territory> territoryMap) {
+    Set<String> myTerritories = playerMap.keySet();
+    int minUnitDifference = Integer.MAX_VALUE;
+    Integer weakestTerritory = null;
+    for (String myTerritory : myTerritories) {
+      int territory = Integer.parseInt(myTerritory);
+      int territoryUnits = territoryMap.get(territory + "").getCurrentUnits();
+      int minDifference = Integer.MAX_VALUE;
+      for (int connection : Territory.CONNECTIONS.get(territory)) {
+        if (!myTerritories.contains(connection + "")) {
+          int unitDifference = territoryUnits - territoryMap.get(connection + "")
+              .getCurrentUnits();
+          if (unitDifference <= minDifference) {
+            minDifference = unitDifference;
+          }
+        }
+      }
+      if (minDifference != Integer.MAX_VALUE && minDifference < minUnitDifference) {
+        weakestTerritory = territory;
+        minUnitDifference = minDifference;
+      }
+    }
+    return Territory.SVG_NAME_MAP.get(weakestTerritory);
   }
 }
