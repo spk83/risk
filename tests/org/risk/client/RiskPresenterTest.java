@@ -86,6 +86,7 @@ public class RiskPresenterTest {
           ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "1"),
           ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "2"),
           ImmutableMap.<String, Object>of(GameApi.PLAYER_ID, "3"));
+  private final ImmutableList<String> playerIds = ImmutableList.<String>of("1", "2", "3");
   
   @Before
   public void runBefore() {
@@ -857,7 +858,7 @@ public class RiskPresenterTest {
     
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
-    when(mockRiskLogic.performEndGame(mockRiskState, AbstractTest.PLAYER_C))
+    when(mockRiskLogic.performEndGame(mockRiskState, AbstractTest.PLAYER_C, playerIds))
         .thenReturn(operations);
 
     riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.CID, state));
@@ -865,7 +866,7 @@ public class RiskPresenterTest {
     
     verify(mockView).setPlayerState(mockRiskState);
     verify(mockView).endGame();
-    verify(mockRiskLogic).performEndGame(mockRiskState, AbstractTest.PLAYER_C);
+    verify(mockRiskLogic).performEndGame(mockRiskState, AbstractTest.PLAYER_C, playerIds);
     verify(mockContainer).sendMakeMove(operations);
   }
   

@@ -203,7 +203,7 @@ public class RiskLogic {
         return performFortify(lastState, null, lastMovePlayerId);
       }
     } else if (lastState.getPhase().equals(GameResources.END_GAME)) {
-      return performEndGame(lastState, lastMovePlayerId);
+      return performEndGame(lastState, lastMovePlayerId, playerIds);
     }
     return null;
   }
@@ -338,7 +338,7 @@ public class RiskLogic {
   }
 
   List<Operation> performEndGame(RiskState lastState,
-      String playerIdToString) {
+      String playerIdToString, List<String> playerIds) {
     List<Operation> endGameOperations = Lists.newArrayList();
     check(lastState.getTurnOrder().size() == 1);
     check(lastState.getTerritoryWinner().equals(playerIdToString));
@@ -347,8 +347,12 @@ public class RiskLogic {
     Player player = lastState.getPlayersMap().get(playerIdToString);
     check(player.getContinent().size() == Continent.CONTINENT_NAMES.size() - 1);
     check(player.getTerritoryUnitMap().size() == GameResources.TOTAL_TERRITORIES - 1);
+    Map<String, Integer> playerIdToScore = new HashMap<String, Integer>();
+    for (String playerId : playerIds) {
+      playerIdToScore.put(playerId, playerIdToString.equals(playerId) ? 1 : 0);
+    }
     endGameOperations.add(new SetTurn(lastState.getTurn()));
-    endGameOperations.add(new EndGame(playerIdToString));
+    endGameOperations.add(new EndGame(playerIdToScore));
     endGameOperations.add(new Set(GameResources.PHASE, GameResources.GAME_ENDED));
     return endGameOperations;
   }

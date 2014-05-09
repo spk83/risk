@@ -1,5 +1,6 @@
 package org.risk.client;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +32,13 @@ public class EndGameTest extends AbstractTest {
         .put(GameResources.LAST_ATTACKING_TERRITORY, 40)
         .put(GameResources.TERRITORY_WINNER, PLAYER_C)
         .build();
-        
+    Map<String, Integer> playerIdToScore = new HashMap<String, Integer>();
+    for (String playerId : getPlayerIds()) {
+        playerIdToScore.put(playerId, CID.equals(playerId) ? 1 : 0);
+    }
     List<Operation> claimEndGameByC = ImmutableList.<Operation>of(
         new SetTurn(CID),
-        new EndGame(CID),
+        new EndGame(playerIdToScore),
         new Set(GameResources.PHASE, GameResources.GAME_ENDED));
 
     assertMoveOk(move(CID, state, claimEndGameByC));

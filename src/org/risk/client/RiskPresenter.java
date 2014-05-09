@@ -368,7 +368,7 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#endGame()}.
    */
   public void endGame() {
-    container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerId));
+    container.sendMakeMove(riskLogic.performEndGame(riskState, myPlayerId, playerIds));
   }
   
   public String getMyPlayerId() {
