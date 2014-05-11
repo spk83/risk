@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;

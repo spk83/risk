@@ -1,12 +1,11 @@
 package org.risk.graphics;
 
-import org.risk.client.GameApi.Container;
-import org.risk.client.GameApi.ContainerConnector;
-import org.risk.client.GameApi.Game;
-import org.risk.client.GameApi.UpdateUI;
-import org.risk.client.GameApi.VerifyMove;
-import org.risk.client.RiskLogic;
-import org.risk.client.RiskPresenter;
+import org.risk.logic.RiskLogic;
+import org.risk.logic.GameApi.Container;
+import org.risk.logic.GameApi.ContainerConnector;
+import org.risk.logic.GameApi.Game;
+import org.risk.logic.GameApi.UpdateUI;
+import org.risk.logic.GameApi.VerifyMove;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;

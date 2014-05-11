@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.junit.Assert.assertEquals;
@@ -11,9 +11,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.risk.client.GameApi.Operation;
-import org.risk.client.GameApi.VerifyMove;
-import org.risk.client.GameApi.VerifyMoveDone;
+import org.risk.logic.GameResources;
+import org.risk.logic.RiskLogic;
+import org.risk.logic.Territory;
+import org.risk.logic.GameApi.Operation;
+import org.risk.logic.GameApi.VerifyMove;
+import org.risk.logic.GameApi.VerifyMoveDone;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

@@ -1,6 +1,6 @@
 package org.risk.graphics;
 
-import org.risk.client.Card;
+import org.risk.logic.Card;
 
 import com.google.gwt.resources.client.ImageResource;
 

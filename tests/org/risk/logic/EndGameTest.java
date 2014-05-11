@@ -1,14 +1,15 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.risk.client.GameApi.Operation;
-import org.risk.client.GameApi.Set;
-import org.risk.client.GameApi.EndGame;
-import org.risk.client.GameApi.SetTurn;
+import org.risk.logic.GameResources;
+import org.risk.logic.GameApi.EndGame;
+import org.risk.logic.GameApi.Operation;
+import org.risk.logic.GameApi.Set;
+import org.risk.logic.GameApi.SetTurn;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.Collections;
 import java.util.List;

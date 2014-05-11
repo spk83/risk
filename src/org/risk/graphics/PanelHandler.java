@@ -3,14 +3,14 @@ package org.risk.graphics;
 import java.util.List;
 import java.util.Map;
 
-import org.risk.client.Card;
-import org.risk.client.GameApi;
-import org.risk.client.GameResources;
-import org.risk.client.Player;
-import org.risk.client.RiskState;
 import org.risk.graphics.i18n.messages.ConstantMessages;
 import org.risk.graphics.i18n.messages.PhaseMessages;
 import org.risk.graphics.i18n.messages.VariableMessages;
+import org.risk.logic.Card;
+import org.risk.logic.GameApi;
+import org.risk.logic.GameResources;
+import org.risk.logic.Player;
+import org.risk.logic.RiskState;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;

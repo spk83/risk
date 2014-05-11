@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public final class GameApi {
       function postMessageListener(e) {
         var str = JSON.stringify(e.data);
         var c = containerConnector;
-        c.@org.risk.client.GameApi.ContainerConnector::eventListner(Ljava/lang/String;)(str);
+        c.@org.risk.logic.GameApi.ContainerConnector::eventListner(Ljava/lang/String;)(str);
       }
       $wnd.addEventListener("message", postMessageListener, false);
     }-*/;

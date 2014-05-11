@@ -1,11 +1,11 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.risk.client.GameApi.Message;
+import org.risk.logic.GameApi.Message;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gwt.json.client.JSONArray;

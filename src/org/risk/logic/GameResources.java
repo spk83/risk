@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.risk.client.GameApi.Operation;
+import org.risk.logic.GameApi.Operation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -281,10 +281,10 @@ public final class GameResources {
   @SuppressWarnings("unchecked")
   public static List<Integer> getTradedCards(List<Operation> operations) {
     for (Operation operation : operations) {
-      if (operation instanceof org.risk.client.GameApi.Set) {
-        if (((org.risk.client.GameApi.Set) operation).getKey()
+      if (operation instanceof org.risk.logic.GameApi.Set) {
+        if (((org.risk.logic.GameApi.Set) operation).getKey()
             .equals(GameResources.CARDS_BEING_TRADED)) {
-              return (List<Integer>) ((org.risk.client.GameApi.Set) operation).getValue();
+              return (List<Integer>) ((org.risk.logic.GameApi.Set) operation).getValue();
         }
       }
     }

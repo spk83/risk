@@ -1,6 +1,5 @@
 package org.risk.graphics;
 
-import org.risk.client.RiskPresenter;
 import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.event.shared.HandlerRegistration;

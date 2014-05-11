@@ -1,12 +1,16 @@
-package org.risk.client;
+package org.risk.graphics;
 
 import java.util.List;
 import java.util.Map;
 
-import org.risk.client.GameApi.Container;
-import org.risk.client.GameApi.Operation;
-import org.risk.client.GameApi.SetTurn;
-import org.risk.client.GameApi.UpdateUI;
+import org.risk.logic.GameResources;
+import org.risk.logic.Player;
+import org.risk.logic.RiskLogic;
+import org.risk.logic.RiskState;
+import org.risk.logic.GameApi.Container;
+import org.risk.logic.GameApi.Operation;
+import org.risk.logic.GameApi.SetTurn;
+import org.risk.logic.GameApi.UpdateUI;
 
 import com.google.common.collect.Maps;
 
@@ -190,7 +194,8 @@ public class RiskPresenter {
     }
     return false;
   }
-  RiskState getRiskState() {
+  
+  public RiskState getRiskState() {
     return riskState;
   }
   

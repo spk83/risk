@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,13 +7,14 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.risk.client.GameApi.Operation;
-import org.risk.client.GameApi.Set;
-import org.risk.client.GameApi.SetTurn;
-import org.risk.client.GameApi.SetVisibility;
-import org.risk.client.GameApi.Shuffle;
-import org.risk.client.GameApi.VerifyMove;
-import org.risk.client.GameApi.Delete;
+import org.risk.logic.GameResources;
+import org.risk.logic.GameApi.Delete;
+import org.risk.logic.GameApi.Operation;
+import org.risk.logic.GameApi.Set;
+import org.risk.logic.GameApi.SetTurn;
+import org.risk.logic.GameApi.SetVisibility;
+import org.risk.logic.GameApi.Shuffle;
+import org.risk.logic.GameApi.VerifyMove;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

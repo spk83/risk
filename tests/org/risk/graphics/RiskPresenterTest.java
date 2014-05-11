@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.graphics;
 
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verify;
@@ -14,11 +14,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
-import org.risk.client.GameApi.Container;
-import org.risk.client.GameApi.Operation;
-import org.risk.client.GameApi.SetTurn;
-import org.risk.client.GameApi.UpdateUI;
-import org.risk.client.RiskPresenter.View;
+import org.risk.graphics.RiskPresenter.View;
+import org.risk.logic.AbstractTest;
+import org.risk.logic.GameApi;
+import org.risk.logic.GameResources;
+import org.risk.logic.Player;
+import org.risk.logic.RiskLogic;
+import org.risk.logic.RiskState;
+import org.risk.logic.GameApi.Container;
+import org.risk.logic.GameApi.Operation;
+import org.risk.logic.GameApi.SetTurn;
+import org.risk.logic.GameApi.UpdateUI;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -67,7 +73,7 @@ import com.google.common.collect.ImmutableMap.Builder;
  * 12) endGame
  */
 @RunWith(JUnit4.class)
-public class RiskPresenterTest {
+public class RiskPresenterTest extends AbstractTest {
   
   /** The object under test. */
   RiskLogic mockRiskLogic;

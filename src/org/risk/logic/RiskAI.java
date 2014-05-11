@@ -1,4 +1,4 @@
-package org.risk.client;
+package org.risk.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import org.risk.client.Card.Type;
+import org.risk.logic.Card.Type;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
