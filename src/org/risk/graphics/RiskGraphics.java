@@ -121,6 +121,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private HeaderButton selectCardsButton = new HeaderButton();
+  private HeaderButton autoClaim = new HeaderButton();
+  private HeaderButton autoDeploy = new HeaderButton();
   private HeaderButton endAttack = new HeaderButton();
   private HeaderButton endReinforce = new HeaderButton();
   private HeaderButton endFortify = new HeaderButton();
@@ -174,6 +176,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createEndAttackButton();
     createEndReinforceButton();
     createEndFortifyButton();
+    createAutoClaimButton();
+    createAutoDeployButton();
     createBackButton();
     addMapHandlers();
     changeSVGLanguage();
@@ -320,7 +324,33 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       }
     });
   }
-    
+  
+  private void createAutoClaimButton() {
+    autoClaim.setRoundButton(true);
+    autoClaim.setText(constantMessages.auto());
+    autoClaim.addTapHandler(new TapHandler() {
+      @Override
+      public void onTap(TapEvent event) {
+        autoClaim.removeFromParent();
+        currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).setAutoClaim(true);
+        chooseNewTerritory();
+      }
+    });
+  }
+  
+  private void createAutoDeployButton() {
+    autoDeploy.setRoundButton(true);
+    autoDeploy.setText(constantMessages.auto());
+    autoDeploy.addTapHandler(new TapHandler() {
+      @Override
+      public void onTap(TapEvent event) {
+        autoDeploy.removeFromParent();
+        currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).setAutoDeploy(true);
+        chooseTerritoryForDeployment();
+      }
+    });
+  }
+  
   private void createEndAttackButton() {
     endAttack.setRoundButton(true);
     endAttack.setText(constantMessages.end());
@@ -515,7 +545,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       territory.setAttribute("style", style);
       territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
       claimTerritory = false;
-      riskPresenter.newTerritorySelected(territoryId);
+      riskPresenter.newTerritorySelected(territoryId, 
+          currentRiskState.getPlayersMap().get(playerId).isAutoClaim());
       soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerId)) {
@@ -538,7 +569,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
       territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
       deployment = false;
-      riskPresenter.territoryForDeployment(territoryId);
+      riskPresenter.territoryForDeployment(territoryId, 
+          currentRiskState.getPlayersMap().get(playerId).isAutoDeploy());
       soundResource.playDeployAudio();
     } else {
       CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -713,7 +745,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       claimTerritory(riskAI.getNewTerritory(
           currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID), 
           currentRiskState.getUnclaimedTerritory()));
+    } else if (currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).isAutoClaim()) {
+      claimTerritory(riskAI.getNewTerritory(
+          currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()), 
+          currentRiskState.getUnclaimedTerritory()));
     } else {
+      headerPanel.setRightWidget(autoClaim);
       claimTerritory = true;
     }
   }
@@ -724,7 +761,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       deployment(riskAI.getTerritoryForDeployment(
           currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap(), 
           currentRiskState.getTerritoryMap()));
+    } else if (currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).isAutoDeploy()) {
+      deployment(riskAI.getTerritoryForDeployment(
+          currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).getTerritoryUnitMap(),
+          currentRiskState.getTerritoryMap()));
     } else {
+      headerPanel.setRightWidget(autoDeploy);
       deployment = true;
     }
   }

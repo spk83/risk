@@ -233,9 +233,9 @@ public class RiskPresenter {
    * This method is called by view only if the presenter called {@link View#chooseNewTerritory()}.
    * @param territory
    */
-  public void newTerritorySelected(String territory) {
+  public void newTerritorySelected(String territory, boolean autoClaim) {
     container.sendMakeMove(riskLogic.performClaimTerritory(
-        riskState, territory, myPlayerId));
+        riskState, territory, myPlayerId, autoClaim));
   }
   
   /**
@@ -244,11 +244,11 @@ public class RiskPresenter {
    * {@link View#chooseTerritoryForDeployment()}.
    * @param territory
    */
-  public void territoryForDeployment(String territory) {
+  public void territoryForDeployment(String territory, boolean autoDeploy) {
     Map<String, Integer> territoryUnitMap = Maps.newHashMap();
     territoryUnitMap.put(territory, 1);
     container.sendMakeMove(riskLogic.performDeployment(
-        riskState, territoryUnitMap, myPlayerId));
+        riskState, territoryUnitMap, myPlayerId, autoDeploy));
   }
   
   /**

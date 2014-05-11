@@ -51,7 +51,8 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 34,
         GameResources.TERRITORY, ImmutableMap.<String, Integer>of("30", 1),
-        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));
+        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING,
+        GameResources.AUTO_CLAIM, false)));
     claimTerritoryByC.add(new Set(GameResources.UNCLAIMED_TERRITORY, newUnclaimedTerritories));
     
     // Check valid move
@@ -125,7 +126,8 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 34,
         GameResources.TERRITORY, ImmutableMap.<String, Object>of("20", 1),
-        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));
+        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING,
+        GameResources.AUTO_CLAIM, false)));
     claimTerritoryByB.add(new Set(GameResources.UNCLAIMED_TERRITORY, newUnclaimedTerritory));
 
     // Check valid moves
@@ -209,7 +211,8 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 21,
         GameResources.TERRITORY, getTerritories(PLAYER_A),
-        GameResources.CONTINENT, ImmutableList.<String>of("0", "1"))));
+        GameResources.CONTINENT, ImmutableList.<String>of("0", "1"),
+        GameResources.AUTO_CLAIM, false)));
     changePhase.add(new Set(GameResources.UNCLAIMED_TERRITORY, GameResources.EMPTYLISTINT));
     changePhase.add(new Set(GameResources.PHASE, GameResources.DEPLOYMENT));
     
@@ -265,7 +268,8 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 20,
         GameResources.TERRITORY, performDeltaOnTerritory(getTerritories(PLAYER_C), "29", 1),
-        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));
+        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING,
+        GameResources.AUTO_DEPLOY, false)));
     
     // Check valid move
     assertMoveOk(move(CID, stateTurn1, deploymentByC));
@@ -327,7 +331,8 @@ public class DeploymentPhaseTest extends AbstractTest {
         GameResources.CARDS, GameResources.EMPTYLISTINT,
         GameResources.UNCLAIMED_UNITS, 0,
         GameResources.TERRITORY, performDeltaOnTerritory(getTerritories(PLAYER_B), "19", 1),
-        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING)));  
+        GameResources.CONTINENT, GameResources.EMPTYLISTSTRING,
+        GameResources.AUTO_DEPLOY, false)));  
     changePhase.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
     
     // Check valid move

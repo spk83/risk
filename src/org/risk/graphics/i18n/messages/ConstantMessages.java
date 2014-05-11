@@ -25,7 +25,7 @@ public interface ConstantMessages extends Constants {
   @DefaultStringValue("Back")
   String back();
  
-  @DefaultStringValue("Ok")
+  @DefaultStringValue("OK")
   String ok();
   
   @DefaultStringValue("End")
@@ -105,4 +105,7 @@ public interface ConstantMessages extends Constants {
   
   @DefaultStringValue("Computer")
   String computer();
+
+  @DefaultStringValue("Auto")
+  String auto();
 }

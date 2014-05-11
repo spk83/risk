@@ -6,15 +6,12 @@ import org.risk.graphics.i18n.messages.ConstantMessages;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.DialogPanel;
 import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
-import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 import com.googlecode.mgwt.ui.client.widget.slider.Slider;
 
 public class PopupChoices extends PopinDialog {
@@ -36,19 +33,18 @@ public class PopupChoices extends PopinDialog {
     this.optionChosen = optionChosen;
     this.valueField = new HTML(options.get(0));
     this.slider = new Slider();
-    RoundPanel panel = new RoundPanel();
     DialogPanel dialogPanel = new DialogPanel();
     dialogPanel.showCancelButton(false);
     dialogPanel.getDialogTitle().setText(mainText);
     
     dialogPanel.setOkButtonText(constantMessages.ok());
-    panel.add(slider);
+    dialogPanel.getContent().add(slider);
     slider.setMax(options.size());
     slider.getElement().setAttribute("style", "width: 200px; position:relative; left: 50%; "
         + "margin-left: -100px");
     
     valueField.getElement().setAttribute("style", "text-align: center;");
-    panel.add(valueField);
+    dialogPanel.getContent().add(valueField);
     if (!isAIPresent) {
       slider
           .addValueChangeHandler(new ValueChangeHandler<Integer>() {
@@ -68,7 +64,6 @@ public class PopupChoices extends PopinDialog {
     } else {
       dialogPanel.showOkButton(false);
     }
-    dialogPanel.getContent().add(panel);
     add(dialogPanel);
   }
   

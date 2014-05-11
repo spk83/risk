@@ -26,18 +26,23 @@ public class Player {
   private Map<String, Integer> territoryUnitMap;
   private List<String> continent;
   private String playerColor;
+  private boolean autoClaim;
+  private boolean autoDeploy;  
  
   @SuppressWarnings("unchecked")
-  public Player(String playerId, String playerName, Map<String, Object> playerMap, int i) {
+  public Player(String playerId, String playerName, Map<String, Object> playerMap, int colorIndex, 
+      boolean autoClaim, boolean autoDeploy) {
     this.playerId = playerId;
     this.playerName = playerName;
-    this.playerColor = playerColorMap.get(i);
+    this.playerColor = playerColorMap.get(colorIndex);
     this.cards = new ArrayList<Integer>((List<Integer>) playerMap.get(GameResources.CARDS));
     this.unclaimedUnits = (Integer) playerMap.get(GameResources.UNCLAIMED_UNITS);
     Map<String, Integer> territoryMap = (Map<String, Integer>) playerMap.get(
         GameResources.TERRITORY);
     this.territoryUnitMap = new HashMap<String, Integer>(territoryMap);
     this.continent = Lists.newArrayList((List<String>) playerMap.get(GameResources.CONTINENT));
+    this.autoClaim = autoClaim;
+    this.autoDeploy = autoDeploy;
   }
   
   public String getPlayerName() {
@@ -77,5 +82,21 @@ public class Player {
 
   public String getPlayerColor() {
     return playerColor;
+  }
+
+  public boolean isAutoClaim() {
+    return autoClaim;
+  }
+
+  public boolean isAutoDeploy() {
+    return autoDeploy;
+  }
+
+  public void setAutoClaim(boolean autoClaim) {
+    this.autoClaim = autoClaim;
+  }
+
+  public void setAutoDeploy(boolean autoDeploy) {
+    this.autoDeploy = autoDeploy;
   }
 }

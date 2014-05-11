@@ -140,8 +140,8 @@ public class RiskAI {
           connections++;
         }
       }
-      if (maxRequirement == null || (unitDifference + connections) >= maxRequirement) {
-        maxRequirement = (float) (unitDifference + connections);
+      if (maxRequirement == null || (unitDifference * 0.5 + connections) >= maxRequirement) {
+        maxRequirement = (float) (unitDifference * 0.5 + connections);
         selectedTerritory = territory;
       }
     }

@@ -11,7 +11,6 @@ import com.googlecode.mgwt.dom.client.event.tap.TapEvent;
 import com.googlecode.mgwt.dom.client.event.tap.TapHandler;
 import com.googlecode.mgwt.ui.client.dialog.DialogPanel;
 import com.googlecode.mgwt.ui.client.dialog.PopinDialog;
-import com.googlecode.mgwt.ui.client.widget.RoundPanel;
 
 public class PopupPanel extends PopinDialog {
   
@@ -27,7 +26,6 @@ public class PopupPanel extends PopinDialog {
     super();
     dialogPanel = new DialogPanel();
     dialogPanel.showCancelButton(false);
-    RoundPanel rpanel = new RoundPanel();
     panel = new VerticalPanel();
     dialogPanel.setOkButtonText(constantMessages.ok());
     regHandler = dialogPanel.getOkButton().addTapHandler(new TapHandler() {
@@ -38,8 +36,7 @@ public class PopupPanel extends PopinDialog {
     });
     panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     panel.setWidth("200px");
-    rpanel.add(panel);
-    dialogPanel.getContent().add(rpanel);
+    dialogPanel.getContent().add(panel);
     add(dialogPanel);
   }
 

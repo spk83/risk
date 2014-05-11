@@ -159,15 +159,15 @@ public class RiskPresenterTest {
     Map<String, Object> state = getClaimTerritoryState(); 
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.CID, playerInfo))
         .thenReturn(mockRiskState);
-    when(mockRiskLogic.performClaimTerritory(mockRiskState, "30", AbstractTest.PLAYER_C))
+    when(mockRiskLogic.performClaimTerritory(mockRiskState, "30", AbstractTest.PLAYER_C, false))
         .thenReturn(operations);
     
     riskPresenter.updateUI(createUpdateUI(AbstractTest.CID, AbstractTest.CID, state));
-    riskPresenter.newTerritorySelected("30");
+    riskPresenter.newTerritorySelected("30", false);
     
     verify(mockView).setPlayerState(mockRiskState);
     verify(mockView).chooseNewTerritory();
-    verify(mockRiskLogic).performClaimTerritory(mockRiskState, "30", AbstractTest.PLAYER_C);
+    verify(mockRiskLogic).performClaimTerritory(mockRiskState, "30", AbstractTest.PLAYER_C, false);
     verify(mockContainer).sendMakeMove(operations);
   }
   
@@ -201,15 +201,16 @@ public class RiskPresenterTest {
     when(mockRiskLogic.gameApiStateToRiskState(state, AbstractTest.BID, playerInfo))
         .thenReturn(mockRiskState);
     when(mockRiskLogic.performDeployment(
-        mockRiskState, differenceTerritoryUnitMap, AbstractTest.PLAYER_B)).thenReturn(operations);
+        mockRiskState, differenceTerritoryUnitMap, AbstractTest.PLAYER_B, false))
+        .thenReturn(operations);
     
     riskPresenter.updateUI(createUpdateUI(AbstractTest.BID, AbstractTest.BID, state));
-    riskPresenter.territoryForDeployment("19");
+    riskPresenter.territoryForDeployment("19", false);
     
     verify(mockView).setPlayerState(mockRiskState);
     verify(mockView).chooseTerritoryForDeployment();
     verify(mockRiskLogic).performDeployment(
-        mockRiskState, differenceTerritoryUnitMap, AbstractTest.PLAYER_B);
+        mockRiskState, differenceTerritoryUnitMap, AbstractTest.PLAYER_B, false);
     verify(mockContainer).sendMakeMove(operations);
   }
   

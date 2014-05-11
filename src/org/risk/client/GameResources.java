@@ -21,35 +21,6 @@ public final class GameResources {
   private GameResources() {
   }
   
-  public static List<String> getNewTerritoryNameList(String newTerritoryName, 
-      int totalLinesAvailable) {
-     String [] newTerritoryNameSplit = newTerritoryName.split(" ");
-     List<String> newTerritoryNameList = Arrays.asList(newTerritoryNameSplit);
-     if (newTerritoryNameList.size() > totalLinesAvailable) {
-       List<String> tempTerritoryNameList = new ArrayList<String>();
-       int oneSlotSize = newTerritoryNameList.size() / totalLinesAvailable;
-       int extras = newTerritoryNameList.size() % totalLinesAvailable;
-       int newTerritoryPointer = 0;
-       for (int j = 0; j < totalLinesAvailable; ++j) {
-         StringBuilder singleSlotTerritoryName = new StringBuilder();
-         for (int i = 0; i < oneSlotSize && newTerritoryPointer < newTerritoryNameList.size();
-             ++i) {
-           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
-           singleSlotTerritoryName.append(" ");
-         }
-         if (extras > 0) {
-           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
-           singleSlotTerritoryName.append(" ");
-           extras--;
-         }
-         singleSlotTerritoryName.deleteCharAt(singleSlotTerritoryName.length() - 1);
-         tempTerritoryNameList.add(singleSlotTerritoryName.toString());
-       }
-       newTerritoryNameList = tempTerritoryNameList;
-     }
-     return newTerritoryNameList;
-  }
-  
   public static final Map<Integer, Integer> PLAYERS_UNIT_MAP = ImmutableMap.<Integer, Integer>of(
       2, 40,
       3, 35,
@@ -112,6 +83,8 @@ public final class GameResources {
   public static final Integer MIN_CARDS_IN_ATTACK_TRADE = 4;
   public static final Integer MAX_CARDS_IN_ATTACK_TRADE = 6;
   public static final String GAME_ENDED = "gameEnded";
+  public static final String AUTO_CLAIM = "autoClaim";
+  public static final String AUTO_DEPLOY = "autoDeploy";
   
   public static final Map<String, Object> EMPTYSTATE = ImmutableMap.<String, Object>of();
   public static final Map<String, Object> NONEMPTYSTATE = ImmutableMap.<String, Object>of(
@@ -139,6 +112,35 @@ public final class GameResources {
       .put(END_GAME, "End of Game")
       .put(GAME_ENDED, "End of Game")
       .build();
+  
+  public static List<String> getNewTerritoryNameList(String newTerritoryName, 
+      int totalLinesAvailable) {
+     String [] newTerritoryNameSplit = newTerritoryName.split(" ");
+     List<String> newTerritoryNameList = Arrays.asList(newTerritoryNameSplit);
+     if (newTerritoryNameList.size() > totalLinesAvailable) {
+       List<String> tempTerritoryNameList = new ArrayList<String>();
+       int oneSlotSize = newTerritoryNameList.size() / totalLinesAvailable;
+       int extras = newTerritoryNameList.size() % totalLinesAvailable;
+       int newTerritoryPointer = 0;
+       for (int j = 0; j < totalLinesAvailable; ++j) {
+         StringBuilder singleSlotTerritoryName = new StringBuilder();
+         for (int i = 0; i < oneSlotSize && newTerritoryPointer < newTerritoryNameList.size();
+             ++i) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+         }
+         if (extras > 0) {
+           singleSlotTerritoryName.append(newTerritoryNameList.get(newTerritoryPointer++));
+           singleSlotTerritoryName.append(" ");
+           extras--;
+         }
+         singleSlotTerritoryName.deleteCharAt(singleSlotTerritoryName.length() - 1);
+         tempTerritoryNameList.add(singleSlotTerritoryName.toString());
+       }
+       newTerritoryNameList = tempTerritoryNameList;
+     }
+     return newTerritoryNameList;
+  }
   
   /*
    * This is a helper method to get risk card value from its ID.
