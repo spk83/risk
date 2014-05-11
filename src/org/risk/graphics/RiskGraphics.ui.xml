@@ -7,9 +7,9 @@
   <ui:with field='resources' type='org.risk.graphics.MapSVG' />
   <mgwt:LayoutPanel ui:field="main">
     <mgwt:HeaderPanel ui:field="headerPanel" />
-    <mgwt:ScrollPanel ui:field="display">
+    <g:FlowPanel ui:field="display" width="100%" height="100%">
         <g:HTML ui:field="mapContainer"/>
-    </mgwt:ScrollPanel>
+    </g:FlowPanel>
     <mgwt:buttonbar.ButtonBar ui:field="footerBar">
       <mgwt:buttonbar.InfoButton ui:field="instructions" />
       <mgwt:buttonbar.ButtonBarSpacer />

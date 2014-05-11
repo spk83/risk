@@ -93,7 +93,8 @@ public class RiskLogic {
           lastMovePlayerId).getTerritoryUnitMap();
       String newTerritory = GameResources.findNewTerritory(
           oldTerritoryMap.keySet(), territoryUnitMap.keySet());
-      return performClaimTerritory(lastState, newTerritory, lastMovePlayerId);
+      Boolean autoClaim = (Boolean) playerValue.get(GameResources.AUTO_CLAIM);
+      return performClaimTerritory(lastState, newTerritory, lastMovePlayerId, autoClaim);
     } else if (lastState.getPhase().equals(GameResources.DEPLOYMENT)) {
       
       //Operations when DEPLOYMENT phase starts
@@ -101,7 +102,8 @@ public class RiskLogic {
       Map<String, Integer> differenceTerritoryMap = 
           GameResources.differenceTerritoryMap(playerValue, lastState, lastMovePlayerId);
       check(differenceTerritoryMap.size() == 1, playerValue, lastState);
-      return performDeployment(lastState, differenceTerritoryMap, lastMovePlayerId);
+      Boolean autoDeploy = (Boolean) playerValue.get(GameResources.AUTO_DEPLOY);
+      return performDeployment(lastState, differenceTerritoryMap, lastMovePlayerId, autoDeploy);
     } else if (lastState.getPhase().equals(GameResources.CARD_TRADE)) {
       
       //Operations when a player might do a cards trade or might skip it
@@ -203,7 +205,7 @@ public class RiskLogic {
         return performFortify(lastState, null, lastMovePlayerId);
       }
     } else if (lastState.getPhase().equals(GameResources.END_GAME)) {
-      return performEndGame(lastState, lastMovePlayerId);
+      return performEndGame(lastState, lastMovePlayerId, playerIds);
     }
     return null;
   }
@@ -338,7 +340,7 @@ public class RiskLogic {
   }
 
   List<Operation> performEndGame(RiskState lastState,
-      String playerIdToString) {
+      String playerIdToString, List<String> playerIds) {
     List<Operation> endGameOperations = Lists.newArrayList();
     check(lastState.getTurnOrder().size() == 1);
     check(lastState.getTerritoryWinner().equals(playerIdToString));
@@ -347,8 +349,12 @@ public class RiskLogic {
     Player player = lastState.getPlayersMap().get(playerIdToString);
     check(player.getContinent().size() == Continent.CONTINENT_NAMES.size() - 1);
     check(player.getTerritoryUnitMap().size() == GameResources.TOTAL_TERRITORIES - 1);
+    Map<String, Integer> playerIdToScore = new HashMap<String, Integer>();
+    for (String playerId : playerIds) {
+      playerIdToScore.put(playerId, playerIdToString.equals(playerId) ? 1 : 0);
+    }
     endGameOperations.add(new SetTurn(lastState.getTurn()));
-    endGameOperations.add(new EndGame(playerIdToString));
+    endGameOperations.add(new EndGame(playerIdToScore));
     endGameOperations.add(new Set(GameResources.PHASE, GameResources.GAME_ENDED));
     return endGameOperations;
   }
@@ -809,7 +815,7 @@ public class RiskLogic {
   }
 
   List<Operation> performClaimTerritory(RiskState lastState,
-      String newTerritory, String playerKey) {
+      String newTerritory, String playerKey, boolean autoClaim) {
     Player playerMap = lastState.getPlayersMap().get(playerKey);
     Map<String, Integer> oldTerritoryMap = playerMap.getTerritoryUnitMap();
     List<Integer> unclaimedTerritory = Lists.newArrayList(lastState.getUnclaimedTerritory());
@@ -828,6 +834,11 @@ public class RiskLogic {
     playerMap.setTerritoryUnitMap(oldTerritoryMap);
     playerMap.setUnclaimedUnits(playerMap.getUnclaimedUnits() - 1);
     check(playerMap.getUnclaimedUnits() > 0, playerMap.getUnclaimedUnits());
+    if (autoClaim) {
+      playerMap.setAutoClaim(autoClaim);
+    } else {
+      check(playerMap.isAutoClaim() == autoClaim, playerMap.isAutoClaim(), autoClaim);
+    }
     List<Operation> move = Lists.newArrayList();
     List<String> turnOrder = lastState.getTurnOrder();
     int index = turnOrder.indexOf(playerKey);
@@ -842,7 +853,8 @@ public class RiskLogic {
         GameResources.CARDS, playerMap.getCards(),
         GameResources.UNCLAIMED_UNITS, playerMap.getUnclaimedUnits(),
         GameResources.TERRITORY, playerMap.getTerritoryUnitMap(),
-        GameResources.CONTINENT, playerMap.getContinent())));
+        GameResources.CONTINENT, playerMap.getContinent(),
+        GameResources.AUTO_CLAIM, playerMap.isAutoClaim())));
     move.add(new Set(GameResources.UNCLAIMED_TERRITORY, unclaimedTerritory));
     if (unclaimedTerritory.size() == 0) {
       move.add(new Set(GameResources.PHASE, GameResources.DEPLOYMENT));
@@ -851,7 +863,7 @@ public class RiskLogic {
   }
   
   List<Operation> performDeployment(RiskState lastState,
-      Map<String, Integer> differenceTerritoryMap, String playerKey) {
+      Map<String, Integer> differenceTerritoryMap, String playerKey, boolean autoDeploy) {
     Player playerMap = lastState.getPlayersMap().get(playerKey);
     Map<String, Integer> oldTerritoryMap = playerMap.getTerritoryUnitMap();
     playerMap.setTerritoryUnitMap(oldTerritoryMap);
@@ -864,6 +876,12 @@ public class RiskLogic {
     boolean isDeploymentDone = true;
     for (Entry<String, Player> playerStateMap : lastState.getPlayersMap().entrySet()) {
       isDeploymentDone = isDeploymentDone && playerStateMap.getValue().getUnclaimedUnits() == 0;
+    }
+    
+    if (autoDeploy) {
+      playerMap.setAutoDeploy(autoDeploy);
+    } else {
+      check(playerMap.isAutoDeploy() == autoDeploy, playerMap.isAutoDeploy(), autoDeploy);
     }
     List<Operation> move = Lists.newArrayList();
     List<String> turnOrder = lastState.getTurnOrder();
@@ -888,7 +906,8 @@ public class RiskLogic {
         GameResources.CARDS, playerMap.getCards(),
         GameResources.UNCLAIMED_UNITS, playerMap.getUnclaimedUnits(),
         GameResources.TERRITORY, playerMap.getTerritoryUnitMap(),
-        GameResources.CONTINENT, playerMap.getContinent())));
+        GameResources.CONTINENT, playerMap.getContinent(),
+        GameResources.AUTO_DEPLOY, playerMap.isAutoDeploy())));
     if (isDeploymentDone) {
       move.add(new Set(GameResources.PHASE, GameResources.CARD_TRADE));
     }
@@ -1086,8 +1105,12 @@ public class RiskLogic {
        playerIds.add(playerId);
        Map<String, Object> tempPlayersMap = (Map<String, Object>) lastApiState.get(playerId);
        if (tempPlayersMap != null) {
+         Boolean autoClaim = (Boolean) tempPlayersMap.get(GameResources.AUTO_CLAIM);
+         autoClaim = autoClaim == null ? false : autoClaim;
+         Boolean autoDeploy = (Boolean) tempPlayersMap.get(GameResources.AUTO_DEPLOY);
+         autoDeploy = autoDeploy == null ? false : autoDeploy;
          Player newPlayer = new Player(playerId, playerName, tempPlayersMap, 
-             playersInfo.indexOf(player));
+             playersInfo.indexOf(player), autoClaim.booleanValue(), autoDeploy.booleanValue());
          playersMap.put(playerId, newPlayer);
          for (Map.Entry<String, Integer> entry : newPlayer.getTerritoryUnitMap().entrySet()) {
            Territory territory = new Territory(entry.getKey(), newPlayer.getPlayerId(), 

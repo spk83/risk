@@ -96,7 +96,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   HeaderPanel headerPanel;
   
   @UiField
-  ScrollPanel display;
+  FlowPanel display;
 
   @UiField
   HTML mapContainer;
@@ -115,12 +115,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   
   private RiskState currentRiskState;
   private Map<String, Integer> territoryDelta = new HashMap<String, Integer>();
-  private Map<Image, Card> cardImagesOfCurrentPlayer = new HashMap<Image, Card>();
+  private Map<Card, Image> cardImagesOfCurrentPlayer = new HashMap<Card, Image>();
   private List<Card> selectedCards = new ArrayList<Card>();
   
   private List<HandlerRegistration> territoryHandlers = new ArrayList<HandlerRegistration>();
   private List<HandlerRegistration> cardHandlers = new ArrayList<HandlerRegistration>();
   private HeaderButton selectCardsButton = new HeaderButton();
+  private HeaderButton autoClaim = new HeaderButton();
+  private HeaderButton autoDeploy = new HeaderButton();
   private HeaderButton endAttack = new HeaderButton();
   private HeaderButton endReinforce = new HeaderButton();
   private HeaderButton endFortify = new HeaderButton();
@@ -162,23 +164,34 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     soundResource = new SoundResource(gameSounds);
+    display.getElement().setAttribute("style", 
+        display.getElement().getAttribute("style") + "-webkit-box-flex:1;");
+    display.getElement().setId("container");
+    mapContainer.getElement().setId("map");
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
-    mapContainer.setStyleName("map");
+    display.setStyleName("map");
     attackImageResource = attackImages.tank();
     createSelectCardsButton();
     createEndAttackButton();
     createEndReinforceButton();
     createEndFortifyButton();
+    createAutoClaimButton();
+    createAutoDeployButton();
     createBackButton();
     addMapHandlers();
     changeSVGLanguage();
+    mapContainer.getElement().getStyle().setWidth(100, Unit.PCT);
     Window.addResizeHandler(new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        display.refresh();
+        resize();
       }
     });
+  }
+  
+  private void resize() {
+    mapContainer.getElement().getStyle().setHeight(display.getElement().getClientHeight(), Unit.PX);
   }
   
   private static boolean isSVGLanguageChangeRequired() {
@@ -257,25 +270,25 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });
   }
   
+  private void cardsCleanup() {
+    selectedCards.clear();
+    removeHandlers(cardHandlers);
+    cardImagesOfCurrentPlayer.clear();
+    selectCardsButton.removeFromParent();
+    playersStatusPanel.removeFromParent();
+    otherHeaderPanel.removeFromParent();
+    playersInfo.setVisible(true);
+    footerBar.removeFromParent();
+    
+    headerPanel.setVisible(true);
+    display.setVisible(true);
+    main.add(footerBar);
+  }
+  
   private void createSelectCardsButton() {
     selectCardsButton.setRoundButton(true);
     selectCardsButton.setText(constantMessages.done());
     selectCardsButton.addTapHandler(new TapHandler() {
-      
-      private void cleanup() {
-        selectedCards.clear();
-        removeHandlers(cardHandlers);
-        cardImagesOfCurrentPlayer.clear();
-        selectCardsButton.removeFromParent();
-        playersStatusPanel.removeFromParent();
-        otherHeaderPanel.removeFromParent();
-        playersInfo.setVisible(true);
-        footerBar.removeFromParent();
-        
-        headerPanel.setVisible(true);
-        display.setVisible(true);
-        main.add(footerBar);
-      }
       
       @Override
       public void onTap(TapEvent event) {
@@ -286,17 +299,17 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           return;
         }
         if (selectedCards.size() == 0) {
-          cleanup();
+          cardsCleanup();
           riskPresenter.cardsTraded(null);
         } else if (units > 0) {
           List<Integer> selectedIntCards = Card.getCardIdsFromCardObjects(selectedCards);
-          cleanup();
+          cardsCleanup();
           riskPresenter.cardsTraded(selectedIntCards);
         } else {
           ConfirmCallback callback = new ConfirmCallback() {
             @Override
             public void onOk() {
-              cleanup();
+              cardsCleanup();
               riskPresenter.cardsTraded(null);
             }
             @Override
@@ -311,7 +324,33 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       }
     });
   }
-    
+  
+  private void createAutoClaimButton() {
+    autoClaim.setRoundButton(true);
+    autoClaim.setText(constantMessages.auto());
+    autoClaim.addTapHandler(new TapHandler() {
+      @Override
+      public void onTap(TapEvent event) {
+        autoClaim.removeFromParent();
+        currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).setAutoClaim(true);
+        chooseNewTerritory();
+      }
+    });
+  }
+  
+  private void createAutoDeployButton() {
+    autoDeploy.setRoundButton(true);
+    autoDeploy.setText(constantMessages.auto());
+    autoDeploy.addTapHandler(new TapHandler() {
+      @Override
+      public void onTap(TapEvent event) {
+        autoDeploy.removeFromParent();
+        currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).setAutoDeploy(true);
+        chooseTerritoryForDeployment();
+      }
+    });
+  }
+  
   private void createEndAttackButton() {
     endAttack.setRoundButton(true);
     endAttack.setText(constantMessages.end());
@@ -391,7 +430,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
             } else if (attack) {
               attack(territoryId);
             } else if (fortify) {
-              fortify(territoryId);
+              fortify(territoryId, null);
             }
           } else if (playerId.equals(GameApi.VIEWER_ID)) {
             CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -428,6 +467,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
+    resize();
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -462,9 +502,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       String playingPlayerId = riskPresenter.getMyPlayerId();
       String turnPlayerId = currentRiskState.getTurn();
       if (playingPlayerId.equals(turnPlayerId)) {
-        dicePanel.setOkBtnHandler(riskPresenter, 1);
+        dicePanel.setOkBtnHandler(riskPresenter, 1, riskPresenter.isAIPresent());
       } else {
-        dicePanel.setOkBtnHandler(riskPresenter, 0);
+        dicePanel.setOkBtnHandler(riskPresenter, 0, riskPresenter.isAIPresent());
       }
       dicePanel.center();
    }
@@ -476,6 +516,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     mandatoryCardSelection = false;
     cardTrade = false;
     setStyle();
+    if (riskPresenter.isAIPresent()) {
+      instructions.setVisible(false);
+      playersInfo.setVisible(false);
+    } else {
+      instructions.setVisible(true);
+      playersInfo.setVisible(true);
+    }
   }
 
   private void setStyle() {
@@ -498,7 +545,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       territory.setAttribute("style", style);
       territoryUnits.getFirstChild().getFirstChild().setNodeValue("1");
       claimTerritory = false;
-      riskPresenter.newTerritorySelected(territoryId);
+      riskPresenter.newTerritorySelected(territoryId, 
+          currentRiskState.getPlayersMap().get(playerId).isAutoClaim());
       soundResource.playDeployAudio();
     } else {
       if (territorySelected.getPlayerKey().equals(playerId)) {
@@ -521,7 +569,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       int units = Integer.parseInt(territoryUnits.getFirstChild().getFirstChild().getNodeValue());
       territoryUnits.getFirstChild().getFirstChild().setNodeValue((units + 1) + "");
       deployment = false;
-      riskPresenter.territoryForDeployment(territoryId);
+      riskPresenter.territoryForDeployment(territoryId, 
+          currentRiskState.getPlayersMap().get(playerId).isAutoDeploy());
       soundResource.playDeployAudio();
     } else {
       CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -617,7 +666,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     }
   } 
   
-  private void fortify(String territoryName) {
+  private void fortify(String territoryName, Integer unitsToMove) {
     String playerId = riskPresenter.getMyPlayerId();
     String territoryId = Territory.SVG_ID_MAP.get(territoryName) + "";
     OMElement territory = boardElt.getElementById(territoryName);
@@ -658,6 +707,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           territory.setAttribute("style", style);
           int unitsOnFromTerritory = currentRiskState.getTerritoryMap()
               .get(fortifyFromTerritory).getCurrentUnits();
+          if (riskPresenter.isAIPresent()) {
+            unitsOnFromTerritory += unitsToMove.intValue();
+          }
           List<String> options = Lists.newArrayList();
           for (int i = 1; i <= unitsOnFromTerritory - 1; i++) {
             options.add(i + "");
@@ -673,7 +725,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
               endFortify.removeFromParent();
               riskPresenter.fortifyMove(territoryDelta);
             }
-          }, constantMessages);
+          }, constantMessages, riskPresenter.isAIPresent());
           fortifyOpt.center();
         } else {
           CustomDialogPanel.alert(constantMessages.notAllowed(), 
@@ -693,7 +745,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       claimTerritory(riskAI.getNewTerritory(
           currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID), 
           currentRiskState.getUnclaimedTerritory()));
+    } else if (currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).isAutoClaim()) {
+      claimTerritory(riskAI.getNewTerritory(
+          currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()), 
+          currentRiskState.getUnclaimedTerritory()));
     } else {
+      headerPanel.setRightWidget(autoClaim);
       claimTerritory = true;
     }
   }
@@ -704,7 +761,12 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       deployment(riskAI.getTerritoryForDeployment(
           currentRiskState.getPlayersMap().get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap(), 
           currentRiskState.getTerritoryMap()));
+    } else if (currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).isAutoDeploy()) {
+      deployment(riskAI.getTerritoryForDeployment(
+          currentRiskState.getPlayersMap().get(riskPresenter.getMyPlayerId()).getTerritoryUnitMap(),
+          currentRiskState.getTerritoryMap()));
     } else {
+      headerPanel.setRightWidget(autoDeploy);
       deployment = true;
     }
   }
@@ -721,10 +783,31 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
         if (Card.isTradePossible(cardObjects)) {
           if (riskPresenter.isAIPresent()) {
-            List<Integer> selectedIntCards = riskAI.chooseCardsForTrading(mandatoryCardSelection, 
-                cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
+            cardTrade = true;
+            playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
+            //Window.alert("start");
+            final List<Card> selectedCardsByAI = riskAI.chooseCardsForTrading(
+                mandatoryCardSelection, cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
                 currentRiskState.getPlayersMap().size());
-            riskPresenter.cardsTraded(selectedIntCards);
+            //Window.alert("list created");
+            for (Card aiCard : selectedCardsByAI) { 
+              selectCard(cardImagesOfCurrentPlayer.get(aiCard), aiCard);
+            }
+            //Window.alert("selection done");
+            new Timer() {
+
+              @Override
+              public void run() {
+                cardsCleanup();
+                riskPresenter.cardsTraded(Card.getCardIdsFromCardObjects(selectedCardsByAI));
+              }
+              
+            } .schedule(2000);
+           /* List<Integer> selectedIntCards = riskAI.chooseCardsForTrading(mandatoryCardSelection, 
+                cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
+                currentRiskState.getPlayersMap().size());*/
+            
+            //riskPresenter.cardsTraded(selectedIntCards);
           } else {
             cardTrade  = true;
             playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
@@ -740,11 +823,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   }
   
   private void registerCardHandlers() {
-    for (Map.Entry<Image, Card> imageCard : cardImagesOfCurrentPlayer.entrySet()) { 
-      cardHandlers.add(addCardHandlers(imageCard.getKey(), imageCard.getValue()));
+    if (!riskPresenter.isAIPresent()) {
+      for (Map.Entry<Card, Image> imageCard : cardImagesOfCurrentPlayer.entrySet()) { 
+        cardHandlers.add(addCardHandlers(imageCard.getValue(), imageCard.getKey()));
+      }
+      otherHeaderPanel.setRightWidget(selectCardsButton);
     }
     otherHeaderPanel.setCenterWidget(new HTML("<b>Trade Cards</b>"));
-    otherHeaderPanel.setRightWidget(selectCardsButton);
     backButton.removeFromParent();
   }
   
@@ -753,16 +838,20 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     return i.addTapHandler(new TapHandler() {
       @Override
       public void onTap(TapEvent event) {
-        if (image.getStyleName().equals("risk-cards")) {
-          image.setStyleName("risk-cards-selected");
-          soundResource.playCardAudio();
-          selectedCards.add(card);
-        } else {
-          image.setStyleName("risk-cards");
-          selectedCards.remove(card);
-        }
+        selectCard(image, card);
       }
     });
+  }
+  
+  private void selectCard(final Image image, final Card card) {
+    if (image.getStyleName().equals("risk-cards")) {
+      image.setStyleName("risk-cards-selected");
+      soundResource.playCardAudio();
+      selectedCards.add(card);
+    } else {
+      image.setStyleName("risk-cards");
+      selectedCards.remove(card);
+    }
   }
 
   @Override
@@ -777,8 +866,14 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     soundResource.playAddUnitsAudio();
     if (riskPresenter.isAIPresent()) {
       while (unclaimedUnits > 0) {
-        reinforce(riskAI.getTerritoryForDeployment(player.getTerritoryUnitMap(), 
-            currentRiskState.getTerritoryMap())); 
+        String territoryToReinforce = null;
+        territoryToReinforce = riskAI.getWeakestTerritory(player.getTerritoryUnitMap(), 
+              currentRiskState.getTerritoryMap());
+        if (territoryToReinforce == null) {
+          territoryToReinforce = riskAI.getTerritoryForDeployment(player.getTerritoryUnitMap(), 
+                currentRiskState.getTerritoryMap());
+        }
+        reinforce(territoryToReinforce); 
       }
     } else {
       CustomDialogPanel.alert(constantMessages.info(), 
@@ -859,15 +954,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
     OMElement territoryUnitsElement = boardElt.getElementById(attackingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(attackUnits + "");
-    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
     int startAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
         - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
     
     territoryUnitsElement = boardElt.getElementById(defendingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(defendUnits + "");
-    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
     int endAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
         - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
     
@@ -886,9 +979,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     dicePanel.getDialogPanel().getDialogTitle().setText(phaseMessages.attackResult());
     dicePanel.setPanelSize("200px", "200px");
     if (playingPlayerId.equals(turnPlayerId)) {
-      dicePanel.setOkBtnHandler(riskPresenter, 2);
+      dicePanel.setOkBtnHandler(riskPresenter, 2, riskPresenter.isAIPresent());
     } else {
-      dicePanel.setOkBtnHandler(riskPresenter, 0);
+      dicePanel.setOkBtnHandler(riskPresenter, 0, riskPresenter.isAIPresent());
     }
     dicePanel.addPanel(attackerDicePanel);
     dicePanel.addPanel(defenderDicePanel);
@@ -974,7 +1067,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           public void optionChosen(String option) {
             riskPresenter.moveUnitsAfterAttack(Integer.parseInt(option));
           }
-        }, constantMessages).center();
+        }, constantMessages, false).center();
       }
     }
   }
@@ -984,9 +1077,65 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     fortifyFromTerritory = null;
     fortifyToTerritory = null;
     if (riskPresenter.isAIPresent()) {
-      riskPresenter.fortifyMove(riskAI.fortify(currentRiskState.getTerritoryMap(), 
+      /*riskPresenter.fortifyMove(riskAI.fortify(currentRiskState.getTerritoryMap(), 
           Maps.newHashMap(currentRiskState.getPlayersMap()
-              .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap())));
+              .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap())));*/
+      fortify = true;
+      Map<String, Territory> territoryMap = currentRiskState.getTerritoryMap();
+      /*Map<String, Territory> newTerritoryMap = new HashMap<String, Territory>();
+      for (Map.Entry<String, Territory> entry : territoryMap.entrySet()) {
+        newTerritoryMap.put(entry.getKey(), new Territory(entry.getValue()));
+      }*/
+      
+      Map<String, Integer> deltaFortify = riskAI.fortify(territoryMap, 
+          Maps.newHashMap(currentRiskState.getPlayersMap()
+              .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap()));
+      String source = null;
+      String destination = null;
+      Integer unitsToMove = null;
+      if (deltaFortify != null && deltaFortify.size() == 2) {
+        for (Map.Entry<String, Integer> deltaTerritoryEntry : deltaFortify.entrySet()) {
+          if (deltaTerritoryEntry.getValue() < 0) {
+            source = deltaTerritoryEntry.getKey();
+          } else if (deltaTerritoryEntry.getValue() > 0) {
+            destination = deltaTerritoryEntry.getKey();
+            unitsToMove = deltaTerritoryEntry.getValue();
+          }
+        }
+      }
+      if (source != null && destination != null) {
+        fortify(Territory.SVG_NAME_MAP.get(Integer.parseInt(source)), unitsToMove);
+        final Integer units = unitsToMove;
+        final Integer destinationTerritory = Integer.parseInt(destination);
+        Timer destinationTimer = new Timer() {
+          @Override
+          public void run() {
+            fortify(Territory.SVG_NAME_MAP.get(destinationTerritory), units);
+            this.cancel();
+          }
+        };
+        destinationTimer.schedule(1000);
+        Timer selectUnitsToMove = new Timer() {
+          @Override
+          public void run() {
+            ((PopupChoices) fortifyOpt).fireValueChange(units);
+            this.cancel();
+          }
+        };
+        selectUnitsToMove.schedule(2000);
+        
+        Timer tapEventTimer = new Timer() {
+          @Override
+          public void run() {
+            ((PopupChoices) fortifyOpt).fireTapEvent();
+            this.cancel();
+          }
+        };
+        tapEventTimer.schedule(3000);
+      } else {
+        riskPresenter.fortifyMove(null);
+      }
+      
     } else {
       String playingPlayerId = riskPresenter.getMyPlayerId();
       String turnPlayerId = currentRiskState.getTurn();
