@@ -150,7 +150,8 @@ public class RiskAI {
 
   public List<Card> chooseCardsForTrading(boolean mandatoryCardSelection, 
       List<Card> cardObjects, int territoryCount, int playerCount) {
-    if (mandatoryCardSelection || territoryCount < GameResources.TOTAL_TERRITORIES / playerCount) {
+    if (mandatoryCardSelection || territoryCount <= GameResources.TOTAL_TERRITORIES / playerCount 
+        || territoryCount >= 1.4 * GameResources.TOTAL_TERRITORIES / playerCount) {
       List<Card> selectedCards = new ArrayList<Card>();
       Map<Type, Integer> cardType = Card.getCardTypeCountMap(cardObjects);
       for (Entry<Type, Integer> entry : cardType.entrySet()) {

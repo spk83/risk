@@ -96,7 +96,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
   HeaderPanel headerPanel;
   
   @UiField
-  ScrollPanel display;
+  FlowPanel display;
 
   @UiField
   HTML mapContainer;
@@ -162,9 +162,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     RiskGraphicsUiBinder uiBinder = GWT.create(RiskGraphicsUiBinder.class);
     initWidget(uiBinder.createAndBindUi(this));
     soundResource = new SoundResource(gameSounds);
+    display.getElement().setAttribute("style", 
+        display.getElement().getAttribute("style") + "-webkit-box-flex:1;");
+    display.getElement().setId("container");
+    mapContainer.getElement().setId("map");
     boardElt = OMSVGParser.parse(riskMapSVG.riskMap().getText());
     mapContainer.getElement().appendChild(boardElt.getElement());
-    mapContainer.setStyleName("map");
+    display.setStyleName("map");
     attackImageResource = attackImages.tank();
     createSelectCardsButton();
     createEndAttackButton();
@@ -173,12 +177,17 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     createBackButton();
     addMapHandlers();
     changeSVGLanguage();
+    mapContainer.getElement().getStyle().setWidth(100, Unit.PCT);
     Window.addResizeHandler(new ResizeHandler() {
       @Override
       public void onResize(ResizeEvent event) {
-        display.refresh();
+        resize();
       }
     });
+  }
+  
+  private void resize() {
+    mapContainer.getElement().getStyle().setHeight(display.getElement().getClientHeight(), Unit.PX);
   }
   
   private static boolean isSVGLanguageChangeRequired() {
@@ -428,6 +437,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
+    resize();
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -902,15 +912,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
     OMElement territoryUnitsElement = boardElt.getElementById(attackingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(attackUnits + "");
-    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
     int startAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
         - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
     
     territoryUnitsElement = boardElt.getElementById(defendingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(defendUnits + "");
-    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteLeft();
+    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
     int endAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
         - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
     
