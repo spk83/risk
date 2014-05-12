@@ -189,7 +189,7 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     });
   }
   
-  private void resize() {
+  void resize() {
     mapContainer.getElement().getStyle().setHeight(display.getElement().getClientHeight(), Unit.PX);
   }
   
@@ -466,7 +466,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
 
   @Override
   public void setPlayerState(RiskState riskState) {
-    resize();
     currentRiskState = riskState;
     changeSVGMap(riskState);
     dicePanel.clearPanel();
@@ -784,29 +783,19 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
           if (riskPresenter.isAIPresent()) {
             cardTrade = true;
             playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
-            //Window.alert("start");
             final List<Card> selectedCardsByAI = riskAI.chooseCardsForTrading(
                 mandatoryCardSelection, cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
                 currentRiskState.getPlayersMap().size());
-            //Window.alert("list created");
             for (Card aiCard : selectedCardsByAI) { 
               selectCard(cardImagesOfCurrentPlayer.get(aiCard), aiCard);
             }
-            //Window.alert("selection done");
             new Timer() {
-
               @Override
               public void run() {
                 cardsCleanup();
                 riskPresenter.cardsTraded(Card.getCardIdsFromCardObjects(selectedCardsByAI));
               }
-              
             } .schedule(2000);
-           /* List<Integer> selectedIntCards = riskAI.chooseCardsForTrading(mandatoryCardSelection, 
-                cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
-                currentRiskState.getPlayersMap().size());*/
-            
-            //riskPresenter.cardsTraded(selectedIntCards);
           } else {
             cardTrade  = true;
             playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
@@ -951,21 +940,26 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     int defendUnits = currentRiskState.getAttack().getDefendUnits();
     final AttackResult attackResult = currentRiskState.getAttack().getAttackResult();
 
+    
+    int tankSize = (int) (Math.min(mapContainer.getOffsetHeight(), mapContainer.getOffsetWidth()) 
+        * 0.08);
     OMElement territoryUnitsElement = boardElt.getElementById(attackingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(attackUnits + "");
-    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
+    int startAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft()
+        - tankSize / 2;
     int startAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
+        - headerPanel.getElement().getClientHeight() - tankSize / 2;
     
     territoryUnitsElement = boardElt.getElementById(defendingTerritorySVG + "_units");
     territoryUnitsElement.getFirstChild().getFirstChild().setNodeValue(defendUnits + "");
-    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft();
+    int endAttackXCords = territoryUnitsElement.getElement().getAbsoluteLeft()
+        - tankSize / 2;
     int endAttackYCords = territoryUnitsElement.getElement().getAbsoluteTop() 
-        - territoryUnitsElement.getElement().getParentElement().getAbsoluteTop();
+        - headerPanel.getElement().getClientHeight() - tankSize / 2;
     
     TankMovingAnimation animation = new TankMovingAnimation(
         mapContainer, startAttackXCords, startAttackYCords, endAttackXCords, endAttackYCords, 
-        attackImageResource, soundResource.getAttackAudio());
+        attackImageResource, soundResource.getAttackAudio(), tankSize);
     
     FlowPanel attackerDicePanel = new FlowPanel();
     final DiceAnimation diceAnimationAttacker = new DiceAnimation(diceImages, attackerDicePanel, 3, 
@@ -1076,16 +1070,8 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
     fortifyFromTerritory = null;
     fortifyToTerritory = null;
     if (riskPresenter.isAIPresent()) {
-      /*riskPresenter.fortifyMove(riskAI.fortify(currentRiskState.getTerritoryMap(), 
-          Maps.newHashMap(currentRiskState.getPlayersMap()
-              .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap())));*/
       fortify = true;
       Map<String, Territory> territoryMap = currentRiskState.getTerritoryMap();
-      /*Map<String, Territory> newTerritoryMap = new HashMap<String, Territory>();
-      for (Map.Entry<String, Territory> entry : territoryMap.entrySet()) {
-        newTerritoryMap.put(entry.getKey(), new Territory(entry.getValue()));
-      }*/
-      
       Map<String, Integer> deltaFortify = riskAI.fortify(territoryMap, 
           Maps.newHashMap(currentRiskState.getPlayersMap()
               .get(GameApi.AI_PLAYER_ID).getTerritoryUnitMap()));
@@ -1134,7 +1120,6 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       } else {
         riskPresenter.fortifyMove(null);
       }
-      
     } else {
       String playingPlayerId = riskPresenter.getMyPlayerId();
       String turnPlayerId = currentRiskState.getTurn();
@@ -1182,6 +1167,13 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         } .schedule(1500);
       }
     }
+  }
+  
+  @Override
+  public void invalidNumberOfPlayers(int size) {
+    CustomDialogPanel.alert(constantMessages.invalidNumberOfPlayers(), 
+        variableMessages.invalidNumberOfPlayers(size), null,
+        constantMessages.ok());
   }
   
   @UiHandler("instructions")

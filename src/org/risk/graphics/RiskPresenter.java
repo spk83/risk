@@ -99,6 +99,13 @@ public class RiskPresenter {
      * calling {@link #endgame()}. 
      */
     void endGame();
+
+    /**
+     * Display proper message when number of players selected is invalid by calling 
+     * {@link #invalidNumberOfPlayers(int)}.
+     * @param numberOfPlayers
+     */
+    void invalidNumberOfPlayers(int size);
   }
   
   private final RiskLogic riskLogic;
@@ -128,6 +135,10 @@ public class RiskPresenter {
     Map<String, Object> state = updateUI.getState();
     GameResources.removeViewer(playerIds, playersInfo);
     if (state.isEmpty()) {
+      if (playerIds.size() < 2 || playerIds.size() > 6) {
+       view.invalidNumberOfPlayers(playerIds.size());
+       return;
+      }
       String startPlayerId = GameResources.getStartPlayerId(playerIds);
       if (myPlayerId.equals(startPlayerId)) {
         sendInitialMove(playerIds, startPlayerId);

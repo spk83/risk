@@ -10,6 +10,7 @@ import org.risk.logic.GameApi.VerifyMove;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.googlecode.mgwt.mvp.client.Animation;
+import com.googlecode.mgwt.mvp.client.AnimationEndCallback;
 import com.googlecode.mgwt.ui.client.MGWT;
 import com.googlecode.mgwt.ui.client.MGWTSettings;
 import com.googlecode.mgwt.ui.client.animation.AnimationHelper;
@@ -18,8 +19,8 @@ public class RiskEntryPoint implements EntryPoint {
 
   Container container;
   RiskPresenter riskPresenter;
-  final RiskLogic riskLogic = new RiskLogic();
-  
+  RiskLogic riskLogic = new RiskLogic();
+  RiskGraphics riskGraphics = new RiskGraphics();
   
   @Override
   public void onModuleLoad() {
@@ -35,19 +36,22 @@ public class RiskEntryPoint implements EntryPoint {
       public void sendVerifyMove(VerifyMove verifyMove) {
         container.sendVerifyMoveDone(riskLogic.verify(verifyMove));
       }
-
+      
       @Override
       public void sendUpdateUI(UpdateUI updateUI) {
         riskPresenter.updateUI(updateUI);
       }
     };
     container = new ContainerConnector(game);
-    RiskGraphics riskGraphics = new RiskGraphics();
-    RiskLogic riskLogic = new RiskLogic();
     riskPresenter = new RiskPresenter(riskGraphics, container, riskLogic);
     container.sendGameReady();
     
     // animate
-    animationHelper.goTo(riskGraphics, Animation.SLIDE);
+    animationHelper.goTo(riskGraphics, Animation.SLIDE, new AnimationEndCallback() {
+      @Override
+      public void onAnimationEnd() {
+        riskGraphics.resize();
+      }
+    });
   }
 }

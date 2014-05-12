@@ -60,4 +60,7 @@ public interface VariableMessages extends Messages {
   
   @DefaultMessage("Unclaimed Units Left: {0}")
   String unclaimedUnitsLeft(int unclaimedUnits);
+  
+  @DefaultMessage("Game does not support {0} players. Please play with 2 to 6 players.")
+  String invalidNumberOfPlayers(int size);
 }

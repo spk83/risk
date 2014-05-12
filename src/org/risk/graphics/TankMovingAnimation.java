@@ -20,14 +20,14 @@ public class TankMovingAnimation extends Animation {
   boolean cancelled;
 
   public TankMovingAnimation(HTML mapContainer, int startX, int startY, int endX, int endY,
-      ImageResource resource, Audio sfx) {
+      ImageResource resource, Audio sfx, int tankSize) {
     piece = resource;
     this.startX = startX;
     this.startY = startY;
     this.endX = endX;
     this.endY = endY;
-    this.startWidth = 40;
-    this.startHeight = 40;
+    this.startWidth = tankSize;
+    this.startHeight = tankSize;
     sound = sfx;
     cancelled = false;
 

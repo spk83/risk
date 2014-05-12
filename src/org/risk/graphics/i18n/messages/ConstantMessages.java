@@ -108,4 +108,7 @@ public interface ConstantMessages extends Constants {
 
   @DefaultStringValue("Auto")
   String auto();
+  
+  @DefaultStringValue("Invalid Number of Players")
+  String invalidNumberOfPlayers();
 }

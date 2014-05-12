@@ -11,12 +11,12 @@
   <!-- Spanish language, independent of country -->
   <extend-property name="locale" values="es"/>
   
- <!--  <set-property name="user.agent" value="safari" /> 
-  <set-property name="mgwt.os" value="android" />  -->
+<!--   <set-property name="user.agent" value="safari" />
+  <set-property name="mgwt.os" value="desktop" />  -->
 
   <entry-point class='org.risk.graphics.RiskEntryPoint'/>
   <add-linker name='xsiframe' />
 
-  <source path='client'/>
+  <source path='logic'/>
   <source path='graphics'/>
 </module>
