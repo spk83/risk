@@ -13,6 +13,7 @@ import org.risk.graphics.i18n.messages.VariableMessages;
 import org.risk.graphics.i18n.names.ContinentNames;
 import org.risk.graphics.i18n.names.TerritoryNames;
 import org.risk.logic.Attack;
+import org.risk.logic.Attack.AttackResult;
 import org.risk.logic.Card;
 import org.risk.logic.Continent;
 import org.risk.logic.GameApi;
@@ -21,7 +22,6 @@ import org.risk.logic.Player;
 import org.risk.logic.RiskAI;
 import org.risk.logic.RiskState;
 import org.risk.logic.Territory;
-import org.risk.logic.Attack.AttackResult;
 import org.vectomatic.dom.svg.OMElement;
 import org.vectomatic.dom.svg.OMNode;
 import org.vectomatic.dom.svg.OMNodeList;
@@ -521,6 +521,9 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
       instructions.setVisible(true);
       playersInfo.setVisible(true);
     }
+    if (mapContainer.getElement().getClientHeight() != display.getElement().getClientHeight()) {
+      resize();
+    }
   }
 
   private void setStyle() {
@@ -781,21 +784,25 @@ public class RiskGraphics extends Composite implements RiskPresenter.View {
         List<Card> cardObjects = Card.getCardsById(currentRiskState.getCardMap(), playerCards);
         if (Card.isTradePossible(cardObjects)) {
           if (riskPresenter.isAIPresent()) {
-            cardTrade = true;
-            playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
             final List<Card> selectedCardsByAI = riskAI.chooseCardsForTrading(
                 mandatoryCardSelection, cardObjects, currentPlayer.getTerritoryUnitMap().size(), 
                 currentRiskState.getPlayersMap().size());
-            for (Card aiCard : selectedCardsByAI) { 
-              selectCard(cardImagesOfCurrentPlayer.get(aiCard), aiCard);
-            }
-            new Timer() {
-              @Override
-              public void run() {
-                cardsCleanup();
-                riskPresenter.cardsTraded(Card.getCardIdsFromCardObjects(selectedCardsByAI));
+            if (selectedCardsByAI.size() == 3) {
+              cardTrade = true;
+              playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
+              for (Card aiCard : selectedCardsByAI) { 
+                selectCard(cardImagesOfCurrentPlayer.get(aiCard), aiCard);
               }
-            } .schedule(2000);
+              new Timer() {
+                @Override
+                public void run() {
+                  cardsCleanup();
+                  riskPresenter.cardsTraded(Card.getCardIdsFromCardObjects(selectedCardsByAI));
+                }
+              } .schedule(2000);
+            } else {
+              riskPresenter.cardsTraded(null);
+            }
           } else {
             cardTrade  = true;
             playersInfo.fireEvent(new TapEvent(playersInfo, playersInfo.getElement(), 0, 0));
