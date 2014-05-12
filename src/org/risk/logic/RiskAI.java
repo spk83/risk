@@ -153,16 +153,52 @@ public class RiskAI {
     if (mandatoryCardSelection || territoryCount <= GameResources.TOTAL_TERRITORIES / playerCount 
         || territoryCount >= 1.4 * GameResources.TOTAL_TERRITORIES / playerCount) {
       List<Card> selectedCards = new ArrayList<Card>();
+      List<Card.Type> selectedCardType = new ArrayList<Card.Type>();
+      boolean threeCards = false;
       Map<Type, Integer> cardType = Card.getCardTypeCountMap(cardObjects);
       for (Entry<Type, Integer> entry : cardType.entrySet()) {
-        if (entry.getValue() >= 3) {
+        if (entry.getValue() >= 3 && entry.getKey() != Card.Type.WILD) {
           selectedCards = new ArrayList<Card>();
+          selectedCardType = new ArrayList<Card.Type>();
+          threeCards = true;
         }
         for (Card card : cardObjects) {
           if (card.getCardType() == entry.getKey()) {
-            selectedCards.add(card);
-            if (selectedCards.size() == 3) {
-              return selectedCards;
+            if (!selectedCardType.contains(entry.getKey())) {
+              selectedCards.add(card);
+              if (!threeCards) {
+                selectedCardType.add(entry.getKey());
+              }
+              if (selectedCards.size() == 3) {
+                return selectedCards;
+              }
+            }
+          }
+        }
+      }
+      selectedCards.clear();
+      selectedCardType.clear();
+      if (cardType.containsKey(Card.Type.WILD) && cardType.size() == 2) {
+        for (Entry<Type, Integer> entry : cardType.entrySet()) {
+          if (entry.getKey() != Card.Type.WILD) {
+            for (Card card : cardObjects) {
+              if (card.getCardType() == entry.getKey()) {
+                selectedCards.add(card);
+                if (selectedCards.size() == 3) {
+                  return selectedCards;
+                }
+              }
+            }
+          } else {
+            for (Card card : cardObjects) {
+              if (card.getCardType() == entry.getKey() 
+                  && !selectedCardType.contains(entry.getKey())) {
+                selectedCards.add(card);
+                selectedCardType.add(entry.getKey());
+                if (selectedCards.size() == 3) {
+                  return selectedCards;
+                }
+              }
             }
           }
         }

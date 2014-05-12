@@ -47,9 +47,13 @@ public class Card {
       return getUnits(cards, 1) > 0;
     }
     Map<Type, Integer> cardTypeCountMap = getCardTypeCountMap(cards);
-    if (cardTypeCountMap.size() == 2 
-        && cardTypeCountMap.entrySet().iterator().next().getValue() == 2) {
-      return false;
+    if (cardTypeCountMap.size() == 2) {
+      if (cardTypeCountMap.containsKey(Type.WILD)) {
+        return true;
+      }
+      if (cardTypeCountMap.entrySet().iterator().next().getValue() == 2) {
+        return false;
+      }
     }
     return true;
   }

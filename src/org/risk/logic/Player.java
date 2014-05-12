@@ -14,8 +14,8 @@ public class Player {
     .put(0, "lightskyblue")
     .put(1, "lightgreen")
     .put(2, "orange")
-    .put(3, "lightcoral")
-    .put(4, "lightsalmon")
+    .put(3, "lightsalmon")
+    .put(4, "cccc00")
     .put(5, "khaki")
     .build();
       
