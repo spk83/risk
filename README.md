@@ -10,3 +10,5 @@ You can also play game in Pass-and-Play mode with "x" players (2 <= x <= 6) at h
 Game was developed as a Course Project for NYU Social Multiplayer Gaming Course -  https://code.google.com/p/nyu-gaming-course/wiki/Syllabus
 
 More Info about the game at http://en.wikipedia.org/wiki/Risk_(game)
+
+[Supported in Chrome only]
